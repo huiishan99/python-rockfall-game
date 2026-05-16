@@ -12,9 +12,11 @@ Every meaningful change should be recorded in [DEVLOG.md](DEVLOG.md). Add entrie
 ## Installation
 
 ### Prerequisites
-To run this project, you'll need Python and several libraries installed, including pygame, numpy, scikit-learn, and joblib. You can install these dependencies via pip:
+To run this project, you'll need Python and the dependencies listed in `requirements.txt`. You can install them with:
 
-```pip install pygame numpy scikit-learn joblib```
+```bash
+python3 -m pip install -r requirements.txt
+```
 
 ### Clone the Repository
 To get started with this project, clone this repository to your local machine:
@@ -25,24 +27,29 @@ To get started with this project, clone this repository to your local machine:
 ## Usage
 
 ### Data Collection
-To collect data for training the machine learning model, run the `game.py` script. This will start the game, and player movements along with the obstacle positions will be recorded:
+To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be recorded:
 
-```python game.py```
+```bash
+python3 game.py
+```
 
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
 
-```python train_model.py```
+```bash
+python3 train_model.py
+```
 
 ### Play the Game with the Model
 Once the model is trained, you can run the game with the model controlling the player movements using the `play_with_model.py` script:
 
-```python play_with_model.py```
+```bash
+python3 play_with_model.py
+```
 
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 
 
 

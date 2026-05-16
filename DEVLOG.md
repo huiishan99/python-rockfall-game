@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add dependency file
+
+- Changed: added `requirements.txt`; updated `README.md` installation and run commands to use `python3` and the dependency file.
+- Why: the local smoke test found `pygame` missing, and the project needed a single source for Python dependencies.
+- Behavior: no gameplay behavior changed; setup instructions are easier to follow on a fresh machine.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py`.
+- Risks/Notes: dependencies are currently unpinned; future releases can add version ranges after testing on a clean environment.
+
 ## 2026-05-16 - Add start and game-over screens
 
 - Changed: updated `game_core.py` with resettable game state plus shared start/game-over screens; updated `game.py` and `play_with_model.py` to use explicit screen states; prevented empty data-collection sessions from overwriting `game_data.json`.
