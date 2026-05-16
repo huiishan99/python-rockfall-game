@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Document v0.1 project status
+
+- Changed: updated `README.md` with current project status, full verification commands, and next steps toward v0.1.
+- Why: the project now has enough functionality that future work needs a clear state summary and completion path.
+- Behavior: no gameplay behavior changed.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py`.
+- Risks/Notes: v0.1 should still wait for a real-window playtest.
+
 ## 2026-05-16 - Clarify controls on screens
 
 - Changed: updated `game_core.py` so start and pause screens use reusable line builders with movement, pause, restart, and quit hints; expanded `test_game_core.py`; documented controls in `README.md`.

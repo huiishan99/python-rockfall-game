@@ -5,6 +5,16 @@
 ## Description
 This project integrates a machine learning model into a simple pygame-based game, where the player's movements are controlled by the model's predictions based on the position of obstacles. The project includes scripts for collecting gameplay data, training a model on this data, and running the game with the trained model.
 
+## Project Status
+
+This is approaching a playable v0.1:
+
+- Manual play collects training data.
+- AI play uses a trained Random Forest model.
+- Headless evaluation reports model score baselines.
+- Difficulty, lane-based spawning, high scores, hit feedback, pause, restart, and game-over summary are implemented.
+- Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core hit/message behavior.
+
 ## Development Log
 
 Every meaningful change should be recorded in [DEVLOG.md](DEVLOG.md). Add entries newest first and include what changed, why it changed, how it was verified, and any risks or follow-up notes. This is especially important when changing gameplay rules, collected data, or the trained model.
@@ -43,6 +53,13 @@ Some tests use only the Python standard library and can run before installing py
 
 ```bash
 python3 -m unittest
+```
+
+Full verification after installing dependencies:
+
+```bash
+python3 -m unittest
+python3 evaluate_model.py --games 3 --max-frames 1800
 ```
 
 ### Data Collection
@@ -91,6 +108,14 @@ python3 evaluate_model.py --games 10 --max-frames 3600
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
+
+## Next Steps
+
+- Do a real-window playtest and tune player speed, lives, and difficulty.
+- Collect fresh lane-based gameplay data.
+- Retrain and compare the model with `evaluate_model.py`.
+- Add optional sound effects and visual polish.
+- Tag a v0.1 release once the real-window playtest feels good.
 
 
 ## Contributing
