@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add tests for high-score storage
+
+- Changed: added `test_scores.py`; documented `python3 -m unittest` in `README.md`.
+- Why: high-score persistence should be protected from regressions around missing files, invalid JSON, lower-score overwrites, and per-mode separation.
+- Behavior: no gameplay behavior changed.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py scores.py test_scores.py`.
+- Risks/Notes: tests currently cover pure score storage only; pygame gameplay still needs an installed pygame environment for runtime checks.
+
 ## 2026-05-16 - Add local high scores
 
 - Changed: added `scores.py`; updated `game.py`, `play_with_model.py`, and `game_core.py` to load, display, and record per-mode high scores; ignored local `high_scores.json`; documented the runtime file in `README.md`.

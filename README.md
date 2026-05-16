@@ -26,6 +26,14 @@ To get started with this project, clone this repository to your local machine:
 
 ## Usage
 
+### Run Tests
+
+Some tests use only the Python standard library and can run before installing pygame:
+
+```bash
+python3 -m unittest
+```
+
 ### Data Collection
 To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be recorded:
 
@@ -54,7 +62,6 @@ High scores are saved locally in `high_scores.json`. This file is ignored by git
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 
 
 
