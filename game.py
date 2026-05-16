@@ -1,7 +1,6 @@
-import json
-
 import pygame
 
+from data_store import GAME_DATA_FILE, append_game_data
 from game_core import (
     ACTION_LEFT,
     ACTION_RIGHT,
@@ -14,7 +13,6 @@ from game_core import (
 from scores import get_high_score, record_high_score
 from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 
-DATA_FILE = "game_data.json"
 MODE_KEY = "manual"
 MODE_NAME = "Data Collection"
 
@@ -88,9 +86,15 @@ def main():
         clock.tick(FPS)
 
     if game_data:
-        with open(DATA_FILE, "w") as f:
-            json.dump(game_data, f)
-            print(f"Data has been saved to {DATA_FILE}")
+        try:
+            previous_count, total_count = append_game_data(game_data, GAME_DATA_FILE)
+        except ValueError as error:
+            print(f"Could not save gameplay data: {error}")
+        else:
+            print(
+                f"Saved {len(game_data)} new samples to {GAME_DATA_FILE} "
+                f"({previous_count} -> {total_count})."
+            )
     else:
         print("No gameplay data collected; existing data file was left unchanged.")
 

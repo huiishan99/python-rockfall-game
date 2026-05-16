@@ -35,7 +35,7 @@ python3 -m unittest
 ```
 
 ### Data Collection
-To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be recorded:
+To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be appended to `game_data.json`:
 
 ```bash
 python3 game.py
@@ -62,6 +62,5 @@ High scores are saved locally in `high_scores.json`. This file is ignored by git
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 
 

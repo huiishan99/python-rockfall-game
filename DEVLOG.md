@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Append collected gameplay data safely
+
+- Changed: added `data_store.py`; updated `game.py` to append new gameplay samples to `game_data.json`; added `test_data_store.py`; updated README wording for data collection.
+- Why: data collection previously overwrote the full training dataset at the end of every session, which could erase useful samples.
+- Behavior: new manual gameplay samples are appended to existing data. Empty sessions still leave the data file unchanged, and invalid existing data fails loudly instead of being overwritten.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py scores.py data_store.py test_scores.py test_data_store.py`.
+- Risks/Notes: no migration was needed because the existing `game_data.json` already stores a top-level list.
+
 ## 2026-05-16 - Add tests for high-score storage
 
 - Changed: added `test_scores.py`; documented `python3 -m unittest` in `README.md`.
