@@ -26,6 +26,10 @@ from settings import (
 ACTION_LEFT = "left"
 ACTION_RIGHT = "right"
 
+SCREEN_START = "start"
+SCREEN_PLAYING = "playing"
+SCREEN_GAME_OVER = "game_over"
+
 BACKGROUND_COLOR = (0, 0, 0)
 HUD_COLOR = (255, 255, 255)
 
@@ -33,6 +37,15 @@ HUD_COLOR = (255, 255, 255)
 class RockfallGame:
     def __init__(self, screen):
         self.screen = screen
+        self.font = pygame.font.Font(None, 36)
+        self.title_font = pygame.font.Font(None, 72)
+        self.level_text = self.font.render("Level:", True, HUD_COLOR)
+        self.progress_bar_x = SCREEN_WIDTH - PROGRESS_BAR_LENGTH - 10
+        self.progress_bar_y = 10
+
+        self.reset()
+
+    def reset(self):
         self.player_x = SCREEN_WIDTH // 2 - PLAYER_WIDTH // 2
         self.player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 10
         self.obstacles = []
@@ -42,12 +55,7 @@ class RockfallGame:
         self.lives = INITIAL_LIVES
         self.score = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
-        self.running = True
-
-        self.font = pygame.font.Font(None, 36)
-        self.level_text = self.font.render("Level:", True, HUD_COLOR)
-        self.progress_bar_x = SCREEN_WIDTH - PROGRESS_BAR_LENGTH - 10
-        self.progress_bar_y = 10
+        self.game_over = False
 
     def snapshot(self):
         return {
@@ -69,6 +77,9 @@ class RockfallGame:
             self.player_x = min(self.player_x + PLAYER_SPEED, SCREEN_WIDTH - PLAYER_WIDTH)
 
     def update(self):
+        if self.game_over:
+            return
+
         self._increase_difficulty()
         self._spawn_obstacle()
         self._move_obstacles_and_check_collisions()
@@ -81,6 +92,27 @@ class RockfallGame:
             pygame.draw.rect(self.screen, OBSTACLE_COLOR, self.obstacle_rect(obstacle))
 
         self._draw_hud()
+
+    def draw_start_screen(self, mode_name):
+        self._draw_message_screen(
+            "ROCKFALL",
+            [
+                mode_name,
+                "Press SPACE to start",
+                "Press ESC to quit",
+            ],
+        )
+
+    def draw_game_over_screen(self, mode_name):
+        self._draw_message_screen(
+            "GAME OVER",
+            [
+                mode_name,
+                f"Final Score: {self.score}",
+                "Press R to restart",
+                "Press ESC to quit",
+            ],
+        )
 
     @property
     def player_rect(self):
@@ -114,11 +146,22 @@ class RockfallGame:
             if player_rect.colliderect(self.obstacle_rect(obstacle)):
                 self.lives -= 1
                 if self.lives <= 0:
-                    self.running = False
+                    self.game_over = True
             else:
                 remaining_obstacles.append(obstacle)
 
         self.obstacles = remaining_obstacles
+
+    def _draw_message_screen(self, title, lines):
+        self.screen.fill(BACKGROUND_COLOR)
+        title_surface = self.title_font.render(title, True, HUD_COLOR)
+        title_x = (SCREEN_WIDTH - title_surface.get_width()) // 2
+        self.screen.blit(title_surface, (title_x, 170))
+
+        for index, line in enumerate(lines):
+            text_surface = self.font.render(line, True, HUD_COLOR)
+            text_x = (SCREEN_WIDTH - text_surface.get_width()) // 2
+            self.screen.blit(text_surface, (text_x, 270 + index * 42))
 
     def _draw_hud(self):
         lives_text = self.font.render(f"Lives: {self.lives}", True, HUD_COLOR)
