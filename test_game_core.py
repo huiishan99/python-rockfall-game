@@ -81,6 +81,19 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.messages, [])
 
+    def test_game_over_lines_include_run_summary(self):
+        game = RockfallGame(self.screen)
+        game.score = 12
+        game.difficulty_level = 3
+        game.lives = 2
+
+        lines = game.game_over_lines("Model Play")
+
+        self.assertIn("Model Play", lines)
+        self.assertIn("Final Score: 12", lines)
+        self.assertIn("Level Reached: 3", lines)
+        self.assertIn("Lives Left: 2", lines)
+
 
 if __name__ == "__main__":
     unittest.main()

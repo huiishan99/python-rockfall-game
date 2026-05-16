@@ -124,16 +124,18 @@ class RockfallGame:
         )
 
     def draw_game_over_screen(self, mode_name):
-        self._draw_message_screen(
-            "GAME OVER",
-            [
-                mode_name,
-                f"Final Score: {self.score}",
-                f"High Score: {self.visible_high_score()}",
-                "Press R to restart",
-                "Press ESC to quit",
-            ],
-        )
+        self._draw_message_screen("GAME OVER", self.game_over_lines(mode_name))
+
+    def game_over_lines(self, mode_name):
+        return [
+            mode_name,
+            f"Final Score: {self.score}",
+            f"High Score: {self.visible_high_score()}",
+            f"Level Reached: {self.difficulty_level}",
+            f"Lives Left: {self.lives}",
+            "Press R to restart",
+            "Press ESC to quit",
+        ]
 
     def draw_pause_screen(self, mode_name):
         self._draw_message_screen(

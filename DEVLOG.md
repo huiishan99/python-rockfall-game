@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Expand game-over summary
+
+- Changed: updated `game_core.py` so the game-over screen is built from reusable summary lines; expanded `test_game_core.py`.
+- Why: the ending screen should summarize the run instead of only showing score and high score.
+- Behavior: game over now shows mode, final score, high score, level reached, lives left, and restart/quit controls.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py`.
+- Risks/Notes: the screen now has more text; if the visual style changes later, spacing should be reviewed in a real window.
+
 ## 2026-05-16 - Add transient gameplay messages
 
 - Changed: updated `settings.py` and `game_core.py` to show short floating messages for score gains, hits, and level-ups; expanded `test_game_core.py`.
