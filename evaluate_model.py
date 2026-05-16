@@ -58,6 +58,19 @@ def summarize_results(results):
     }
 
 
+def format_summary_lines(summary, games_label="Games"):
+    return [
+        f"{games_label}: {summary['games']}",
+        f"Average score: {summary['average_score']:.2f}",
+        f"Best score: {summary['best_score']}",
+        f"Worst score: {summary['worst_score']}",
+        f"Average best combo: {summary['average_best_combo']:.2f}",
+        f"Best combo: {summary['best_combo']}",
+        f"Average frames: {summary['average_frames']:.1f}",
+        f"Timed out games: {summary['timeouts']}",
+    ]
+
+
 def main(argv=None):
     args = parse_args(argv)
     if args.games <= 0:
@@ -83,14 +96,8 @@ def main(argv=None):
 
     summary = summarize_results(results)
     print(f"Model: {args.model}")
-    print(f"Games: {summary['games']}")
-    print(f"Average score: {summary['average_score']:.2f}")
-    print(f"Best score: {summary['best_score']}")
-    print(f"Worst score: {summary['worst_score']}")
-    print(f"Average best combo: {summary['average_best_combo']:.2f}")
-    print(f"Best combo: {summary['best_combo']}")
-    print(f"Average frames: {summary['average_frames']:.1f}")
-    print(f"Timed out games: {summary['timeouts']}")
+    for line in format_summary_lines(summary):
+        print(line)
 
     pygame.quit()
 

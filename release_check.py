@@ -4,7 +4,7 @@ import random
 import sys
 import unittest
 
-from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, run_game, summarize_results
+from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, format_summary_lines, run_game, summarize_results
 from settings import VERSION
 
 DEFAULT_GAMES = 3
@@ -48,14 +48,8 @@ def run_evaluation(model_path, games, max_frames, random_seed):
 
 
 def print_evaluation_summary(summary):
-    print(f"Evaluation games: {summary['games']}")
-    print(f"Average score: {summary['average_score']:.2f}")
-    print(f"Best score: {summary['best_score']}")
-    print(f"Worst score: {summary['worst_score']}")
-    print(f"Average best combo: {summary['average_best_combo']:.2f}")
-    print(f"Best combo: {summary['best_combo']}")
-    print(f"Average frames: {summary['average_frames']:.1f}")
-    print(f"Timed out games: {summary['timeouts']}")
+    for line in format_summary_lines(summary, games_label="Evaluation games"):
+        print(line)
 
 
 def main(argv=None):
