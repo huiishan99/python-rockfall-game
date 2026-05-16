@@ -82,6 +82,12 @@ To collect data for training the machine learning model, run the `game.py` scrip
 python3 game.py
 ```
 
+To collect an experiment dataset without touching the default tracked file:
+
+```bash
+python3 game.py --data runs/experiment.json
+```
+
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
 

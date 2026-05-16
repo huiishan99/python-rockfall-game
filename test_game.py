@@ -1,0 +1,20 @@
+import unittest
+
+from data_store import GAME_DATA_FILE
+from game import parse_args
+
+
+class GameEntrypointTest(unittest.TestCase):
+    def test_parse_args_defaults_to_tracked_data_file(self):
+        args = parse_args([])
+
+        self.assertEqual(args.data, GAME_DATA_FILE)
+
+    def test_parse_args_accepts_data_file_override(self):
+        args = parse_args(["--data", "runs/experiment.json"])
+
+        self.assertEqual(args.data, "runs/experiment.json")
+
+
+if __name__ == "__main__":
+    unittest.main()

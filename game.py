@@ -24,6 +24,7 @@ MODE_NAME = "Data Collection"
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Play Rockfall and collect training data.")
+    parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data file to append.")
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
@@ -102,12 +103,12 @@ def main(argv=None):
 
     if game_data:
         try:
-            previous_count, total_count = append_game_data(game_data, GAME_DATA_FILE)
+            previous_count, total_count = append_game_data(game_data, args.data)
         except ValueError as error:
             print(f"Could not save gameplay data: {error}")
         else:
             print(
-                f"Saved {len(game_data)} new samples to {GAME_DATA_FILE} "
+                f"Saved {len(game_data)} new samples to {args.data} "
                 f"({previous_count} -> {total_count})."
             )
     else:

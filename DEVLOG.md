@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Allow alternate data collection files
+
+- Changed: updated `game.py` with a `--data` option for the append target; added `test_game.py`; documented experiment data collection in `README.md`; updated this devlog.
+- Why: fresh playtest experiments should be able to write separate datasets without touching the default tracked `game_data.json`.
+- Behavior: `python3 game.py` still appends to `game_data.json`; `python3 game.py --data runs/experiment.json` appends to the selected file.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py test_game.py`; ran `python3 game.py --help`.
+- Risks/Notes: selected parent directories must already exist; this follows the existing data-store behavior.
+
 ## 2026-05-16 - Cover player movement bounds
 
 - Changed: expanded `test_game_core.py` with tests for left-edge clamp, right-edge clamp, and missing-action movement behavior; updated this devlog.
