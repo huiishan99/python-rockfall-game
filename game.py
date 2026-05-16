@@ -6,6 +6,7 @@ from game_core import (
     ACTION_LEFT,
     ACTION_RIGHT,
     SCREEN_GAME_OVER,
+    SCREEN_PAUSED,
     SCREEN_PLAYING,
     SCREEN_START,
     RockfallGame,
@@ -49,6 +50,13 @@ def main():
                 elif screen_state == SCREEN_START and event.key == pygame.K_SPACE:
                     game.reset()
                     screen_state = SCREEN_PLAYING
+                elif screen_state == SCREEN_PLAYING and event.key == pygame.K_p:
+                    screen_state = SCREEN_PAUSED
+                elif screen_state == SCREEN_PAUSED and event.key == pygame.K_p:
+                    screen_state = SCREEN_PLAYING
+                elif screen_state == SCREEN_PAUSED and event.key == pygame.K_r:
+                    game.reset()
+                    screen_state = SCREEN_PLAYING
                 elif screen_state == SCREEN_GAME_OVER and event.key == pygame.K_r:
                     game.reset()
                     screen_state = SCREEN_PLAYING
@@ -65,6 +73,8 @@ def main():
 
         if screen_state == SCREEN_START:
             game.draw_start_screen(MODE_NAME)
+        elif screen_state == SCREEN_PAUSED:
+            game.draw_pause_screen(MODE_NAME)
         elif screen_state == SCREEN_GAME_OVER:
             game.draw_game_over_screen(MODE_NAME)
         else:

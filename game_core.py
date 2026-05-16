@@ -28,6 +28,7 @@ ACTION_RIGHT = "right"
 
 SCREEN_START = "start"
 SCREEN_PLAYING = "playing"
+SCREEN_PAUSED = "paused"
 SCREEN_GAME_OVER = "game_over"
 
 BACKGROUND_COLOR = (0, 0, 0)
@@ -109,6 +110,17 @@ class RockfallGame:
             [
                 mode_name,
                 f"Final Score: {self.score}",
+                "Press R to restart",
+                "Press ESC to quit",
+            ],
+        )
+
+    def draw_pause_screen(self, mode_name):
+        self._draw_message_screen(
+            "PAUSED",
+            [
+                mode_name,
+                "Press P to resume",
                 "Press R to restart",
                 "Press ESC to quit",
             ],

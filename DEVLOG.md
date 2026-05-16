@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add pause support
+
+- Changed: added a shared paused screen state in `game_core.py`; wired P-to-pause/resume and R-to-restart while paused in `game.py` and `play_with_model.py`.
+- Why: repeated playtesting and data collection need a way to stop the action without closing the game.
+- Behavior: both manual and AI modes can pause with P, resume with P, restart from pause with R, and quit with ESC.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py`.
+- Risks/Notes: pause uses a simple full-screen message for now; later UI polish could draw it as an overlay on the frozen game state.
+
 ## 2026-05-16 - Add dependency file
 
 - Changed: added `requirements.txt`; updated `README.md` installation and run commands to use `python3` and the dependency file.
