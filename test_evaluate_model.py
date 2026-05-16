@@ -58,9 +58,13 @@ class EvaluateModelTest(unittest.TestCase):
                 "average_frames": 150,
                 "timeouts": 1,
             },
+            max_frames=300,
+            random_seed=42,
         )
 
         self.assertEqual(payload["model"], "model.pkl")
+        self.assertEqual(payload["max_frames"], 300)
+        self.assertEqual(payload["random_seed"], 42)
         self.assertEqual(payload["games"], 2)
         self.assertEqual(payload["best_combo"], 6)
 

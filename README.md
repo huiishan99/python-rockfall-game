@@ -111,7 +111,7 @@ python3 evaluate_model.py --games 10 --max-frames 3600
 
 The evaluation summary reports score, best combo, frame survival, and timeout counts.
 
-For scripts or future charts, emit machine-readable JSON:
+For scripts or future charts, emit machine-readable JSON with the evaluation settings and summary metrics:
 
 ```bash
 python3 evaluate_model.py --games 10 --max-frames 3600 --json

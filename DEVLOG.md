@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Include evaluation settings in JSON
+
+- Changed: updated `evaluate_model.py` JSON payloads to include `max_frames` and `random_seed`; expanded `test_evaluate_model.py`; clarified `README.md`.
+- Why: stored JSON results need enough context to compare runs later.
+- Behavior: `python3 evaluate_model.py --json` now includes the model path, frame limit, random seed, and summary metrics.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --random-seed 42 --json`.
+- Risks/Notes: text output is unchanged; only JSON consumers see the additional keys.
+
 ## 2026-05-16 - Add JSON model evaluation output
 
 - Changed: updated `evaluate_model.py` with `--json` output and a summary payload helper; expanded `test_evaluate_model.py`; documented the flag in `README.md`.

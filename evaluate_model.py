@@ -73,8 +73,13 @@ def format_summary_lines(summary, games_label="Games"):
     ]
 
 
-def build_summary_payload(model_path, summary):
-    return {"model": model_path, **summary}
+def build_summary_payload(model_path, summary, max_frames=None, random_seed=None):
+    payload = {"model": model_path, **summary}
+    if max_frames is not None:
+        payload["max_frames"] = max_frames
+    if random_seed is not None:
+        payload["random_seed"] = random_seed
+    return payload
 
 
 def main(argv=None):
@@ -102,7 +107,13 @@ def main(argv=None):
 
     summary = summarize_results(results)
     if args.json:
-        print(json.dumps(build_summary_payload(args.model, summary), indent=2, sort_keys=True))
+        payload = build_summary_payload(
+            args.model,
+            summary,
+            max_frames=args.max_frames,
+            random_seed=args.random_seed,
+        )
+        print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Model: {args.model}")
         for line in format_summary_lines(summary):
