@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Extract shared settings and clamp manual movement
+
+- Changed: added `settings.py`; updated `game.py` and `play_with_model.py` to use shared constants; clamped manual player movement to the screen bounds.
+- Why: the manual and model-driven game loops were duplicating core settings, and manual play allowed the player to move outside the visible screen.
+- Behavior: human-controlled play now keeps the player within the window, matching the AI-controlled movement constraints.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py`.
+- Risks/Notes: the two game loops still duplicate update/render logic and should eventually share a single game engine.
+
 ## 2026-05-16 - Add project devlog
 
 - Changed: added `DEVLOG.md`; documented the devlog workflow in `README.md`.

@@ -2,41 +2,63 @@ import pygame
 import random
 import json
 
+from settings import (
+    DIFFICULTY_INTERVAL_FRAMES,
+    FPS,
+    INITIAL_DIFFICULTY_LEVEL,
+    INITIAL_LIVES,
+    INITIAL_OBSTACLE_SPEED,
+    MAX_DIFFICULTY_LEVEL,
+    OBSTACLE_COLOR,
+    OBSTACLE_FREQUENCY,
+    OBSTACLE_HEIGHT,
+    OBSTACLE_WIDTH,
+    PLAYER_COLOR,
+    PLAYER_HEIGHT,
+    PLAYER_SPEED,
+    PLAYER_WIDTH,
+    PROGRESS_BAR_HEIGHT,
+    PROGRESS_BAR_LENGTH,
+    PROGRESS_COLOR,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+)
+
 # 初始化pygame
 pygame.init()
 game_time = 0
 game_data = []  # 用于存放游戏数据
 
 # 设置屏幕尺寸
-screen_width = 800
-screen_height = 600
+screen_width = SCREEN_WIDTH
+screen_height = SCREEN_HEIGHT
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 # 进度条设置
-difficulty_level = 1
-max_difficulty_level = 10
-progress_bar_length = 200  # 进度条长度，单位为像素
-progress_bar_height = 20
-progress_color = (0, 0, 255)  # 蓝色进度条
+difficulty_level = INITIAL_DIFFICULTY_LEVEL
+max_difficulty_level = MAX_DIFFICULTY_LEVEL
+progress_bar_length = PROGRESS_BAR_LENGTH  # 进度条长度，单位为像素
+progress_bar_height = PROGRESS_BAR_HEIGHT
+progress_color = PROGRESS_COLOR
 progress_bar_x = screen_width - 210  # 右上角位置，考虑到长度和一点边距
 progress_bar_y = 10  # 顶部边距
 
 # 玩家设置
-player_width = 50
-player_height = 50
+player_width = PLAYER_WIDTH
+player_height = PLAYER_HEIGHT
 player_x = screen_width // 2 - player_width // 2
 player_y = screen_height - player_height - 10
-player_color = (255, 255, 255)
-player_speed = 5
-lives = 10  # 玩家初始生命值
+player_color = PLAYER_COLOR
+player_speed = PLAYER_SPEED
+lives = INITIAL_LIVES  # 玩家初始生命值
 
 # 障碍物设置
-obstacle_width = 50
-obstacle_height = 50
-obstacle_color = (255, 0, 0)
+obstacle_width = OBSTACLE_WIDTH
+obstacle_height = OBSTACLE_HEIGHT
+obstacle_color = OBSTACLE_COLOR
 obstacles = []
-obstacle_speed = 5
-obstacle_frequency = 25
+obstacle_speed = INITIAL_OBSTACLE_SPEED
+obstacle_frequency = OBSTACLE_FREQUENCY
 
 frame_count = 0
 
@@ -62,16 +84,16 @@ while running:
     }
 
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-        player_x -= player_speed
+        player_x = max(player_x - player_speed, 0)
         game_data.append({'state': current_state, 'action': 'left'})
 
     if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-        player_x += player_speed
+        player_x = min(player_x + player_speed, screen_width - player_width)
         game_data.append({'state': current_state, 'action': 'right'})
 
     # 更新游戏时间和障碍物速度
     game_time += 1
-    if game_time % 600 == 0:
+    if game_time % DIFFICULTY_INTERVAL_FRAMES == 0:
         obstacle_speed += 1
         difficulty_level = min(difficulty_level + 1, max_difficulty_level)
 
@@ -118,7 +140,7 @@ while running:
     pygame.display.flip()
 
     # 控制游戏更新速率
-    clock.tick(30)
+    clock.tick(FPS)
 
 # 游戏主循环结束后保存数据
 with open('game_data.json', 'w') as f:

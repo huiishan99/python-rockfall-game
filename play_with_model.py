@@ -3,28 +3,43 @@ import random
 import joblib
 import numpy as np
 
+from settings import (
+    FPS,
+    INITIAL_OBSTACLE_SPEED,
+    OBSTACLE_COLOR,
+    OBSTACLE_FREQUENCY,
+    OBSTACLE_HEIGHT,
+    OBSTACLE_WIDTH,
+    PLAYER_COLOR,
+    PLAYER_HEIGHT,
+    PLAYER_SPEED,
+    PLAYER_WIDTH,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+)
+
 # 初始化pygame
 pygame.init()
-screen_width = 800
-screen_height = 600
+screen_width = SCREEN_WIDTH
+screen_height = SCREEN_HEIGHT
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 # 加载模型
 model = joblib.load('game_model.pkl')
 
 # 玩家设置
-player_width = 50
-player_height = 50
+player_width = PLAYER_WIDTH
+player_height = PLAYER_HEIGHT
 player_x = screen_width // 2 - player_width // 2
 player_y = screen_height - player_height - 10
-player_speed = 5
+player_speed = PLAYER_SPEED
 
 # 障碍物设置
-obstacle_width = 50
-obstacle_height = 50
+obstacle_width = OBSTACLE_WIDTH
+obstacle_height = OBSTACLE_HEIGHT
 obstacles = []
-obstacle_speed = 5
-obstacle_frequency = 25
+obstacle_speed = INITIAL_OBSTACLE_SPEED
+obstacle_frequency = OBSTACLE_FREQUENCY
 frame_count = 0
 
 # 游戏主循环控制
@@ -63,17 +78,17 @@ while running:
     screen.fill((0, 0, 0))
 
     # 绘制玩家
-    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(player_x, player_y, player_width, player_height))
+    pygame.draw.rect(screen, PLAYER_COLOR, pygame.Rect(player_x, player_y, player_width, player_height))
 
     # 绘制障碍物
     for ob in obstacles:
-        pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(ob[0], ob[1], obstacle_width, obstacle_height))
+        pygame.draw.rect(screen, OBSTACLE_COLOR, pygame.Rect(ob[0], ob[1], obstacle_width, obstacle_height))
 
     # 更新屏幕显示
     pygame.display.flip()
 
     # 控制游戏更新速率
-    clock.tick(30)
+    clock.tick(FPS)
 
 # 退出pygame
 pygame.quit()
