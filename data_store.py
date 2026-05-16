@@ -1,4 +1,5 @@
 import json
+import os
 
 GAME_DATA_FILE = "game_data.json"
 
@@ -27,6 +28,9 @@ def append_game_data(new_entries, path=GAME_DATA_FILE):
 
     previous_count = len(existing_entries)
     combined_entries = existing_entries + list(new_entries)
+    parent_dir = os.path.dirname(path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
 
     with open(path, "w") as f:
         json.dump(combined_entries, f)

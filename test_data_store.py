@@ -26,6 +26,16 @@ class GameDataStoreTest(unittest.TestCase):
         self.assertEqual(total_count, 1)
         self.assertEqual(load_game_data(self.data_path), [entry])
 
+    def test_append_creates_parent_directory(self):
+        nested_path = os.path.join(self.temp_dir.name, "runs", "experiment.json")
+        entry = {"state": {"player_x": 10, "obstacles": []}, "action": "left"}
+
+        previous_count, total_count = append_game_data([entry], nested_path)
+
+        self.assertEqual(previous_count, 0)
+        self.assertEqual(total_count, 1)
+        self.assertEqual(load_game_data(nested_path), [entry])
+
     def test_append_preserves_existing_entries(self):
         old_entry = {"state": {"player_x": 10, "obstacles": []}, "action": "left"}
         new_entry = {"state": {"player_x": 20, "obstacles": []}, "action": "right"}

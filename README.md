@@ -88,6 +88,8 @@ To collect an experiment dataset without touching the default tracked file:
 python3 game.py --data runs/experiment.json
 ```
 
+Missing parent directories for the selected data file are created automatically.
+
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
 

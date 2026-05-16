@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Create data collection directories
+
+- Changed: updated `data_store.py` so appending gameplay data creates missing parent directories; expanded `test_data_store.py`; clarified `README.md`; updated this devlog.
+- Why: the new `game.py --data runs/experiment.json` workflow should work without manual directory setup.
+- Behavior: when appending non-empty gameplay data to a nested path, missing parent directories are created before writing.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile data_store.py test_data_store.py game.py test_game.py`.
+- Risks/Notes: empty data sessions still do not create files or directories.
+
 ## 2026-05-16 - Allow alternate data collection files
 
 - Changed: updated `game.py` with a `--data` option for the append target; added `test_game.py`; documented experiment data collection in `README.md`; updated this devlog.
