@@ -7,6 +7,7 @@ import pygame
 
 from game_core import RockfallGame
 from settings import (
+    COMBO_BONUS_INTERVAL,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
     MESSAGE_DURATION_FRAMES,
@@ -111,6 +112,43 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("Move: Left/Right or A/D", lines)
         self.assertIn("Press P to resume", lines)
         self.assertIn("Press R to restart", lines)
+
+    def test_avoiding_obstacles_builds_combo_and_score(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_avoid(100)
+
+        self.assertEqual(game.combo, 1)
+        self.assertEqual(game.best_combo, 1)
+        self.assertEqual(game.score, 1)
+
+    def test_combo_bonus_increases_score_after_interval(self):
+        game = RockfallGame(self.screen)
+
+        for _ in range(COMBO_BONUS_INTERVAL):
+            game._handle_avoid(100)
+
+        self.assertEqual(game.combo, COMBO_BONUS_INTERVAL)
+        self.assertEqual(game.combo_points(), 2)
+        self.assertEqual(game.score, COMBO_BONUS_INTERVAL + 1)
+
+    def test_hit_resets_combo(self):
+        game = RockfallGame(self.screen)
+        game._handle_avoid(100)
+        game._handle_avoid(100)
+
+        game._handle_hit()
+
+        self.assertEqual(game.combo, 0)
+        self.assertEqual(game.best_combo, 2)
+
+    def test_game_over_lines_include_best_combo(self):
+        game = RockfallGame(self.screen)
+        game.best_combo = 7
+
+        lines = game.game_over_lines("Model Play")
+
+        self.assertIn("Best Combo: 7", lines)
 
 
 if __name__ == "__main__":

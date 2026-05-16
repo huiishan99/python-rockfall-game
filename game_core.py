@@ -5,6 +5,8 @@ import pygame
 from difficulty import difficulty_for_time
 from features import build_model_features
 from settings import (
+    COMBO_BONUS_INTERVAL,
+    COMBO_MESSAGE_COLOR,
     INITIAL_DIFFICULTY_LEVEL,
     INITIAL_LIVES,
     INITIAL_OBSTACLE_SPEED,
@@ -13,6 +15,7 @@ from settings import (
     HIT_MESSAGE_COLOR,
     LEVEL_MESSAGE_COLOR,
     MAX_DIFFICULTY_LEVEL,
+    MAX_COMBO_BONUS,
     MESSAGE_DURATION_FRAMES,
     OBSTACLE_COLOR,
     OBSTACLE_HEIGHT,
@@ -73,6 +76,8 @@ class RockfallGame:
         self.lives = INITIAL_LIVES
         self.invincibility_frames = 0
         self.score = 0
+        self.combo = 0
+        self.best_combo = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.messages = []
         self.game_over = False
@@ -134,6 +139,7 @@ class RockfallGame:
             f"Final Score: {self.score}",
             f"High Score: {self.visible_high_score()}",
             f"Level Reached: {self.difficulty_level}",
+            f"Best Combo: {self.best_combo}",
             f"Lives Left: {self.lives}",
             "Press R to restart",
             "Press ESC to quit",
@@ -191,8 +197,7 @@ class RockfallGame:
 
         for obstacle in self.obstacles:
             if obstacle[1] >= SCREEN_HEIGHT:
-                self.score += 1
-                self._add_message("+1", SCORE_MESSAGE_COLOR, obstacle[0], SCREEN_HEIGHT - 95)
+                self._handle_avoid(obstacle[0])
                 continue
 
             obstacle[1] += self.obstacle_speed
@@ -209,9 +214,24 @@ class RockfallGame:
 
         self.lives -= 1
         self.invincibility_frames = INVINCIBILITY_FRAMES
+        self.combo = 0
         self._add_message("HIT!", HIT_MESSAGE_COLOR, self.player_x - 5, self.player_y - 35)
         if self.lives <= 0:
             self.game_over = True
+
+    def _handle_avoid(self, obstacle_x):
+        self.combo += 1
+        self.best_combo = max(self.best_combo, self.combo)
+        points = self.combo_points()
+        self.score += points
+        self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
+
+        if points > 1:
+            self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
+
+    def combo_points(self):
+        bonus = min(MAX_COMBO_BONUS, self.combo // COMBO_BONUS_INTERVAL)
+        return 1 + bonus
 
     def _tick_invincibility(self):
         if self.invincibility_frames > 0:
@@ -257,6 +277,9 @@ class RockfallGame:
 
         high_score_text = self.font.render(f"Best: {self.visible_high_score()}", True, HUD_COLOR)
         self.screen.blit(high_score_text, (10, 80))
+
+        combo_text = self.font.render(f"Combo: {self.combo}", True, HUD_COLOR)
+        self.screen.blit(combo_text, (10, 115))
 
         progress = (self.difficulty_level / MAX_DIFFICULTY_LEVEL) * PROGRESS_BAR_LENGTH
         pygame.draw.rect(

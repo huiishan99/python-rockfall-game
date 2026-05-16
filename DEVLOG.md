@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add combo scoring
+
+- Changed: updated `settings.py` and `game_core.py` with combo counters, combo score bonuses, combo HUD text, and game-over best combo; expanded `test_game_core.py`; documented combo behavior in `README.md`.
+- Why: v0.2 should reward sustained clean movement, not only count avoided rocks one by one.
+- Behavior: each avoided rock increases combo; every 5 combo adds one extra point per avoided rock up to a capped bonus; hits reset the active combo but preserve best combo for the run summary.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_release_check.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800` with average score 78.67, best 98, worst 66.
+- Risks/Notes: scoring baselines are no longer directly comparable to v0.1 because combo bonuses increase total score.
+
 ## 2026-05-16 - Start v0.2 development
 
 - Changed: updated `settings.py` version to `0.2.0-dev`; updated `README.md` project status.
