@@ -15,6 +15,8 @@ from settings import (
     INITIAL_OBSTACLE_SPEED,
     INVINCIBILITY_FRAMES,
     HIT_FLASH_INTERVAL,
+    HIT_OVERLAY_COLOR,
+    HIT_OVERLAY_MAX_ALPHA,
     HIT_MESSAGE_COLOR,
     LEVEL_MESSAGE_COLOR,
     MAX_DIFFICULTY_LEVEL,
@@ -127,6 +129,7 @@ class RockfallGame:
         for obstacle in self.obstacles:
             self._draw_obstacle(obstacle)
 
+        self._draw_hit_overlay()
         self._draw_hud()
         self._draw_messages()
 
@@ -261,6 +264,11 @@ class RockfallGame:
         obstacle_center = obstacle_x + OBSTACLE_WIDTH // 2
         return abs(player_center - obstacle_center) <= NEAR_MISS_DISTANCE
 
+    def hit_overlay_alpha(self):
+        if self.invincibility_frames <= 0:
+            return 0
+        return max(1, HIT_OVERLAY_MAX_ALPHA * self.invincibility_frames // INVINCIBILITY_FRAMES)
+
     def _tick_invincibility(self):
         if self.invincibility_frames > 0:
             self.invincibility_frames -= 1
@@ -311,6 +319,15 @@ class RockfallGame:
         pygame.draw.rect(self.screen, OBSTACLE_SHADOW_COLOR, shadow_rect)
         pygame.draw.rect(self.screen, OBSTACLE_COLOR, obstacle_rect)
         pygame.draw.rect(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_rect)
+
+    def _draw_hit_overlay(self):
+        alpha = self.hit_overlay_alpha()
+        if alpha <= 0:
+            return
+
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((*HIT_OVERLAY_COLOR, alpha))
+        self.screen.blit(overlay, (0, 0))
 
     def _draw_message_screen(self, title, lines):
         self._draw_background()

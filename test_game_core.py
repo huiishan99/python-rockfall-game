@@ -14,6 +14,7 @@ from settings import (
     HUD_COLOR,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
+    HIT_OVERLAY_MAX_ALPHA,
     LANE_HIGHLIGHT_COLOR,
     MENU_ACCENT_COLOR,
     MENU_SECONDARY_COLOR,
@@ -69,6 +70,18 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._handle_hit()
 
         self.assertIn(game.player_color(), (PLAYER_COLOR, PLAYER_HIT_COLOR))
+
+    def test_hit_overlay_alpha_fades_with_invincibility(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_hit()
+        initial_alpha = game.hit_overlay_alpha()
+        game.invincibility_frames = 1
+
+        self.assertEqual(initial_alpha, HIT_OVERLAY_MAX_ALPHA)
+        self.assertLess(game.hit_overlay_alpha(), initial_alpha)
+        game.invincibility_frames = 0
+        self.assertEqual(game.hit_overlay_alpha(), 0)
 
     def test_hit_adds_message(self):
         game = RockfallGame(self.screen)
@@ -210,6 +223,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.draw()
 
         self.assertEqual(self.screen.get_at(game.player_rect.topleft)[:3], PLAYER_OUTLINE_COLOR)
+
+    def test_draw_hit_overlay_tints_background_after_hit(self):
+        game = RockfallGame(self.screen)
+        game._handle_hit()
+
+        game.draw()
+
+        self.assertNotEqual(self.screen.get_at((3, 3))[:3], BACKGROUND_COLOR)
 
     def test_draw_adds_obstacle_highlight_and_shadow(self):
         game = RockfallGame(self.screen)
