@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Make training output reproducible and visible
+
+- Changed: updated `train_model.py` to skip invalid entries, require both actions, use a fixed random seed, stratify the train/test split when possible, and print sample counts plus validation accuracy.
+- Why: training previously overwrote the model silently, making it hard to compare models or spot bad data.
+- Behavior: training now reports how much data was used, action balance, validation accuracy, and where the model was saved.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py`.
+- Risks/Notes: `game_model.pkl` was not retrained in this change; the feature shape remains compatible with the existing model.
+
 ## 2026-05-16 - Add score for avoided rocks
 
 - Changed: updated `game_core.py` to track score and render it in the HUD.
