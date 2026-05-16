@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add model comparison CLI
+
+- Changed: added `compare_models.py` for evaluating one or more model files with shared seeds; added `test_compare_models.py`; updated `README.md`.
+- Why: v0.2 experiments need a direct way to compare default and candidate models without manually running separate commands and aligning settings.
+- Behavior: `python3 compare_models.py game_model.pkl runs/v02_model.pkl` prints a comparison table; `--json` prints structured comparison output.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile compare_models.py test_compare_models.py evaluate_model.py`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --json`.
+- Risks/Notes: all compared models must be compatible with the current feature shape.
+
 ## 2026-05-16 - Create model output directories
 
 - Changed: extracted `ensure_parent_dir` in `data_store.py`; updated `train_model.py` to create missing parent directories before saving model files; added `test_train_model.py`; updated `README.md`; updated this devlog.

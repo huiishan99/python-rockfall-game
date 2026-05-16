@@ -23,7 +23,7 @@ This is now in v0.2 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
+- Headless model evaluation and model comparison with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -138,6 +138,14 @@ For scripts or future charts, emit machine-readable JSON with the evaluation set
 ```bash
 python3 evaluate_model.py --games 10 --max-frames 3600 --json
 ```
+
+Compare multiple models with the same random seeds:
+
+```bash
+python3 compare_models.py game_model.pkl runs/v02_model.pkl --games 10 --max-frames 3600
+```
+
+Add `--json` to produce structured comparison output.
 
 ### Runtime Files
 
