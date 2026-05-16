@@ -8,13 +8,18 @@ import pygame
 from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from game_core import RockfallGame
 from settings import (
+    BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     DIFFICULTY_INTERVAL_FRAMES,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
     MESSAGE_DURATION_FRAMES,
+    OBSTACLE_HIGHLIGHT_COLOR,
+    OBSTACLE_SHADOW_COLOR,
+    OBSTACLE_WIDTH,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
+    PLAYER_OUTLINE_COLOR,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -168,6 +173,32 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._increase_difficulty()
 
         self.assertEqual(game.pop_events(), [EVENT_LEVEL_UP])
+
+    def test_draw_uses_styled_background(self):
+        game = RockfallGame(self.screen)
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at((3, 3))[:3], BACKGROUND_COLOR)
+
+    def test_draw_adds_player_outline(self):
+        game = RockfallGame(self.screen)
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at(game.player_rect.topleft)[:3], PLAYER_OUTLINE_COLOR)
+
+    def test_draw_adds_obstacle_highlight_and_shadow(self):
+        game = RockfallGame(self.screen)
+        game.obstacles = [[100, 100]]
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at((101, 101))[:3], OBSTACLE_HIGHLIGHT_COLOR)
+        self.assertEqual(
+            self.screen.get_at((100 + OBSTACLE_WIDTH + 1, 100 + OBSTACLE_WIDTH + 1))[:3],
+            OBSTACLE_SHADOW_COLOR,
+        )
 
 
 if __name__ == "__main__":

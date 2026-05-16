@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add playfield visual polish
+
+- Changed: updated `settings.py` and `game_core.py` with shared visual colors, lane guide drawing, player shadow/outline, and obstacle shadow/highlight; expanded `test_game_core.py`; updated `README.md`.
+- Why: v0.2 should look more like an intentional arcade game and less like debug rectangles while staying asset-free.
+- Behavior: the playfield now has a darker background, readable lane lines, a clearer player silhouette, and falling rocks with simple depth cues.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800` with average score 78.67, best 98, worst 66.
+- Risks/Notes: this is a lightweight pygame drawing pass; real-window visual spacing and color contrast should still be checked by hand.
+
 ## 2026-05-16 - Add optional sound feedback
 
 - Changed: added `game_events.py` and `game_audio.py`; updated `game_core.py` to emit avoid/hit/level-up events; updated manual and model entrypoints to play generated tones; added `--mute`; added `test_game_audio.py` and expanded `test_game_core.py`; documented mute usage in `README.md`.

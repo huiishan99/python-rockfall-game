@@ -6,8 +6,10 @@ from difficulty import difficulty_for_time
 from features import build_model_features
 from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from settings import (
+    BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
+    HUD_COLOR,
     INITIAL_DIFFICULTY_LEVEL,
     INITIAL_LIVES,
     INITIAL_OBSTACLE_SPEED,
@@ -20,10 +22,16 @@ from settings import (
     MESSAGE_DURATION_FRAMES,
     OBSTACLE_COLOR,
     OBSTACLE_HEIGHT,
+    OBSTACLE_HIGHLIGHT_COLOR,
+    OBSTACLE_SHADOW_COLOR,
     OBSTACLE_WIDTH,
+    LANE_COLOR,
+    LANE_HIGHLIGHT_COLOR,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_HEIGHT,
+    PLAYER_OUTLINE_COLOR,
+    PLAYER_SHADOW_COLOR,
     PLAYER_SPEED,
     PLAYER_WIDTH,
     PROGRESS_BAR_HEIGHT,
@@ -33,7 +41,7 @@ from settings import (
     SCREEN_WIDTH,
     SCORE_MESSAGE_COLOR,
 )
-from spawning import choose_spawn_x
+from spawning import build_spawn_lanes, choose_spawn_x
 
 ACTION_LEFT = "left"
 ACTION_RIGHT = "right"
@@ -42,9 +50,6 @@ SCREEN_START = "start"
 SCREEN_PLAYING = "playing"
 SCREEN_PAUSED = "paused"
 SCREEN_GAME_OVER = "game_over"
-
-BACKGROUND_COLOR = (0, 0, 0)
-HUD_COLOR = (255, 255, 255)
 
 
 class RockfallGame:
@@ -110,11 +115,11 @@ class RockfallGame:
         self._tick_messages()
 
     def draw(self):
-        self.screen.fill(BACKGROUND_COLOR)
-        pygame.draw.rect(self.screen, self.player_color(), self.player_rect)
+        self._draw_background()
+        self._draw_player()
 
         for obstacle in self.obstacles:
-            pygame.draw.rect(self.screen, OBSTACLE_COLOR, self.obstacle_rect(obstacle))
+            self._draw_obstacle(obstacle)
 
         self._draw_hud()
         self._draw_messages()
@@ -269,6 +274,30 @@ class RockfallGame:
             if message["frames"] > 0:
                 remaining_messages.append(message)
         self.messages = remaining_messages
+
+    def _draw_background(self):
+        self.screen.fill(BACKGROUND_COLOR)
+
+        lanes = build_spawn_lanes()
+        for lane_index, lane_x in enumerate(lanes):
+            center_x = lane_x + OBSTACLE_WIDTH // 2
+            lane_color = LANE_HIGHLIGHT_COLOR if lane_index % 2 == 0 else LANE_COLOR
+            pygame.draw.line(self.screen, lane_color, (center_x, 0), (center_x, SCREEN_HEIGHT), 1)
+
+    def _draw_player(self):
+        shadow_rect = self.player_rect.move(4, 5)
+        pygame.draw.rect(self.screen, PLAYER_SHADOW_COLOR, shadow_rect)
+        pygame.draw.rect(self.screen, self.player_color(), self.player_rect)
+        pygame.draw.rect(self.screen, PLAYER_OUTLINE_COLOR, self.player_rect, 2)
+
+    def _draw_obstacle(self, obstacle):
+        obstacle_rect = self.obstacle_rect(obstacle)
+        shadow_rect = obstacle_rect.move(4, 5)
+        highlight_rect = pygame.Rect(obstacle_rect.x, obstacle_rect.y, obstacle_rect.width, 8)
+
+        pygame.draw.rect(self.screen, OBSTACLE_SHADOW_COLOR, shadow_rect)
+        pygame.draw.rect(self.screen, OBSTACLE_COLOR, obstacle_rect)
+        pygame.draw.rect(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_rect)
 
     def _draw_message_screen(self, title, lines):
         self.screen.fill(BACKGROUND_COLOR)
