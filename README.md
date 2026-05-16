@@ -17,6 +17,15 @@ This is now in v0.2 development after the playable v0.1 release:
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
 
+## Current Features
+
+- Manual play for data collection, with left/right or A/D movement, pause, restart, and local high scores.
+- AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
+- Dynamic difficulty with faster falling speed, tighter spawn frequency, and lane-based rock spawning.
+- Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
+- Headless model evaluation with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
+- Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
+
 ## Development Log
 
 Every meaningful change should be recorded in [DEVLOG.md](DEVLOG.md). Add entries newest first and include what changed, why it changed, how it was verified, and any risks or follow-up notes. This is especially important when changing gameplay rules, collected data, or the trained model.

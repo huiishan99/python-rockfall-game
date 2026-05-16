@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Document current feature set
+
+- Changed: updated `README.md` with a `Current Features` section covering manual play, AI play, difficulty, feedback, evaluation, and verification; updated this devlog.
+- Why: the v0.2 development line has accumulated enough small improvements that README needed a consolidated feature map.
+- Behavior: no gameplay behavior changed.
+- Verification: ran `python3 -m unittest`; ran `git diff --check`.
+- Risks/Notes: documentation-only change; keep this section current as new systems land.
+
 ## 2026-05-16 - Generalize release-check wording
 
 - Changed: updated `release_check.py` argparse text and the project-status bullet in `README.md`; updated this devlog.
