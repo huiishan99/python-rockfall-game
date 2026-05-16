@@ -40,7 +40,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD highlights low lives and active combo, while the playfield and menu screens draw subtle lane guides, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Incoming rocks briefly mark the top of their lane before fully entering the screen. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD highlights low lives and active combo, while the playfield and menu screens draw subtle lane guides, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
 
 Controls:
 

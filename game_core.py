@@ -32,6 +32,8 @@ from settings import (
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
+    OBSTACLE_WARNING_COLOR,
+    OBSTACLE_WARNING_HEIGHT,
     OBSTACLE_WIDTH,
     LANE_COLOR,
     LANE_HIGHLIGHT_COLOR,
@@ -333,6 +335,12 @@ class RockfallGame:
         pygame.draw.rect(self.screen, OBSTACLE_SHADOW_COLOR, shadow_rect)
         pygame.draw.rect(self.screen, OBSTACLE_COLOR, obstacle_rect)
         pygame.draw.rect(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_rect)
+        if obstacle_rect.y < 0:
+            self._draw_obstacle_warning(obstacle_rect)
+
+    def _draw_obstacle_warning(self, obstacle_rect):
+        warning_rect = pygame.Rect(obstacle_rect.x, 0, obstacle_rect.width, OBSTACLE_WARNING_HEIGHT)
+        pygame.draw.rect(self.screen, OBSTACLE_WARNING_COLOR, warning_rect)
 
     def _draw_hit_overlay(self):
         alpha = self.hit_overlay_alpha()

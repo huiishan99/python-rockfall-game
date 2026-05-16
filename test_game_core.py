@@ -26,6 +26,7 @@ from settings import (
     LOW_LIVES_THRESHOLD,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
+    OBSTACLE_WARNING_COLOR,
     OBSTACLE_WIDTH,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
@@ -263,6 +264,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
             self.screen.get_at((100 + OBSTACLE_WIDTH + 1, 100 + OBSTACLE_WIDTH + 1))[:3],
             OBSTACLE_SHADOW_COLOR,
         )
+
+    def test_draw_adds_top_warning_for_incoming_obstacle(self):
+        game = RockfallGame(self.screen)
+        game.obstacles = [[100, -30]]
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at((101, 1))[:3], OBSTACLE_WARNING_COLOR)
 
     def test_message_line_colors_highlight_mode_and_controls(self):
         game = RockfallGame(self.screen)
