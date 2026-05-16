@@ -26,6 +26,10 @@ To get started with this project, clone this repository to your local machine:
 
 ## Usage
 
+### Gameplay
+
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills.
+
 ### Run Tests
 
 Some tests use only the Python standard library and can run before installing pygame:

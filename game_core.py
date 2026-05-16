@@ -2,15 +2,14 @@ import random
 
 import pygame
 
+from difficulty import difficulty_for_time
 from features import build_model_features
 from settings import (
-    DIFFICULTY_INTERVAL_FRAMES,
     INITIAL_DIFFICULTY_LEVEL,
     INITIAL_LIVES,
     INITIAL_OBSTACLE_SPEED,
     MAX_DIFFICULTY_LEVEL,
     OBSTACLE_COLOR,
-    OBSTACLE_FREQUENCY,
     OBSTACLE_HEIGHT,
     OBSTACLE_WIDTH,
     PLAYER_COLOR,
@@ -59,6 +58,7 @@ class RockfallGame:
         self.player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 10
         self.obstacles = []
         self.obstacle_speed = INITIAL_OBSTACLE_SPEED
+        self.obstacle_frequency = difficulty_for_time(0).obstacle_frequency
         self.frame_count = 0
         self.game_time = 0
         self.lives = INITIAL_LIVES
@@ -142,13 +142,14 @@ class RockfallGame:
 
     def _increase_difficulty(self):
         self.game_time += 1
-        if self.game_time % DIFFICULTY_INTERVAL_FRAMES == 0:
-            self.obstacle_speed += 1
-            self.difficulty_level = min(self.difficulty_level + 1, MAX_DIFFICULTY_LEVEL)
+        difficulty = difficulty_for_time(self.game_time)
+        self.obstacle_speed = difficulty.obstacle_speed
+        self.obstacle_frequency = difficulty.obstacle_frequency
+        self.difficulty_level = difficulty.level
 
     def _spawn_obstacle(self):
         self.frame_count += 1
-        if self.frame_count % OBSTACLE_FREQUENCY == 0:
+        if self.frame_count % self.obstacle_frequency == 0:
             max_x = SCREEN_WIDTH - OBSTACLE_WIDTH
             self.obstacles.append([random.randint(0, max_x), -OBSTACLE_HEIGHT])
 

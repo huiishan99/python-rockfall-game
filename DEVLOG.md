@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add dynamic difficulty curve
+
+- Changed: added `difficulty.py`; updated `settings.py` and `game_core.py` so each difficulty level increases obstacle speed and reduces spawn interval; added `test_difficulty.py`; documented the gameplay behavior in `README.md`.
+- Why: the game previously increased falling speed over time but kept the same spawn cadence, which made progression feel flat.
+- Behavior: difficulty now rises every 600 frames, obstacle speed increases by level, and obstacle spawn frequency tightens from 25 frames down to a 12-frame minimum.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py`; ran `python3 evaluate_model.py --games 3 --max-frames 600`; ran `python3 evaluate_model.py --games 3 --max-frames 1800`.
+- Risks/Notes: this changes gameplay pacing without retraining the model; evaluation scores may shift because later frames generate rocks more aggressively.
+
 ## 2026-05-16 - Add headless model evaluation
 
 - Changed: added `evaluate_model.py` for repeated model simulations without opening a window; added `test_evaluate_model.py`; documented the evaluation command in `README.md`.

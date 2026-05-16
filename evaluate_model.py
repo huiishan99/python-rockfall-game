@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 from statistics import mean
 
@@ -61,6 +62,8 @@ def main(argv=None):
         raise ValueError("--max-frames must be greater than zero.")
 
     import joblib
+
+    os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
 
     from settings import SCREEN_HEIGHT, SCREEN_WIDTH
