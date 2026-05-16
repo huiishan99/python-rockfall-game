@@ -36,8 +36,9 @@ HUD_COLOR = (255, 255, 255)
 
 
 class RockfallGame:
-    def __init__(self, screen):
+    def __init__(self, screen, high_score=0):
         self.screen = screen
+        self.high_score = high_score
         self.font = pygame.font.Font(None, 36)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
@@ -45,6 +46,12 @@ class RockfallGame:
         self.progress_bar_y = 10
 
         self.reset()
+
+    def set_high_score(self, high_score):
+        self.high_score = max(0, int(high_score))
+
+    def visible_high_score(self):
+        return max(self.high_score, self.score)
 
     def reset(self):
         self.player_x = SCREEN_WIDTH // 2 - PLAYER_WIDTH // 2
@@ -99,6 +106,7 @@ class RockfallGame:
             "ROCKFALL",
             [
                 mode_name,
+                f"High Score: {self.visible_high_score()}",
                 "Press SPACE to start",
                 "Press ESC to quit",
             ],
@@ -110,6 +118,7 @@ class RockfallGame:
             [
                 mode_name,
                 f"Final Score: {self.score}",
+                f"High Score: {self.visible_high_score()}",
                 "Press R to restart",
                 "Press ESC to quit",
             ],
@@ -120,6 +129,7 @@ class RockfallGame:
             "PAUSED",
             [
                 mode_name,
+                f"High Score: {self.visible_high_score()}",
                 "Press P to resume",
                 "Press R to restart",
                 "Press ESC to quit",
@@ -181,6 +191,9 @@ class RockfallGame:
 
         score_text = self.font.render(f"Score: {self.score}", True, HUD_COLOR)
         self.screen.blit(score_text, (10, 45))
+
+        high_score_text = self.font.render(f"Best: {self.visible_high_score()}", True, HUD_COLOR)
+        self.screen.blit(high_score_text, (10, 80))
 
         progress = (self.difficulty_level / MAX_DIFFICULTY_LEVEL) * PROGRESS_BAR_LENGTH
         pygame.draw.rect(

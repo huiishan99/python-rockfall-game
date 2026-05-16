@@ -47,10 +47,13 @@ Once the model is trained, you can run the game with the model controlling the p
 python3 play_with_model.py
 ```
 
+### Runtime Files
+
+High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
+
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 
 
 

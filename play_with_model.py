@@ -10,9 +10,11 @@ from game_core import (
     SCREEN_START,
     RockfallGame,
 )
+from scores import get_high_score, record_high_score
 from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 
 MODEL_FILE = "game_model.pkl"
+MODE_KEY = "model"
 MODE_NAME = "Model Play"
 
 
@@ -29,7 +31,7 @@ def main():
     pygame.display.set_caption("Rockfall - Model Play")
 
     model = joblib.load(MODEL_FILE)
-    game = RockfallGame(screen)
+    game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
     clock = pygame.time.Clock()
     screen_state = SCREEN_START
     app_running = True
@@ -59,6 +61,8 @@ def main():
             game.apply_action(predict_action(model, game))
             game.update()
             if game.game_over:
+                high_score, _ = record_high_score(MODE_KEY, game.score)
+                game.set_high_score(high_score)
                 screen_state = SCREEN_GAME_OVER
 
         if screen_state == SCREEN_START:

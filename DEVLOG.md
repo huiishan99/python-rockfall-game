@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add local high scores
+
+- Changed: added `scores.py`; updated `game.py`, `play_with_model.py`, and `game_core.py` to load, display, and record per-mode high scores; ignored local `high_scores.json`; documented the runtime file in `README.md`.
+- Why: score is more useful when players and model runs can compare against a saved best result.
+- Behavior: manual and model modes each display a saved high score, show a new best immediately during play, and persist it after game over.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py scores.py`; ran a `scores.py` helper smoke test with a temporary score file.
+- Risks/Notes: high scores are local-only and intentionally untracked; corrupted score files reset to an empty score table.
+
 ## 2026-05-16 - Add pause support
 
 - Changed: added a shared paused screen state in `game_core.py`; wired P-to-pause/resume and R-to-restart while paused in `game.py` and `play_with_model.py`.
