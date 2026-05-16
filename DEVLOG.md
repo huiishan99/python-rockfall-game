@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Start v0.2 development
+
+- Changed: updated `settings.py` version to `0.2.0-dev`; updated `README.md` project status.
+- Why: v0.1.0 has been tagged, so new changes should identify as the next development line.
+- Behavior: window titles and release checks now identify local builds as `0.2.0-dev`.
+- Verification: ran `python3 -m unittest`.
+- Risks/Notes: this is a development version, not a release tag.
+
 ## 2026-05-16 - Release v0.1.0
 
 - Changed: promoted `settings.py` version from `0.1.0-candidate` to `0.1.0`; updated `README.md` project status and next steps.
