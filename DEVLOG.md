@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Polish HUD state colors
+
+- Changed: updated `settings.py` and `game_core.py` with low-life, active-combo, and progress-background HUD colors; expanded `test_game_core.py`; updated `README.md`.
+- Why: important run state should be readable from the HUD without requiring careful text parsing.
+- Behavior: low lives now use a warning color, active combo uses a combo color, and the difficulty progress bar has a visible dark background.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800` with average score 78.67, best 98, worst 66.
+- Risks/Notes: color thresholds are intentionally simple; real-window playtesting should confirm they remain legible against hit tint and menu colors.
+
 ## 2026-05-16 - Add hit screen tint
 
 - Changed: updated `settings.py` and `game_core.py` with a fading hit overlay color/alpha; expanded `test_game_core.py`; updated `README.md`.

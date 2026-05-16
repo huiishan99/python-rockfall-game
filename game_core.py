@@ -10,6 +10,9 @@ from settings import (
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
     HUD_COLOR,
+    HUD_COMBO_COLOR,
+    HUD_PROGRESS_BACK_COLOR,
+    HUD_WARNING_COLOR,
     INITIAL_DIFFICULTY_LEVEL,
     INITIAL_LIVES,
     INITIAL_OBSTACLE_SPEED,
@@ -19,6 +22,7 @@ from settings import (
     HIT_OVERLAY_MAX_ALPHA,
     HIT_MESSAGE_COLOR,
     LEVEL_MESSAGE_COLOR,
+    LOW_LIVES_THRESHOLD,
     MAX_DIFFICULTY_LEVEL,
     MAX_COMBO_BONUS,
     MESSAGE_DURATION_FRAMES,
@@ -269,6 +273,16 @@ class RockfallGame:
             return 0
         return max(1, HIT_OVERLAY_MAX_ALPHA * self.invincibility_frames // INVINCIBILITY_FRAMES)
 
+    def lives_color(self):
+        if self.lives <= LOW_LIVES_THRESHOLD:
+            return HUD_WARNING_COLOR
+        return HUD_COLOR
+
+    def combo_color(self):
+        if self.combo > 0:
+            return HUD_COMBO_COLOR
+        return HUD_COLOR
+
     def _tick_invincibility(self):
         if self.invincibility_frames > 0:
             self.invincibility_frames -= 1
@@ -360,7 +374,7 @@ class RockfallGame:
         return HUD_COLOR
 
     def _draw_hud(self):
-        lives_text = self.font.render(f"Lives: {self.lives}", True, HUD_COLOR)
+        lives_text = self.font.render(f"Lives: {self.lives}", True, self.lives_color())
         self.screen.blit(lives_text, (10, 10))
 
         score_text = self.font.render(f"Score: {self.score}", True, HUD_COLOR)
@@ -369,10 +383,15 @@ class RockfallGame:
         high_score_text = self.font.render(f"Best: {self.visible_high_score()}", True, HUD_COLOR)
         self.screen.blit(high_score_text, (10, 80))
 
-        combo_text = self.font.render(f"Combo: {self.combo}", True, HUD_COLOR)
+        combo_text = self.font.render(f"Combo: {self.combo}", True, self.combo_color())
         self.screen.blit(combo_text, (10, 115))
 
         progress = (self.difficulty_level / MAX_DIFFICULTY_LEVEL) * PROGRESS_BAR_LENGTH
+        pygame.draw.rect(
+            self.screen,
+            HUD_PROGRESS_BACK_COLOR,
+            (self.progress_bar_x, self.progress_bar_y, PROGRESS_BAR_LENGTH, PROGRESS_BAR_HEIGHT),
+        )
         pygame.draw.rect(
             self.screen,
             HUD_COLOR,

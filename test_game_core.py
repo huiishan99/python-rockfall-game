@@ -11,7 +11,10 @@ from settings import (
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     DIFFICULTY_INTERVAL_FRAMES,
+    HUD_COMBO_COLOR,
     HUD_COLOR,
+    HUD_PROGRESS_BACK_COLOR,
+    HUD_WARNING_COLOR,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
     HIT_OVERLAY_MAX_ALPHA,
@@ -20,6 +23,7 @@ from settings import (
     MENU_SECONDARY_COLOR,
     MESSAGE_DURATION_FRAMES,
     NEAR_MISS_MESSAGE_COLOR,
+    LOW_LIVES_THRESHOLD,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
     OBSTACLE_WIDTH,
@@ -187,6 +191,22 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.messages[-1]["color"], NEAR_MISS_MESSAGE_COLOR)
         self.assertEqual(game.score, 1)
 
+    def test_lives_color_warns_when_low(self):
+        game = RockfallGame(self.screen)
+        self.assertEqual(game.lives_color(), HUD_COLOR)
+
+        game.lives = LOW_LIVES_THRESHOLD
+
+        self.assertEqual(game.lives_color(), HUD_WARNING_COLOR)
+
+    def test_combo_color_highlights_active_combo(self):
+        game = RockfallGame(self.screen)
+        self.assertEqual(game.combo_color(), HUD_COLOR)
+
+        game.combo = 1
+
+        self.assertEqual(game.combo_color(), HUD_COMBO_COLOR)
+
     def test_game_over_lines_include_best_combo(self):
         game = RockfallGame(self.screen)
         game.best_combo = 7
@@ -258,6 +278,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(self.screen.get_at((25, 3))[:3], LANE_HIGHLIGHT_COLOR)
         self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 220))[:3], MENU_ACCENT_COLOR)
+
+    def test_hud_draws_progress_background(self):
+        game = RockfallGame(self.screen)
+
+        game.draw()
+
+        progress_back_pixel = (game.progress_bar_x + 120, game.progress_bar_y + 5)
+        self.assertEqual(self.screen.get_at(progress_back_pixel)[:3], HUD_PROGRESS_BACK_COLOR)
 
 
 if __name__ == "__main__":
