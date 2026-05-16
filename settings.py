@@ -1,3 +1,5 @@
+VERSION = "0.1.0-candidate"
+
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 30

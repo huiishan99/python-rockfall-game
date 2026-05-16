@@ -7,6 +7,8 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
+Current version: `0.1.0-candidate`.
+
 This is approaching a playable v0.1:
 
 - Manual play collects training data.

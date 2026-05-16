@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Mark v0.1 candidate version
+
+- Changed: added `VERSION = "0.1.0-candidate"` in `settings.py`; updated manual and model window captions; documented the candidate version in `README.md`.
+- Why: the project is close enough to v0.1 that builds should identify their current candidate version.
+- Behavior: pygame window titles now show the v0.1 candidate version.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py`; ran `python3 evaluate_model.py --games 3 --max-frames 600`.
+- Risks/Notes: this does not create a git tag; tag `v0.1.0` after a final hands-on playtest.
+
 ## 2026-05-16 - Playtest and retrain with fresh data
 
 - Changed: appended 812 new manual playtest samples to `game_data.json`; retrained `game_model.pkl` from 2472 valid samples.

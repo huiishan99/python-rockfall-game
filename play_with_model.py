@@ -34,11 +34,11 @@ def main(argv=None):
         RockfallGame,
     )
     from scores import get_high_score, record_high_score
-    from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+    from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, VERSION
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rockfall - Model Play")
+    pygame.display.set_caption(f"Rockfall {VERSION} - Model Play")
 
     model = joblib.load(args.model)
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))

@@ -11,7 +11,7 @@ from game_core import (
     RockfallGame,
 )
 from scores import get_high_score, record_high_score
-from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, VERSION
 
 MODE_KEY = "manual"
 MODE_NAME = "Data Collection"
@@ -32,7 +32,7 @@ def read_manual_action():
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rockfall - Data Collection")
+    pygame.display.set_caption(f"Rockfall {VERSION} - Data Collection")
 
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
     clock = pygame.time.Clock()
