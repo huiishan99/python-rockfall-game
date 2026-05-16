@@ -3,6 +3,7 @@ import argparse
 from collections import Counter
 
 from data_store import GAME_DATA_FILE, load_game_data
+from features import FEATURE_NAMES, build_model_features
 
 MODEL_FILE = "game_model.pkl"
 RANDOM_STATE = 42
@@ -29,14 +30,21 @@ def load_data(filepath):
     skipped_entries = 0
 
     for entry in data:
-        obstacles = entry["state"].get("obstacles", [])
+        state = entry.get("state", {})
+        player_x = state.get("player_x")
+        obstacles = state.get("obstacles", [])
         action = entry.get("action")
 
-        if not obstacles or action not in ("left", "right"):
+        if player_x is None or not obstacles or action not in ("left", "right"):
             skipped_entries += 1
             continue
 
-        features.append([entry["state"]["player_x"], obstacles[0][0]])
+        try:
+            features.append(build_model_features(player_x, obstacles))
+        except (TypeError, ValueError):
+            skipped_entries += 1
+            continue
+
         labels.append(1 if action == "right" else 0)
 
     return np.array(features), np.array(labels), skipped_entries
@@ -83,6 +91,7 @@ def main(argv=None):
     joblib.dump(model, args.model)
 
     print(f"Loaded {len(X)} valid samples from {args.data} ({skipped_entries} skipped).")
+    print(f"Features: {', '.join(FEATURE_NAMES)}.")
     print(f"Action balance: left={action_counts[0]}, right={action_counts[1]}.")
     print(f"Validation accuracy: {accuracy:.3f}.")
     print(f"Model saved to {args.model}.")

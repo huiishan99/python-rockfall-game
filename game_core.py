@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from features import build_model_features
 from settings import (
     DIFFICULTY_INTERVAL_FRAMES,
     INITIAL_DIFFICULTY_LEVEL,
@@ -72,11 +73,7 @@ class RockfallGame:
         }
 
     def model_features(self):
-        if self.obstacles:
-            first_obstacle_x = self.obstacles[0][0]
-        else:
-            first_obstacle_x = 0
-        return [self.player_x, first_obstacle_x]
+        return build_model_features(self.player_x, self.obstacles)
 
     def apply_action(self, action):
         if action == ACTION_LEFT:

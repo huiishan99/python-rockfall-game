@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Use richer obstacle features for the model
+
+- Changed: added `features.py`; updated `game_core.py` and `train_model.py` to share model feature extraction; added `test_features.py`; documented the current feature set in `README.md`; retrained `game_model.pkl`.
+- Why: the model previously saw only player x-position and the first obstacle x-position, which ignored obstacle height and horizontal distance.
+- Behavior: model training and model play now use player x-position, nearest obstacle x-position, nearest obstacle y-position, and horizontal distance to the nearest obstacle.
+- Verification: installed dependencies with `python3 -m pip install -r requirements.txt`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py scores.py data_store.py features.py test_scores.py test_data_store.py test_features.py`; ran `python3 train_model.py`; ran a model prediction smoke test against `game_model.pkl`; ran a pygame dummy-display smoke test.
+- Risks/Notes: old two-feature model files are no longer compatible with the default AI play path; retraining is required for alternate model files.
+
 ## 2026-05-16 - Add model experiment CLI options
 
 - Changed: updated `train_model.py` with argparse options for data path, model path, validation split, random seed, and tree count; updated `play_with_model.py` with a model path option; delayed heavy imports so help text is easier to access; documented examples in `README.md`.
