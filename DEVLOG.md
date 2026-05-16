@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Give AI play mode lives and collision
+
+- Changed: updated `play_with_model.py` so model-controlled play tracks lives, detects obstacle collisions, ends at zero lives, increases difficulty over time, and shows the same basic HUD as manual play.
+- Why: AI play mode previously only moved and rendered the player, so it could not be used to judge whether the model was actually surviving the game.
+- Behavior: model-controlled play now has a real fail condition and visible lives/difficulty feedback.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py`.
+- Risks/Notes: manual and AI modes still duplicate some game-loop logic; this should be unified in a future refactor.
+
 ## 2026-05-16 - Extract shared settings and clamp manual movement
 
 - Changed: added `settings.py`; updated `game.py` and `play_with_model.py` to use shared constants; clamped manual player movement to the screen bounds.
