@@ -4,6 +4,7 @@ import pygame
 
 from difficulty import difficulty_for_time
 from features import build_model_features
+from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from settings import (
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
@@ -80,6 +81,7 @@ class RockfallGame:
         self.best_combo = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.messages = []
+        self.events = []
         self.game_over = False
 
     def snapshot(self):
@@ -116,6 +118,11 @@ class RockfallGame:
 
         self._draw_hud()
         self._draw_messages()
+
+    def pop_events(self):
+        events = self.events
+        self.events = []
+        return events
 
     def draw_start_screen(self, mode_name):
         self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
@@ -183,6 +190,7 @@ class RockfallGame:
         self.difficulty_level = difficulty.level
         if self.difficulty_level > previous_level:
             self._add_message(f"LEVEL {self.difficulty_level}", LEVEL_MESSAGE_COLOR, SCREEN_WIDTH // 2 - 70, 120)
+            self._emit_event(EVENT_LEVEL_UP)
 
     def _spawn_obstacle(self):
         self.frame_count += 1
@@ -216,6 +224,7 @@ class RockfallGame:
         self.invincibility_frames = INVINCIBILITY_FRAMES
         self.combo = 0
         self._add_message("HIT!", HIT_MESSAGE_COLOR, self.player_x - 5, self.player_y - 35)
+        self._emit_event(EVENT_HIT)
         if self.lives <= 0:
             self.game_over = True
 
@@ -225,6 +234,7 @@ class RockfallGame:
         points = self.combo_points()
         self.score += points
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
+        self._emit_event(EVENT_AVOID)
 
         if points > 1:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
@@ -247,6 +257,9 @@ class RockfallGame:
                 "frames": duration,
             }
         )
+
+    def _emit_event(self, event):
+        self.events.append(event)
 
     def _tick_messages(self):
         remaining_messages = []

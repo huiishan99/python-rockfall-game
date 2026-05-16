@@ -5,9 +5,11 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
 
+from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from game_core import RockfallGame
 from settings import (
     COMBO_BONUS_INTERVAL,
+    DIFFICULTY_INTERVAL_FRAMES,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
     MESSAGE_DURATION_FRAMES,
@@ -64,6 +66,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._handle_hit()
 
         self.assertEqual(game.messages[-1]["text"], "HIT!")
+        self.assertEqual(game.pop_events(), [EVENT_HIT])
 
     def test_messages_tick_down_and_float(self):
         game = RockfallGame(self.screen)
@@ -121,6 +124,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.combo, 1)
         self.assertEqual(game.best_combo, 1)
         self.assertEqual(game.score, 1)
+        self.assertEqual(game.pop_events(), [EVENT_AVOID])
 
     def test_combo_bonus_increases_score_after_interval(self):
         game = RockfallGame(self.screen)
@@ -149,6 +153,21 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         lines = game.game_over_lines("Model Play")
 
         self.assertIn("Best Combo: 7", lines)
+
+    def test_pop_events_clears_event_queue(self):
+        game = RockfallGame(self.screen)
+        game._handle_avoid(100)
+
+        self.assertEqual(game.pop_events(), [EVENT_AVOID])
+        self.assertEqual(game.pop_events(), [])
+
+    def test_level_up_emits_event(self):
+        game = RockfallGame(self.screen)
+        game.game_time = DIFFICULTY_INTERVAL_FRAMES - 1
+
+        game._increase_difficulty()
+
+        self.assertEqual(game.pop_events(), [EVENT_LEVEL_UP])
 
 
 if __name__ == "__main__":

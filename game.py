@@ -1,6 +1,11 @@
+import argparse
+import os
+
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 
 from data_store import GAME_DATA_FILE, append_game_data
+from game_audio import GameSoundPlayer
 from game_core import (
     ACTION_LEFT,
     ACTION_RIGHT,
@@ -11,10 +16,16 @@ from game_core import (
     RockfallGame,
 )
 from scores import get_high_score, record_high_score
-from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, VERSION
+from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
 
 MODE_KEY = "manual"
 MODE_NAME = "Data Collection"
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="Play Rockfall and collect training data.")
+    parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
+    return parser.parse_args(argv)
 
 
 def read_manual_action():
@@ -29,12 +40,15 @@ def read_manual_action():
     return ACTION_RIGHT
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(f"Rockfall {VERSION} - Data Collection")
 
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
+    sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
     game_data = []
     screen_state = SCREEN_START
@@ -68,6 +82,7 @@ def main():
 
             game.apply_action(action)
             game.update()
+            sound_player.play_events(game.pop_events())
             if game.game_over:
                 high_score, _ = record_high_score(MODE_KEY, game.score)
                 game.set_high_score(high_score)

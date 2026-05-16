@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add optional sound feedback
+
+- Changed: added `game_events.py` and `game_audio.py`; updated `game_core.py` to emit avoid/hit/level-up events; updated manual and model entrypoints to play generated tones; added `--mute`; added `test_game_audio.py` and expanded `test_game_core.py`; documented mute usage in `README.md`.
+- Why: v0.2 should make score, hit, and level-up feedback feel more immediate.
+- Behavior: avoided rocks, hits, and level-ups now trigger optional generated sound effects. If audio initialization fails, gameplay continues silently.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 game.py --help`; ran `python3 play_with_model.py --help`; ran `python3 evaluate_model.py --games 3 --max-frames 1800`.
+- Risks/Notes: generated tones depend on pygame mixer availability; real-window audio should be checked on the user's machine.
+
 ## 2026-05-16 - Add combo scoring
 
 - Changed: updated `settings.py` and `game_core.py` with combo counters, combo score bonuses, combo HUD text, and game-over best combo; expanded `test_game_core.py`; documented combo behavior in `README.md`.

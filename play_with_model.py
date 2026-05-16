@@ -8,6 +8,7 @@ MODE_NAME = "Model Play"
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Run Rockfall with a trained model.")
     parser.add_argument("--model", default=MODEL_FILE, help="Model file to load.")
+    parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
 
@@ -33,8 +34,9 @@ def main(argv=None):
         SCREEN_START,
         RockfallGame,
     )
+    from game_audio import GameSoundPlayer
     from scores import get_high_score, record_high_score
-    from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, VERSION
+    from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -42,6 +44,7 @@ def main(argv=None):
 
     model = joblib.load(args.model)
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
+    sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
     screen_state = SCREEN_START
     app_running = True
@@ -70,6 +73,7 @@ def main(argv=None):
         if screen_state == SCREEN_PLAYING:
             game.apply_action(predict_action(model, game))
             game.update()
+            sound_player.play_events(game.pop_events())
             if game.game_over:
                 high_score, _ = record_high_score(MODE_KEY, game.score)
                 game.set_high_score(high_score)

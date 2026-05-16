@@ -48,6 +48,7 @@ Controls:
 - Press P to pause or resume.
 - Press R to restart from pause or game over.
 - Press Esc to quit.
+- Add `--mute` to manual or model play commands to disable generated sound effects.
 
 ### Run Tests
 
