@@ -5,6 +5,10 @@
 ## Description
 This project integrates a machine learning model into a simple pygame-based game, where the player's movements are controlled by the model's predictions based on the position of obstacles. The project includes scripts for collecting gameplay data, training a model on this data, and running the game with the trained model.
 
+## Development Log
+
+Every meaningful change should be recorded in [DEVLOG.md](DEVLOG.md). Add entries newest first and include what changed, why it changed, how it was verified, and any risks or follow-up notes. This is especially important when changing gameplay rules, collected data, or the trained model.
+
 ## Installation
 
 ### Prerequisites
@@ -38,7 +42,6 @@ Once the model is trained, you can run the game with the model controlling the p
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 
 
 
