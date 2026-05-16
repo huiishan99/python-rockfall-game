@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Clarify controls on screens
+
+- Changed: updated `game_core.py` so start and pause screens use reusable line builders with movement, pause, restart, and quit hints; expanded `test_game_core.py`; documented controls in `README.md`.
+- Why: first-time players needed visible controls before starting the game.
+- Behavior: start and pause screens now explain movement, pause/resume, restart, and quit controls.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800`.
+- Risks/Notes: the start screen has more text now; real-window visual spacing should be checked before tagging v0.1.
+
 ## 2026-05-16 - Expand game-over summary
 
 - Changed: updated `game_core.py` so the game-over screen is built from reusable summary lines; expanded `test_game_core.py`.

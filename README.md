@@ -30,6 +30,13 @@ To get started with this project, clone this repository to your local machine:
 
 Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure.
 
+Controls:
+
+- Move left/right with arrow keys or A/D.
+- Press P to pause or resume.
+- Press R to restart from pause or game over.
+- Press Esc to quit.
+
 ### Run Tests
 
 Some tests use only the Python standard library and can run before installing pygame:

@@ -113,15 +113,17 @@ class RockfallGame:
         self._draw_messages()
 
     def draw_start_screen(self, mode_name):
-        self._draw_message_screen(
-            "ROCKFALL",
-            [
-                mode_name,
-                f"High Score: {self.visible_high_score()}",
-                "Press SPACE to start",
-                "Press ESC to quit",
-            ],
-        )
+        self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
+
+    def start_lines(self, mode_name):
+        return [
+            mode_name,
+            f"High Score: {self.visible_high_score()}",
+            "Move: Left/Right or A/D",
+            "Pause: P",
+            "Press SPACE to start",
+            "Press ESC to quit",
+        ]
 
     def draw_game_over_screen(self, mode_name):
         self._draw_message_screen("GAME OVER", self.game_over_lines(mode_name))
@@ -138,16 +140,17 @@ class RockfallGame:
         ]
 
     def draw_pause_screen(self, mode_name):
-        self._draw_message_screen(
-            "PAUSED",
-            [
-                mode_name,
-                f"High Score: {self.visible_high_score()}",
-                "Press P to resume",
-                "Press R to restart",
-                "Press ESC to quit",
-            ],
-        )
+        self._draw_message_screen("PAUSED", self.pause_lines(mode_name))
+
+    def pause_lines(self, mode_name):
+        return [
+            mode_name,
+            f"High Score: {self.visible_high_score()}",
+            "Move: Left/Right or A/D",
+            "Press P to resume",
+            "Press R to restart",
+            "Press ESC to quit",
+        ]
 
     @property
     def player_rect(self):

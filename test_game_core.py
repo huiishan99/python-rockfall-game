@@ -94,6 +94,24 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("Level Reached: 3", lines)
         self.assertIn("Lives Left: 2", lines)
 
+    def test_start_lines_include_controls(self):
+        game = RockfallGame(self.screen)
+
+        lines = game.start_lines("Data Collection")
+
+        self.assertIn("Move: Left/Right or A/D", lines)
+        self.assertIn("Pause: P", lines)
+        self.assertIn("Press SPACE to start", lines)
+
+    def test_pause_lines_include_controls(self):
+        game = RockfallGame(self.screen)
+
+        lines = game.pause_lines("Data Collection")
+
+        self.assertIn("Move: Left/Right or A/D", lines)
+        self.assertIn("Press P to resume", lines)
+        self.assertIn("Press R to restart", lines)
+
 
 if __name__ == "__main__":
     unittest.main()
