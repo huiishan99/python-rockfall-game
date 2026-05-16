@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Hide pygame prompt in AI play
+
+- Changed: updated `play_with_model.py` to set `PYGAME_HIDE_SUPPORT_PROMPT` before pygame is imported; updated this devlog.
+- Why: AI play error output should focus on the actionable message, not pygame's support banner.
+- Behavior: model-play startup and load-failure paths no longer print the pygame community prompt.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile play_with_model.py test_play_with_model.py`; ran `SDL_VIDEODRIVER=dummy python3 play_with_model.py --model missing.pkl --mute` and confirmed only the concise load error printed with exit status 1.
+- Risks/Notes: no gameplay behavior changed.
+
 ## 2026-05-16 - Handle AI model load failures
 
 - Changed: updated `play_with_model.py` to catch model loading errors, print a concise message, quit pygame, and return a nonzero exit code; expanded `test_play_with_model.py`; updated `README.md`.

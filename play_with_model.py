@@ -1,6 +1,8 @@
 import argparse
 import os
 
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+
 MODEL_FILE = "game_model.pkl"
 MODE_KEY = "model"
 MODE_NAME = "Model Play"
