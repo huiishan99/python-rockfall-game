@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add headless model evaluation
+
+- Changed: added `evaluate_model.py` for repeated model simulations without opening a window; added `test_evaluate_model.py`; documented the evaluation command in `README.md`.
+- Why: model changes need a numeric comparison path instead of relying only on visual observation.
+- Behavior: `python3 evaluate_model.py --games 10 --max-frames 3600` reports average score, best/worst score, average frames, and timeout count.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py game_core.py scores.py data_store.py features.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py`; ran `python3 evaluate_model.py --games 3 --max-frames 600`.
+- Risks/Notes: evaluation uses the same random obstacle generator as the game and seeds each run for repeatability.
+
 ## 2026-05-16 - Use richer obstacle features for the model
 
 - Changed: added `features.py`; updated `game_core.py` and `train_model.py` to share model feature extraction; added `test_features.py`; documented the current feature set in `README.md`; retrained `game_model.pkl`.

@@ -69,6 +69,14 @@ To try a different model file:
 python3 play_with_model.py --model game_model.pkl
 ```
 
+### Evaluate the Model
+
+Run headless simulations to compare model performance without opening a game window:
+
+```bash
+python3 evaluate_model.py --games 10 --max-frames 3600
+```
+
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
