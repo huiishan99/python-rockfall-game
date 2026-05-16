@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Cover player movement bounds
+
+- Changed: expanded `test_game_core.py` with tests for left-edge clamp, right-edge clamp, and missing-action movement behavior; updated this devlog.
+- Why: player movement is a core hand-feel contract and should be protected before future speed or control tuning.
+- Behavior: no gameplay behavior changed.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py test_game_core.py`.
+- Risks/Notes: test-only change.
+
 ## 2026-05-16 - Document current feature set
 
 - Changed: updated `README.md` with a `Current Features` section covering manual play, AI play, difficulty, feedback, evaluation, and verification; updated this devlog.

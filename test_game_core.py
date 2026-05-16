@@ -6,7 +6,7 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 
 from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
-from game_core import RockfallGame
+from game_core import ACTION_LEFT, ACTION_RIGHT, RockfallGame
 from settings import (
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
@@ -31,6 +31,7 @@ from settings import (
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_OUTLINE_COLOR,
+    PLAYER_WIDTH,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -51,6 +52,30 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.lives, INITIAL_LIVES - 1)
         self.assertEqual(game.invincibility_frames, INVINCIBILITY_FRAMES)
+
+    def test_apply_action_clamps_player_to_left_edge(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 0
+
+        game.apply_action(ACTION_LEFT)
+
+        self.assertEqual(game.player_x, 0)
+
+    def test_apply_action_clamps_player_to_right_edge(self):
+        game = RockfallGame(self.screen)
+        game.player_x = SCREEN_WIDTH
+
+        game.apply_action(ACTION_RIGHT)
+
+        self.assertEqual(game.player_x, SCREEN_WIDTH - PLAYER_WIDTH)
+
+    def test_apply_action_ignores_missing_action(self):
+        game = RockfallGame(self.screen)
+        starting_x = game.player_x
+
+        game.apply_action(None)
+
+        self.assertEqual(game.player_x, starting_x)
 
     def test_invincibility_prevents_extra_life_loss(self):
         game = RockfallGame(self.screen)
