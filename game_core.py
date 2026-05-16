@@ -8,11 +8,14 @@ from settings import (
     INITIAL_DIFFICULTY_LEVEL,
     INITIAL_LIVES,
     INITIAL_OBSTACLE_SPEED,
+    INVINCIBILITY_FRAMES,
+    HIT_FLASH_INTERVAL,
     MAX_DIFFICULTY_LEVEL,
     OBSTACLE_COLOR,
     OBSTACLE_HEIGHT,
     OBSTACLE_WIDTH,
     PLAYER_COLOR,
+    PLAYER_HIT_COLOR,
     PLAYER_HEIGHT,
     PLAYER_SPEED,
     PLAYER_WIDTH,
@@ -64,6 +67,7 @@ class RockfallGame:
         self.frame_count = 0
         self.game_time = 0
         self.lives = INITIAL_LIVES
+        self.invincibility_frames = 0
         self.score = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.game_over = False
@@ -90,10 +94,11 @@ class RockfallGame:
         self._increase_difficulty()
         self._spawn_obstacle()
         self._move_obstacles_and_check_collisions()
+        self._tick_invincibility()
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
-        pygame.draw.rect(self.screen, PLAYER_COLOR, self.player_rect)
+        pygame.draw.rect(self.screen, self.player_color(), self.player_rect)
 
         for obstacle in self.obstacles:
             pygame.draw.rect(self.screen, OBSTACLE_COLOR, self.obstacle_rect(obstacle))
@@ -142,6 +147,15 @@ class RockfallGame:
     def obstacle_rect(self, obstacle):
         return pygame.Rect(obstacle[0], obstacle[1], OBSTACLE_WIDTH, OBSTACLE_HEIGHT)
 
+    def player_color(self):
+        if self.invincibility_frames <= 0:
+            return PLAYER_COLOR
+
+        flash_phase = self.invincibility_frames // HIT_FLASH_INTERVAL
+        if flash_phase % 2 == 0:
+            return PLAYER_HIT_COLOR
+        return PLAYER_COLOR
+
     def _increase_difficulty(self):
         self.game_time += 1
         difficulty = difficulty_for_time(self.game_time)
@@ -167,13 +181,24 @@ class RockfallGame:
 
             obstacle[1] += self.obstacle_speed
             if player_rect.colliderect(self.obstacle_rect(obstacle)):
-                self.lives -= 1
-                if self.lives <= 0:
-                    self.game_over = True
+                self._handle_hit()
             else:
                 remaining_obstacles.append(obstacle)
 
         self.obstacles = remaining_obstacles
+
+    def _handle_hit(self):
+        if self.invincibility_frames > 0:
+            return
+
+        self.lives -= 1
+        self.invincibility_frames = INVINCIBILITY_FRAMES
+        if self.lives <= 0:
+            self.game_over = True
+
+    def _tick_invincibility(self):
+        if self.invincibility_frames > 0:
+            self.invincibility_frames -= 1
 
     def _draw_message_screen(self, title, lines):
         self.screen.fill(BACKGROUND_COLOR)
