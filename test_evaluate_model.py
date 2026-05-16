@@ -1,9 +1,14 @@
 import unittest
 
-from evaluate_model import format_summary_lines, summarize_results
+from evaluate_model import build_summary_payload, format_summary_lines, parse_args, summarize_results
 
 
 class EvaluateModelTest(unittest.TestCase):
+    def test_parse_args_supports_json_output(self):
+        args = parse_args(["--json"])
+
+        self.assertTrue(args.json)
+
     def test_summarizes_scores_and_timeouts(self):
         summary = summarize_results(
             [
@@ -39,6 +44,25 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(lines[0], "Evaluation games: 2")
         self.assertIn("Average best combo: 4.00", lines)
         self.assertIn("Timed out games: 1", lines)
+
+    def test_builds_summary_payload_with_model_path(self):
+        payload = build_summary_payload(
+            "model.pkl",
+            {
+                "games": 2,
+                "average_score": 5,
+                "best_score": 7,
+                "worst_score": 3,
+                "average_best_combo": 4,
+                "best_combo": 6,
+                "average_frames": 150,
+                "timeouts": 1,
+            },
+        )
+
+        self.assertEqual(payload["model"], "model.pkl")
+        self.assertEqual(payload["games"], 2)
+        self.assertEqual(payload["best_combo"], 6)
 
 
 if __name__ == "__main__":

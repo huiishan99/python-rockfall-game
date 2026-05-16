@@ -111,6 +111,12 @@ python3 evaluate_model.py --games 10 --max-frames 3600
 
 The evaluation summary reports score, best combo, frame survival, and timeout counts.
 
+For scripts or future charts, emit machine-readable JSON:
+
+```bash
+python3 evaluate_model.py --games 10 --max-frames 3600 --json
+```
+
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.

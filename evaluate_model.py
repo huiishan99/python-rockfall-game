@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import random
 from statistics import mean
@@ -16,6 +17,7 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Number of games to simulate.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Base random seed.")
+    parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
 
@@ -71,6 +73,10 @@ def format_summary_lines(summary, games_label="Games"):
     ]
 
 
+def build_summary_payload(model_path, summary):
+    return {"model": model_path, **summary}
+
+
 def main(argv=None):
     args = parse_args(argv)
     if args.games <= 0:
@@ -95,9 +101,12 @@ def main(argv=None):
         results.append(run_game(model, screen, args.max_frames))
 
     summary = summarize_results(results)
-    print(f"Model: {args.model}")
-    for line in format_summary_lines(summary):
-        print(line)
+    if args.json:
+        print(json.dumps(build_summary_payload(args.model, summary), indent=2, sort_keys=True))
+    else:
+        print(f"Model: {args.model}")
+        for line in format_summary_lines(summary):
+            print(line)
 
     pygame.quit()
 

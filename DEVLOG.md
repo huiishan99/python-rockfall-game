@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add JSON model evaluation output
+
+- Changed: updated `evaluate_model.py` with `--json` output and a summary payload helper; expanded `test_evaluate_model.py`; documented the flag in `README.md`.
+- Why: future model comparisons and charts should consume structured metrics instead of parsing human-readable text.
+- Behavior: `python3 evaluate_model.py --json` prints the model path and summary metrics as sorted, indented JSON; default text output is unchanged.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --json`.
+- Risks/Notes: JSON output still runs the same pygame-surface simulation and depends on the model file loading successfully.
+
 ## 2026-05-16 - Share evaluation summary formatting
 
 - Changed: updated `evaluate_model.py` with `format_summary_lines`; updated `release_check.py` to reuse it; expanded `test_evaluate_model.py`.
