@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add score for avoided rocks
+
+- Changed: updated `game_core.py` to track score and render it in the HUD.
+- Why: the game needed a visible success metric, especially now that manual and AI modes share the same fail condition.
+- Behavior: each obstacle that leaves the screen without colliding adds 1 point; both manual and AI modes show the score.
+- Verification: ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py`.
+- Risks/Notes: scoring currently counts avoided obstacles only; future scoring could add survival time, combos, or difficulty multipliers.
+
 ## 2026-05-16 - Share the game engine between manual and AI modes
 
 - Changed: added `game_core.py` with shared game state, movement, obstacle spawning, collision, difficulty, and HUD rendering; rewrote `game.py` and `play_with_model.py` as small entrypoints.

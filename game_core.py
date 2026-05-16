@@ -40,6 +40,7 @@ class RockfallGame:
         self.frame_count = 0
         self.game_time = 0
         self.lives = INITIAL_LIVES
+        self.score = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.running = True
 
@@ -106,6 +107,7 @@ class RockfallGame:
 
         for obstacle in self.obstacles:
             if obstacle[1] >= SCREEN_HEIGHT:
+                self.score += 1
                 continue
 
             obstacle[1] += self.obstacle_speed
@@ -121,6 +123,9 @@ class RockfallGame:
     def _draw_hud(self):
         lives_text = self.font.render(f"Lives: {self.lives}", True, HUD_COLOR)
         self.screen.blit(lives_text, (10, 10))
+
+        score_text = self.font.render(f"Score: {self.score}", True, HUD_COLOR)
+        self.screen.blit(score_text, (10, 45))
 
         progress = (self.difficulty_level / MAX_DIFFICULTY_LEVEL) * PROGRESS_BAR_LENGTH
         pygame.draw.rect(
