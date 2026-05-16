@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Playtest and retrain with fresh data
+
+- Changed: appended 812 new manual playtest samples to `game_data.json`; retrained `game_model.pkl` from 2472 valid samples.
+- Why: real-window playtesting produced fresh gameplay data, so the default model needed to stay aligned with the tracked dataset.
+- Behavior: default AI play now uses the retrained model. Training reported left=1226, right=1246, validation accuracy=0.903.
+- Verification: launched `python3 game.py`; ran `python3 train_model.py`; ran `python3 -m unittest`; ran `python3 evaluate_model.py --games 5 --max-frames 1800` with average score 53.40, best 65, worst 43, timed out games 2.
+- Risks/Notes: Computer Use could not reliably inspect the pygame accessibility tree, so this was a launch/playtest plus metrics pass rather than a visual UI audit.
+
 ## 2026-05-16 - Document v0.1 project status
 
 - Changed: updated `README.md` with current project status, full verification commands, and next steps toward v0.1.
