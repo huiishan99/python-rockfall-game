@@ -33,6 +33,7 @@ def run_game(model, screen, max_frames):
 
     return {
         "score": game.score,
+        "best_combo": game.best_combo,
         "frames": frames,
         "lives": game.lives,
         "timed_out": not game.game_over,
@@ -41,6 +42,7 @@ def run_game(model, screen, max_frames):
 
 def summarize_results(results):
     scores = [result["score"] for result in results]
+    best_combos = [result["best_combo"] for result in results]
     frames = [result["frames"] for result in results]
     timeouts = sum(1 for result in results if result["timed_out"])
 
@@ -49,6 +51,8 @@ def summarize_results(results):
         "average_score": mean(scores),
         "best_score": max(scores),
         "worst_score": min(scores),
+        "average_best_combo": mean(best_combos),
+        "best_combo": max(best_combos),
         "average_frames": mean(frames),
         "timeouts": timeouts,
     }
@@ -83,6 +87,8 @@ def main(argv=None):
     print(f"Average score: {summary['average_score']:.2f}")
     print(f"Best score: {summary['best_score']}")
     print(f"Worst score: {summary['worst_score']}")
+    print(f"Average best combo: {summary['average_best_combo']:.2f}")
+    print(f"Best combo: {summary['best_combo']}")
     print(f"Average frames: {summary['average_frames']:.1f}")
     print(f"Timed out games: {summary['timeouts']}")
 
