@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add release readiness check
+
+- Changed: added `release_check.py`; added `test_release_check.py`; updated `README.md` full verification instructions.
+- Why: v0.1 needs one memorable command that runs the release safety checks instead of requiring several commands.
+- Behavior: `python3 release_check.py` prints the candidate version, runs the unit test suite, runs a short headless model evaluation, and exits nonzero if tests fail.
+- Verification: ran `python3 release_check.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_release_check.py`.
+- Risks/Notes: release check is still headless; it does not replace final hands-on pygame window playtesting.
+
 ## 2026-05-16 - Mark v0.1 candidate version
 
 - Changed: added `VERSION = "0.1.0-candidate"` in `settings.py`; updated manual and model window captions; documented the candidate version in `README.md`.

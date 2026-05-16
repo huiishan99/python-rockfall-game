@@ -60,9 +60,10 @@ python3 -m unittest
 Full verification after installing dependencies:
 
 ```bash
-python3 -m unittest
-python3 evaluate_model.py --games 3 --max-frames 1800
+python3 release_check.py
 ```
+
+This runs the unit tests and a short headless model evaluation.
 
 ### Data Collection
 To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be appended to `game_data.json`:
