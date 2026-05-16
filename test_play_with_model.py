@@ -1,6 +1,6 @@
 import unittest
 
-from play_with_model import MODEL_FILE, model_mode_name, parse_args
+from play_with_model import MODEL_FILE, model_load_error_message, model_mode_name, parse_args
 
 
 class PlayWithModelTest(unittest.TestCase):
@@ -13,6 +13,12 @@ class PlayWithModelTest(unittest.TestCase):
         mode_name = model_mode_name("experiments/alt_model.pkl")
 
         self.assertEqual(mode_name, "Model Play (alt_model.pkl)")
+
+    def test_model_load_error_message_includes_path_and_error(self):
+        message = model_load_error_message("missing.pkl", FileNotFoundError("not found"))
+
+        self.assertIn("missing.pkl", message)
+        self.assertIn("not found", message)
 
 
 if __name__ == "__main__":

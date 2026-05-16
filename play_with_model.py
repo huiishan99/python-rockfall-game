@@ -26,6 +26,10 @@ def model_mode_name(model_path):
     return f"{MODE_NAME} ({os.path.basename(model_path)})"
 
 
+def model_load_error_message(model_path, error):
+    return f"Could not load model '{model_path}': {error}"
+
+
 def main(argv=None):
     args = parse_args(argv)
 
@@ -48,7 +52,13 @@ def main(argv=None):
     mode_name = model_mode_name(args.model)
     pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
-    model = joblib.load(args.model)
+    try:
+        model = joblib.load(args.model)
+    except Exception as error:
+        print(model_load_error_message(args.model, error))
+        pygame.quit()
+        return 1
+
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
@@ -98,7 +108,8 @@ def main(argv=None):
         clock.tick(FPS)
 
     pygame.quit()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Handle AI model load failures
+
+- Changed: updated `play_with_model.py` to catch model loading errors, print a concise message, quit pygame, and return a nonzero exit code; expanded `test_play_with_model.py`; updated `README.md`.
+- Why: missing or invalid model files should fail clearly instead of dumping a traceback after opening the game window.
+- Behavior: `python3 play_with_model.py --model missing.pkl` now reports the load failure and exits with status 1.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py test_play_with_model.py`; ran `SDL_VIDEODRIVER=dummy python3 play_with_model.py --model missing.pkl --mute` and confirmed it printed a concise error with exit status 1.
+- Risks/Notes: the error handler is intentionally scoped around model loading; gameplay errors after a model loads still surface normally.
+
 ## 2026-05-16 - Show active model name in AI play
 
 - Changed: updated `play_with_model.py` to derive a mode label from the selected model filename and use it in the window title plus start/pause/game-over screens; added `test_play_with_model.py`; updated `README.md`.

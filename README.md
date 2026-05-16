@@ -102,6 +102,7 @@ python3 play_with_model.py --model game_model.pkl
 ```
 
 Model play screens and the window title show the active model filename.
+If the model file cannot be loaded, the command prints a concise error and exits nonzero.
 
 ### Evaluate the Model
 
