@@ -20,6 +20,8 @@ from settings import (
     MAX_DIFFICULTY_LEVEL,
     MAX_COMBO_BONUS,
     MESSAGE_DURATION_FRAMES,
+    NEAR_MISS_DISTANCE,
+    NEAR_MISS_MESSAGE_COLOR,
     OBSTACLE_COLOR,
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
@@ -247,10 +249,17 @@ class RockfallGame:
 
         if points > 1:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
+        if self.is_near_miss(obstacle_x):
+            self._add_message("CLOSE!", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 165)
 
     def combo_points(self):
         bonus = min(MAX_COMBO_BONUS, self.combo // COMBO_BONUS_INTERVAL)
         return 1 + bonus
+
+    def is_near_miss(self, obstacle_x):
+        player_center = self.player_x + PLAYER_WIDTH // 2
+        obstacle_center = obstacle_x + OBSTACLE_WIDTH // 2
+        return abs(player_center - obstacle_center) <= NEAR_MISS_DISTANCE
 
     def _tick_invincibility(self):
         if self.invincibility_frames > 0:

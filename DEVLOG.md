@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add near-miss feedback
+
+- Changed: updated `settings.py` and `game_core.py` with near-miss distance and message color; added near-miss detection and feedback message on close dodges; expanded `test_game_core.py`; updated `README.md`.
+- Why: close dodges should feel intentional and readable without changing the scoring economy.
+- Behavior: when a rock leaves the screen close to the player's horizontal center, the game shows `CLOSE!`; score, combo rules, events, and model features are unchanged.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800` with average score 78.67, best 98, worst 66.
+- Risks/Notes: the distance threshold is a first-pass tuning value and should be judged during real-window playtesting.
+
 ## 2026-05-16 - Style menu screens
 
 - Changed: updated `settings.py` and `game_core.py` with menu title/accent colors, shared background drawing on start/pause/game-over screens, centered text helper, and menu text color rules; expanded `test_game_core.py`; updated `README.md`.

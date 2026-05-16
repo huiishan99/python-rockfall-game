@@ -18,6 +18,7 @@ from settings import (
     MENU_ACCENT_COLOR,
     MENU_SECONDARY_COLOR,
     MESSAGE_DURATION_FRAMES,
+    NEAR_MISS_MESSAGE_COLOR,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
     OBSTACLE_WIDTH,
@@ -154,6 +155,24 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.combo, 0)
         self.assertEqual(game.best_combo, 2)
+
+    def test_near_miss_detection_uses_horizontal_centers(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+
+        self.assertTrue(game.is_near_miss(160))
+        self.assertFalse(game.is_near_miss(300))
+
+    def test_near_miss_adds_message_without_score_bonus(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+
+        game._handle_avoid(160)
+
+        messages = [message["text"] for message in game.messages]
+        self.assertIn("CLOSE!", messages)
+        self.assertEqual(game.messages[-1]["color"], NEAR_MISS_MESSAGE_COLOR)
+        self.assertEqual(game.score, 1)
 
     def test_game_over_lines_include_best_combo(self):
         game = RockfallGame(self.screen)
