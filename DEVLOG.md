@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Polish release check output
+
+- Changed: updated `release_check.py` so unit-test output writes to stdout and status headings flush before long-running checks.
+- Why: the first release check output showed unittest results before the release-check heading, which made the command harder to read.
+- Behavior: `python3 release_check.py` now prints the version header and step labels before test/evaluation output.
+- Verification: ran `python3 release_check.py`; ran `python3 -m unittest`.
+- Risks/Notes: output-only change.
+
 ## 2026-05-16 - Add release readiness check
 
 - Changed: added `release_check.py`; added `test_release_check.py`; updated `README.md` full verification instructions.

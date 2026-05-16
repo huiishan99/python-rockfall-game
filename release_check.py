@@ -1,6 +1,7 @@
 import argparse
 import os
 import random
+import sys
 import unittest
 
 from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, run_game, summarize_results
@@ -21,7 +22,7 @@ def parse_args(argv=None):
 
 def run_unittests():
     suite = unittest.defaultTestLoader.discover(".")
-    result = unittest.TextTestRunner(verbosity=1).run(suite)
+    result = unittest.TextTestRunner(stream=sys.stdout, verbosity=1).run(suite)
     return result.wasSuccessful()
 
 
@@ -63,13 +64,16 @@ def main(argv=None):
         raise ValueError("--max-frames must be greater than zero.")
 
     print(f"Rockfall {VERSION} release check")
+    sys.stdout.flush()
     print("Running unit tests...")
+    sys.stdout.flush()
     tests_ok = run_unittests()
     if not tests_ok:
         print("Release check failed: unit tests failed.")
         return 1
 
     print("Running model evaluation...")
+    sys.stdout.flush()
     summary = run_evaluation(args.model, args.games, args.max_frames, args.random_seed)
     print_evaluation_summary(summary)
 
