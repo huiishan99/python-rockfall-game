@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add lane-based rock spawning
+
+- Changed: added `spawning.py`; updated `settings.py` and `game_core.py` so rocks spawn from fixed lanes and avoid nearby repeat lanes at lower difficulty; added `test_spawning.py`; updated README gameplay notes.
+- Why: pure random x-position spawning made the game harder to read and could produce awkward repeated drops.
+- Behavior: rocks now spawn on 8 readable lanes. Early levels keep at least a two-lane gap from the previous spawn; higher difficulty reduces that protection until maximum difficulty can repeat pressure anywhere.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py settings.py difficulty.py game_core.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py`; ran `python3 evaluate_model.py --games 3 --max-frames 1800`.
+- Risks/Notes: this changes obstacle distribution without retraining from newly collected lane-based data; future collection should refresh the dataset.
+
 ## 2026-05-16 - Add dynamic difficulty curve
 
 - Changed: added `difficulty.py`; updated `settings.py` and `game_core.py` so each difficulty level increases obstacle speed and reduces spawn interval; added `test_difficulty.py`; documented the gameplay behavior in `README.md`.

@@ -22,6 +22,7 @@ from settings import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
+from spawning import choose_spawn_x
 
 ACTION_LEFT = "left"
 ACTION_RIGHT = "right"
@@ -59,6 +60,7 @@ class RockfallGame:
         self.obstacles = []
         self.obstacle_speed = INITIAL_OBSTACLE_SPEED
         self.obstacle_frequency = difficulty_for_time(0).obstacle_frequency
+        self.last_spawn_x = None
         self.frame_count = 0
         self.game_time = 0
         self.lives = INITIAL_LIVES
@@ -150,8 +152,9 @@ class RockfallGame:
     def _spawn_obstacle(self):
         self.frame_count += 1
         if self.frame_count % self.obstacle_frequency == 0:
-            max_x = SCREEN_WIDTH - OBSTACLE_WIDTH
-            self.obstacles.append([random.randint(0, max_x), -OBSTACLE_HEIGHT])
+            obstacle_x = choose_spawn_x(self.last_spawn_x, self.difficulty_level, random)
+            self.obstacles.append([obstacle_x, -OBSTACLE_HEIGHT])
+            self.last_spawn_x = obstacle_x
 
     def _move_obstacles_and_check_collisions(self):
         player_rect = self.player_rect
