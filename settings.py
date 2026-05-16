@@ -1,4 +1,4 @@
-VERSION = "0.1.0-candidate"
+VERSION = "0.1.0"
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600

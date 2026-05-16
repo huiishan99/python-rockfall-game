@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Release v0.1.0
+
+- Changed: promoted `settings.py` version from `0.1.0-candidate` to `0.1.0`; updated `README.md` project status and next steps.
+- Why: hands-on playtest feedback was good enough to mark the first playable release.
+- Behavior: window titles and release checks now identify the build as `0.1.0`.
+- Verification: ran `python3 release_check.py`.
+- Risks/Notes: v0.1.0 is still a small pygame/ML project; future versions should focus on more fresh play data, model comparison, and visual/audio polish.
+
 ## 2026-05-16 - Polish release check output
 
 - Changed: updated `release_check.py` so unit-test output writes to stdout and status headings flush before long-running checks.

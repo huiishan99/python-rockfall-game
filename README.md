@@ -7,9 +7,9 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.1.0-candidate`.
+Current version: `0.1.0`.
 
-This is approaching a playable v0.1:
+This is a playable v0.1:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
@@ -118,7 +118,7 @@ High scores are saved locally in `high_scores.json`. This file is ignored by git
 - Collect fresh lane-based gameplay data.
 - Retrain and compare the model with `evaluate_model.py`.
 - Add optional sound effects and visual polish.
-- Tag a v0.1 release once the real-window playtest feels good.
+- Continue collecting fresh play data and compare future models with `evaluate_model.py`.
 
 
 ## Contributing
