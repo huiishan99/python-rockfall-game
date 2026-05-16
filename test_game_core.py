@@ -9,6 +9,7 @@ from game_core import RockfallGame
 from settings import (
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
+    MESSAGE_DURATION_FRAMES,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     SCREEN_HEIGHT,
@@ -55,6 +56,30 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._handle_hit()
 
         self.assertIn(game.player_color(), (PLAYER_COLOR, PLAYER_HIT_COLOR))
+
+    def test_hit_adds_message(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_hit()
+
+        self.assertEqual(game.messages[-1]["text"], "HIT!")
+
+    def test_messages_tick_down_and_float(self):
+        game = RockfallGame(self.screen)
+        game._add_message("+1", (255, 255, 255), 10, 20)
+
+        game._tick_messages()
+
+        self.assertEqual(game.messages[0]["frames"], MESSAGE_DURATION_FRAMES - 1)
+        self.assertEqual(game.messages[0]["y"], 19)
+
+    def test_messages_expire(self):
+        game = RockfallGame(self.screen)
+        game._add_message("+1", (255, 255, 255), 10, 20, duration=1)
+
+        game._tick_messages()
+
+        self.assertEqual(game.messages, [])
 
 
 if __name__ == "__main__":

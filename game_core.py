@@ -10,7 +10,10 @@ from settings import (
     INITIAL_OBSTACLE_SPEED,
     INVINCIBILITY_FRAMES,
     HIT_FLASH_INTERVAL,
+    HIT_MESSAGE_COLOR,
+    LEVEL_MESSAGE_COLOR,
     MAX_DIFFICULTY_LEVEL,
+    MESSAGE_DURATION_FRAMES,
     OBSTACLE_COLOR,
     OBSTACLE_HEIGHT,
     OBSTACLE_WIDTH,
@@ -24,6 +27,7 @@ from settings import (
     PROGRESS_COLOR,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
+    SCORE_MESSAGE_COLOR,
 )
 from spawning import choose_spawn_x
 
@@ -70,6 +74,7 @@ class RockfallGame:
         self.invincibility_frames = 0
         self.score = 0
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
+        self.messages = []
         self.game_over = False
 
     def snapshot(self):
@@ -95,6 +100,7 @@ class RockfallGame:
         self._spawn_obstacle()
         self._move_obstacles_and_check_collisions()
         self._tick_invincibility()
+        self._tick_messages()
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -104,6 +110,7 @@ class RockfallGame:
             pygame.draw.rect(self.screen, OBSTACLE_COLOR, self.obstacle_rect(obstacle))
 
         self._draw_hud()
+        self._draw_messages()
 
     def draw_start_screen(self, mode_name):
         self._draw_message_screen(
@@ -158,10 +165,13 @@ class RockfallGame:
 
     def _increase_difficulty(self):
         self.game_time += 1
+        previous_level = self.difficulty_level
         difficulty = difficulty_for_time(self.game_time)
         self.obstacle_speed = difficulty.obstacle_speed
         self.obstacle_frequency = difficulty.obstacle_frequency
         self.difficulty_level = difficulty.level
+        if self.difficulty_level > previous_level:
+            self._add_message(f"LEVEL {self.difficulty_level}", LEVEL_MESSAGE_COLOR, SCREEN_WIDTH // 2 - 70, 120)
 
     def _spawn_obstacle(self):
         self.frame_count += 1
@@ -177,6 +187,7 @@ class RockfallGame:
         for obstacle in self.obstacles:
             if obstacle[1] >= SCREEN_HEIGHT:
                 self.score += 1
+                self._add_message("+1", SCORE_MESSAGE_COLOR, obstacle[0], SCREEN_HEIGHT - 95)
                 continue
 
             obstacle[1] += self.obstacle_speed
@@ -193,12 +204,33 @@ class RockfallGame:
 
         self.lives -= 1
         self.invincibility_frames = INVINCIBILITY_FRAMES
+        self._add_message("HIT!", HIT_MESSAGE_COLOR, self.player_x - 5, self.player_y - 35)
         if self.lives <= 0:
             self.game_over = True
 
     def _tick_invincibility(self):
         if self.invincibility_frames > 0:
             self.invincibility_frames -= 1
+
+    def _add_message(self, text, color, x, y, duration=MESSAGE_DURATION_FRAMES):
+        self.messages.append(
+            {
+                "text": text,
+                "color": color,
+                "x": x,
+                "y": y,
+                "frames": duration,
+            }
+        )
+
+    def _tick_messages(self):
+        remaining_messages = []
+        for message in self.messages:
+            message["frames"] -= 1
+            message["y"] -= 1
+            if message["frames"] > 0:
+                remaining_messages.append(message)
+        self.messages = remaining_messages
 
     def _draw_message_screen(self, title, lines):
         self.screen.fill(BACKGROUND_COLOR)
@@ -237,3 +269,8 @@ class RockfallGame:
             self.level_text,
             (self.progress_bar_x - self.level_text.get_width() - 10, self.progress_bar_y),
         )
+
+    def _draw_messages(self):
+        for message in self.messages:
+            text_surface = self.font.render(message["text"], True, message["color"])
+            self.screen.blit(text_surface, (message["x"], message["y"]))
