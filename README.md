@@ -105,6 +105,8 @@ You can also experiment with alternate data or model files:
 python3 train_model.py --data game_data.json --model game_model.pkl --estimators 150
 ```
 
+Missing parent directories for the selected model output are created automatically.
+
 ### Play the Game with the Model
 Once the model is trained, you can run the game with the model controlling the player movements using the `play_with_model.py` script:
 

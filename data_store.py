@@ -19,6 +19,12 @@ def load_game_data(path=GAME_DATA_FILE):
     return data
 
 
+def ensure_parent_dir(path):
+    parent_dir = os.path.dirname(path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
+
 def append_game_data(new_entries, path=GAME_DATA_FILE):
     existing_entries = load_game_data(path)
 
@@ -28,9 +34,7 @@ def append_game_data(new_entries, path=GAME_DATA_FILE):
 
     previous_count = len(existing_entries)
     combined_entries = existing_entries + list(new_entries)
-    parent_dir = os.path.dirname(path)
-    if parent_dir:
-        os.makedirs(parent_dir, exist_ok=True)
+    ensure_parent_dir(path)
 
     with open(path, "w") as f:
         json.dump(combined_entries, f)

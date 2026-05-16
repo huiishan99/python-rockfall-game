@@ -2,7 +2,7 @@
 import argparse
 from collections import Counter
 
-from data_store import GAME_DATA_FILE, load_game_data
+from data_store import GAME_DATA_FILE, ensure_parent_dir, load_game_data
 from features import FEATURE_NAMES, build_model_features
 
 MODEL_FILE = "game_model.pkl"
@@ -72,10 +72,15 @@ def split_data(X, y, test_size, random_state):
     )
 
 
+def save_model(model, path):
+    import joblib
+
+    ensure_parent_dir(path)
+    joblib.dump(model, path)
+
+
 def main(argv=None):
     args = parse_args(argv)
-
-    import joblib
 
     X, y, skipped_entries = load_data(args.data)
     if len(X) < 2:
@@ -88,7 +93,7 @@ def main(argv=None):
     X_train, X_test, y_train, y_test = split_data(X, y, args.test_size, args.random_state)
     model = train_model(X_train, y_train, args.estimators, args.random_state)
     accuracy = model.score(X_test, y_test)
-    joblib.dump(model, args.model)
+    save_model(model, args.model)
 
     print(f"Loaded {len(X)} valid samples from {args.data} ({skipped_entries} skipped).")
     print(f"Features: {', '.join(FEATURE_NAMES)}.")

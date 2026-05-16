@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Create model output directories
+
+- Changed: extracted `ensure_parent_dir` in `data_store.py`; updated `train_model.py` to create missing parent directories before saving model files; added `test_train_model.py`; updated `README.md`; updated this devlog.
+- Why: model experiments should support paths like `runs/model.pkl` without manual directory setup.
+- Behavior: `python3 train_model.py --model runs/model.pkl` now creates `runs/` before writing the model.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile data_store.py train_model.py test_data_store.py test_train_model.py`; ran `python3 train_model.py --help`.
+- Risks/Notes: no training behavior changed; this only affects output path preparation.
+
 ## 2026-05-16 - Create data collection directories
 
 - Changed: updated `data_store.py` so appending gameplay data creates missing parent directories; expanded `test_data_store.py`; clarified `README.md`; updated this devlog.
