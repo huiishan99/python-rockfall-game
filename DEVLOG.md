@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Show active model name in AI play
+
+- Changed: updated `play_with_model.py` to derive a mode label from the selected model filename and use it in the window title plus start/pause/game-over screens; added `test_play_with_model.py`; updated `README.md`.
+- Why: model experiments are easier to compare when the active model file is visible during playback.
+- Behavior: `python3 play_with_model.py --model experiments/alt_model.pkl` displays `Model Play (alt_model.pkl)` in the UI.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py evaluate_model.py release_check.py settings.py difficulty.py game_core.py game_events.py game_audio.py scores.py data_store.py features.py spawning.py test_scores.py test_data_store.py test_features.py test_evaluate_model.py test_difficulty.py test_spawning.py test_game_core.py test_game_audio.py test_release_check.py test_play_with_model.py`; ran `python3 play_with_model.py --help`.
+- Risks/Notes: very long model filenames may crowd the menu line; use shorter experiment filenames if needed.
+
 ## 2026-05-16 - Include evaluation settings in JSON
 
 - Changed: updated `evaluate_model.py` JSON payloads to include `max_frames` and `random_seed`; expanded `test_evaluate_model.py`; clarified `README.md`.

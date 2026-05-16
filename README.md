@@ -101,6 +101,8 @@ To try a different model file:
 python3 play_with_model.py --model game_model.pkl
 ```
 
+Model play screens and the window title show the active model filename.
+
 ### Evaluate the Model
 
 Run headless simulations to compare model performance without opening a game window:

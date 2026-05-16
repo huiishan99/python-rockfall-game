@@ -1,4 +1,5 @@
 import argparse
+import os
 
 MODEL_FILE = "game_model.pkl"
 MODE_KEY = "model"
@@ -21,6 +22,10 @@ def predict_action(model, game):
     return ACTION_LEFT
 
 
+def model_mode_name(model_path):
+    return f"{MODE_NAME} ({os.path.basename(model_path)})"
+
+
 def main(argv=None):
     args = parse_args(argv)
 
@@ -40,7 +45,8 @@ def main(argv=None):
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption(f"Rockfall {VERSION} - Model Play")
+    mode_name = model_mode_name(args.model)
+    pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
     model = joblib.load(args.model)
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
@@ -80,11 +86,11 @@ def main(argv=None):
                 screen_state = SCREEN_GAME_OVER
 
         if screen_state == SCREEN_START:
-            game.draw_start_screen(MODE_NAME)
+            game.draw_start_screen(mode_name)
         elif screen_state == SCREEN_PAUSED:
-            game.draw_pause_screen(MODE_NAME)
+            game.draw_pause_screen(mode_name)
         elif screen_state == SCREEN_GAME_OVER:
-            game.draw_game_over_screen(MODE_NAME)
+            game.draw_game_over_screen(mode_name)
         else:
             game.draw()
 
