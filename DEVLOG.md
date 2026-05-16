@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Add model experiment CLI options
+
+- Changed: updated `train_model.py` with argparse options for data path, model path, validation split, random seed, and tree count; updated `play_with_model.py` with a model path option; delayed heavy imports so help text is easier to access; documented examples in `README.md`.
+- Why: model experiments should not require editing source code or overwriting `game_model.pkl`.
+- Behavior: default commands still work, but alternate data/model files can now be passed from the command line.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py train_model.py settings.py game_core.py scores.py data_store.py test_scores.py test_data_store.py`; ran `python3 train_model.py --help`; ran `python3 play_with_model.py --help`.
+- Risks/Notes: full training execution still depends on installed `numpy`, `scikit-learn`, and `joblib`.
+
 ## 2026-05-16 - Append collected gameplay data safely
 
 - Changed: added `data_store.py`; updated `game.py` to append new gameplay samples to `game_data.json`; added `test_data_store.py`; updated README wording for data collection.

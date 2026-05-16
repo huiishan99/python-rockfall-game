@@ -48,11 +48,23 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
+You can also experiment with alternate data or model files:
+
+```bash
+python3 train_model.py --data game_data.json --model game_model.pkl --estimators 150
+```
+
 ### Play the Game with the Model
 Once the model is trained, you can run the game with the model controlling the player movements using the `play_with_model.py` script:
 
 ```bash
 python3 play_with_model.py
+```
+
+To try a different model file:
+
+```bash
+python3 play_with_model.py --model game_model.pkl
 ```
 
 ### Runtime Files
@@ -62,5 +74,4 @@ High scores are saved locally in `high_scores.json`. This file is ignored by git
 
 ## Contributing
 Contributions to this project are welcome! Please fork the repository and submit a pull request with your improvements.
-
 

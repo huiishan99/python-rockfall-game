@@ -1,36 +1,46 @@
-import joblib
-import pygame
-
-from game_core import (
-    ACTION_LEFT,
-    ACTION_RIGHT,
-    SCREEN_GAME_OVER,
-    SCREEN_PAUSED,
-    SCREEN_PLAYING,
-    SCREEN_START,
-    RockfallGame,
-)
-from scores import get_high_score, record_high_score
-from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+import argparse
 
 MODEL_FILE = "game_model.pkl"
 MODE_KEY = "model"
 MODE_NAME = "Model Play"
 
 
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="Run Rockfall with a trained model.")
+    parser.add_argument("--model", default=MODEL_FILE, help="Model file to load.")
+    return parser.parse_args(argv)
+
+
 def predict_action(model, game):
+    from game_core import ACTION_LEFT, ACTION_RIGHT
+
     predicted_action = model.predict([game.model_features()])[0]
     if predicted_action == 1:
         return ACTION_RIGHT
     return ACTION_LEFT
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+
+    import joblib
+    import pygame
+
+    from game_core import (
+        SCREEN_GAME_OVER,
+        SCREEN_PAUSED,
+        SCREEN_PLAYING,
+        SCREEN_START,
+        RockfallGame,
+    )
+    from scores import get_high_score, record_high_score
+    from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Rockfall - Model Play")
 
-    model = joblib.load(MODEL_FILE)
+    model = joblib.load(args.model)
     game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
     clock = pygame.time.Clock()
     screen_state = SCREEN_START
