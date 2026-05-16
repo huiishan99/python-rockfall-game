@@ -27,6 +27,10 @@ from settings import (
     OBSTACLE_WIDTH,
     LANE_COLOR,
     LANE_HIGHLIGHT_COLOR,
+    MENU_ACCENT_COLOR,
+    MENU_SECONDARY_COLOR,
+    MENU_TITLE_COLOR,
+    MENU_TITLE_SHADOW_COLOR,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_HEIGHT,
@@ -300,15 +304,34 @@ class RockfallGame:
         pygame.draw.rect(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_rect)
 
     def _draw_message_screen(self, title, lines):
-        self.screen.fill(BACKGROUND_COLOR)
-        title_surface = self.title_font.render(title, True, HUD_COLOR)
-        title_x = (SCREEN_WIDTH - title_surface.get_width()) // 2
-        self.screen.blit(title_surface, (title_x, 170))
+        self._draw_background()
+        title_y = 145
+        title_shadow = self.title_font.render(title, True, MENU_TITLE_SHADOW_COLOR)
+        title_surface = self.title_font.render(title, True, MENU_TITLE_COLOR)
+        self._blit_centered(title_shadow, title_y + 4)
+        self._blit_centered(title_surface, title_y)
+        pygame.draw.line(
+            self.screen,
+            MENU_ACCENT_COLOR,
+            (SCREEN_WIDTH // 2 - 120, 220),
+            (SCREEN_WIDTH // 2 + 120, 220),
+            2,
+        )
 
         for index, line in enumerate(lines):
-            text_surface = self.font.render(line, True, HUD_COLOR)
-            text_x = (SCREEN_WIDTH - text_surface.get_width()) // 2
-            self.screen.blit(text_surface, (text_x, 270 + index * 42))
+            text_surface = self.font.render(line, True, self._message_line_color(index, line))
+            self._blit_centered(text_surface, 250 + index * 38)
+
+    def _blit_centered(self, surface, y):
+        x = (SCREEN_WIDTH - surface.get_width()) // 2
+        self.screen.blit(surface, (x, y))
+
+    def _message_line_color(self, index, line):
+        if index == 0:
+            return MENU_ACCENT_COLOR
+        if line.startswith(("Move:", "Pause:", "Press ")):
+            return MENU_SECONDARY_COLOR
+        return HUD_COLOR
 
     def _draw_hud(self):
         lives_text = self.font.render(f"Lives: {self.lives}", True, HUD_COLOR)

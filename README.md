@@ -14,7 +14,7 @@ This is now in v0.2 development after the playable v0.1 release:
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
 - Headless evaluation reports model score baselines.
-- Difficulty, lane-based spawning, high scores, hit feedback, visual polish, pause, restart, game-over summary, and v0.1 release checks are implemented.
+- Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and v0.1 release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
 
 ## Development Log
@@ -40,7 +40,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Consecutive avoided rocks build combo, which adds score bonuses until the next hit. The playfield now draws subtle lane guides, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Consecutive avoided rocks build combo, which adds score bonuses until the next hit. The playfield and menu screens now draw subtle lane guides, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
 
 Controls:
 

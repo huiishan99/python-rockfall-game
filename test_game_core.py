@@ -11,8 +11,12 @@ from settings import (
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     DIFFICULTY_INTERVAL_FRAMES,
+    HUD_COLOR,
     INITIAL_LIVES,
     INVINCIBILITY_FRAMES,
+    LANE_HIGHLIGHT_COLOR,
+    MENU_ACCENT_COLOR,
+    MENU_SECONDARY_COLOR,
     MESSAGE_DURATION_FRAMES,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
@@ -199,6 +203,21 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
             self.screen.get_at((100 + OBSTACLE_WIDTH + 1, 100 + OBSTACLE_WIDTH + 1))[:3],
             OBSTACLE_SHADOW_COLOR,
         )
+
+    def test_message_line_colors_highlight_mode_and_controls(self):
+        game = RockfallGame(self.screen)
+
+        self.assertEqual(game._message_line_color(0, "Data Collection"), MENU_ACCENT_COLOR)
+        self.assertEqual(game._message_line_color(2, "Press SPACE to start"), MENU_SECONDARY_COLOR)
+        self.assertEqual(game._message_line_color(1, "High Score: 10"), HUD_COLOR)
+
+    def test_start_screen_uses_styled_background_and_divider(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_start_screen("Data Collection")
+
+        self.assertEqual(self.screen.get_at((25, 3))[:3], LANE_HIGHLIGHT_COLOR)
+        self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 220))[:3], MENU_ACCENT_COLOR)
 
 
 if __name__ == "__main__":
