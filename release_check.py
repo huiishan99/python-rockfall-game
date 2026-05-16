@@ -12,7 +12,7 @@ DEFAULT_MAX_FRAMES = 1800
 
 
 def parse_args(argv=None):
-    parser = argparse.ArgumentParser(description="Run the v0.1 release readiness checks.")
+    parser = argparse.ArgumentParser(description="Run Rockfall release readiness checks.")
     parser.add_argument("--model", default=MODEL_FILE, help="Model file to evaluate.")
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Number of evaluation games.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")

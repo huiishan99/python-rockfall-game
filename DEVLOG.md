@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-16 - Generalize release-check wording
+
+- Changed: updated `release_check.py` argparse text and the project-status bullet in `README.md`; updated this devlog.
+- Why: the project is now on `0.2.0-dev`, so current release-check wording should not imply it is only for v0.1.
+- Behavior: help text now describes generic Rockfall release readiness checks.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile release_check.py test_release_check.py`; ran `python3 release_check.py --help`.
+- Risks/Notes: documentation/output wording only.
+
 ## 2026-05-16 - Hide pygame prompt in AI play
 
 - Changed: updated `play_with_model.py` to set `PYGAME_HIDE_SUPPORT_PROMPT` before pygame is imported; updated this devlog.
