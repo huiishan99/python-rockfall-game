@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add runtime initial lives tuning
+
+- Changed: updated `game_core.py` to reset from configurable initial lives; wired `--lives` through manual play, AI play, evaluation, comparison, experiments, and release checks; included `initial_lives` in JSON reports; expanded tests across affected entrypoints; updated `README.md`.
+- Why: v0.4 hand-feel tuning needs lives to be adjustable alongside difficulty and player speed without editing source constants.
+- Behavior: commands can now use values like `--lives 3`; invalid non-positive values fail before running evaluation or experiments.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py game.py play_with_model.py evaluate_model.py compare_models.py run_model_experiment.py release_check.py test_game_core.py test_game.py test_play_with_model.py test_evaluate_model.py test_compare_models.py test_run_model_experiment.py test_release_check.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --difficulty hard --player-speed 8 --lives 3 --json`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: score and survival baselines are sensitive to the initial lives setting, so comparisons should record and match it.
+
 ## 2026-05-17 - Add runtime player speed tuning
 
 - Changed: updated `game_core.py` to use a configurable player speed; wired `--player-speed` through manual play, AI play, evaluation, comparison, experiments, and release checks; expanded tests across affected entrypoints; updated `README.md`.

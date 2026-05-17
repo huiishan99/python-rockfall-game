@@ -20,6 +20,11 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(args.player_speed, 8)
 
+    def test_parse_args_accepts_lives(self):
+        args = parse_args(["--lives", "3"])
+
+        self.assertEqual(args.lives, 3)
+
     def test_model_mode_name_uses_basename(self):
         mode_name = model_mode_name("experiments/alt_model.pkl")
 

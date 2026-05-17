@@ -1,7 +1,7 @@
 import unittest
 
 from release_check import parse_args
-from settings import PLAYER_SPEED
+from settings import INITIAL_LIVES, PLAYER_SPEED
 
 
 class ReleaseCheckTest(unittest.TestCase):
@@ -12,6 +12,7 @@ class ReleaseCheckTest(unittest.TestCase):
         self.assertEqual(args.max_frames, 1800)
         self.assertEqual(args.difficulty, "normal")
         self.assertEqual(args.player_speed, PLAYER_SPEED)
+        self.assertEqual(args.lives, INITIAL_LIVES)
 
     def test_parse_args_overrides(self):
         args = parse_args(["--games", "5", "--max-frames", "600", "--model", "alt.pkl"])
@@ -29,6 +30,11 @@ class ReleaseCheckTest(unittest.TestCase):
         args = parse_args(["--player-speed", "8"])
 
         self.assertEqual(args.player_speed, 8)
+
+    def test_parse_args_accepts_lives(self):
+        args = parse_args(["--lives", "3"])
+
+        self.assertEqual(args.lives, 3)
 
 
 if __name__ == "__main__":

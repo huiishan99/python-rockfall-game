@@ -15,7 +15,7 @@ from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
 from play_with_model import MODEL_FILE
-from settings import PLAYER_SPEED
+from settings import INITIAL_LIVES, PLAYER_SPEED
 from train_model import (
     N_ESTIMATORS,
     RANDOM_STATE,
@@ -63,6 +63,7 @@ def parse_args(argv=None):
         help="Difficulty preset for model comparison.",
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
+    parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
@@ -163,6 +164,7 @@ def evaluate_models(
     random_seed,
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
 ):
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
@@ -181,6 +183,7 @@ def evaluate_models(
                 screen,
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
+                initial_lives=initial_lives,
             )
             for model_path in model_paths
         ]
@@ -196,6 +199,7 @@ def build_experiment_payload(
     eval_random_seed,
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
 ):
     return {
         "training": training_summary,
@@ -206,6 +210,7 @@ def build_experiment_payload(
             random_seed=eval_random_seed,
             difficulty_preset=difficulty_preset,
             player_speed=player_speed,
+            initial_lives=initial_lives,
         ),
         "candidate_result": candidate_result(comparison_summaries[0], comparison_summaries[1]),
     }
@@ -265,6 +270,8 @@ def main(argv=None):
         raise ValueError("--max-frames must be greater than zero.")
     if args.player_speed <= 0:
         raise ValueError("--player-speed must be greater than zero.")
+    if args.lives <= 0:
+        raise ValueError("--lives must be greater than zero.")
     validate_experiment_paths(args.baseline, args.candidate)
     validate_model_paths([args.baseline])
 
@@ -286,6 +293,7 @@ def main(argv=None):
         args.eval_random_seed,
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
+        initial_lives=args.lives,
     )
     payload = build_experiment_payload(
         training_summary,
@@ -295,6 +303,7 @@ def main(argv=None):
         args.eval_random_seed,
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
+        initial_lives=args.lives,
     )
 
     if args.report:
@@ -305,6 +314,7 @@ def main(argv=None):
     else:
         print(f"Difficulty: {args.difficulty}")
         print(f"Player speed: {args.player_speed}")
+        print(f"Initial lives: {args.lives}")
         for line in format_experiment_lines(training_summary, model_paths, comparison_summaries):
             print(line)
         if args.report:

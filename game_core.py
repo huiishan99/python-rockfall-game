@@ -73,11 +73,13 @@ class RockfallGame:
         high_score=0,
         difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
         player_speed=PLAYER_SPEED,
+        initial_lives=INITIAL_LIVES,
     ):
         self.screen = screen
         self.high_score = high_score
         self.difficulty_preset = difficulty_preset
         self.player_speed = max(1, int(player_speed))
+        self.initial_lives = max(1, int(initial_lives))
         self.font = pygame.font.Font(None, 36)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
@@ -101,7 +103,7 @@ class RockfallGame:
         self.last_spawn_x = None
         self.frame_count = 0
         self.game_time = 0
-        self.lives = INITIAL_LIVES
+        self.lives = self.initial_lives
         self.invincibility_frames = 0
         self.score = 0
         self.combo = 0

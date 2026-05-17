@@ -13,7 +13,7 @@ from evaluate_model import (
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from play_with_model import MODEL_FILE
-from settings import PLAYER_SPEED
+from settings import INITIAL_LIVES, PLAYER_SPEED
 
 
 def parse_args(argv=None):
@@ -29,6 +29,7 @@ def parse_args(argv=None):
         help="Difficulty preset.",
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
+    parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
 
@@ -47,6 +48,7 @@ def evaluate_model_path(
     screen,
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
 ):
     import joblib
 
@@ -61,6 +63,7 @@ def evaluate_model_path(
                 max_frames,
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
+                initial_lives=initial_lives,
             )
         )
 
@@ -74,6 +77,7 @@ def build_comparison_payload(
     random_seed,
     difficulty_preset=None,
     player_speed=None,
+    initial_lives=None,
 ):
     baseline_summary = summaries[0]
     return {
@@ -81,6 +85,7 @@ def build_comparison_payload(
         "random_seed": random_seed,
         "difficulty": difficulty_preset,
         "player_speed": player_speed,
+        "initial_lives": initial_lives,
         "best_model": comparison_winner(model_paths, summaries),
         "models": [
             {
@@ -89,6 +94,7 @@ def build_comparison_payload(
                     summary,
                     difficulty_preset=difficulty_preset,
                     player_speed=player_speed,
+                    initial_lives=initial_lives,
                 ),
                 "score_delta": score_delta(summary, baseline_summary),
             }
@@ -165,6 +171,8 @@ def main(argv=None):
         raise ValueError("--max-frames must be greater than zero.")
     if args.player_speed <= 0:
         raise ValueError("--player-speed must be greater than zero.")
+    if args.lives <= 0:
+        raise ValueError("--lives must be greater than zero.")
     validate_model_paths(args.models)
 
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
@@ -183,6 +191,7 @@ def main(argv=None):
             screen,
             difficulty_preset=args.difficulty,
             player_speed=args.player_speed,
+            initial_lives=args.lives,
         )
         for model_path in args.models
     ]
@@ -196,11 +205,13 @@ def main(argv=None):
             args.random_seed,
             difficulty_preset=args.difficulty,
             player_speed=args.player_speed,
+            initial_lives=args.lives,
         )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Difficulty: {args.difficulty}")
         print(f"Player speed: {args.player_speed}")
+        print(f"Initial lives: {args.lives}")
         for line in format_comparison_lines(args.models, summaries):
             print(line)
 

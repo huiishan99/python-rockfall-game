@@ -6,8 +6,7 @@ import unittest
 
 from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, format_summary_lines, run_game, summarize_results
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-from settings import VERSION
-from settings import PLAYER_SPEED
+from settings import INITIAL_LIVES, PLAYER_SPEED, VERSION
 
 DEFAULT_GAMES = 3
 DEFAULT_MAX_FRAMES = 1800
@@ -26,6 +25,7 @@ def parse_args(argv=None):
         help="Difficulty preset.",
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
+    parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     return parser.parse_args(argv)
 
 
@@ -42,6 +42,7 @@ def run_evaluation(
     random_seed,
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
 ):
     import joblib
 
@@ -64,6 +65,7 @@ def run_evaluation(
                 max_frames,
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
+                initial_lives=initial_lives,
             )
         )
 
@@ -84,6 +86,8 @@ def main(argv=None):
         raise ValueError("--max-frames must be greater than zero.")
     if args.player_speed <= 0:
         raise ValueError("--player-speed must be greater than zero.")
+    if args.lives <= 0:
+        raise ValueError("--lives must be greater than zero.")
 
     print(f"Rockfall {VERSION} release check")
     sys.stdout.flush()
@@ -103,9 +107,11 @@ def main(argv=None):
         args.random_seed,
         args.difficulty,
         args.player_speed,
+        args.lives,
     )
     print(f"Difficulty: {args.difficulty}")
     print(f"Player speed: {args.player_speed}")
+    print(f"Initial lives: {args.lives}")
     print_evaluation_summary(summary)
 
     print("Release check passed.")

@@ -25,6 +25,11 @@ class GameEntrypointTest(unittest.TestCase):
 
         self.assertEqual(args.player_speed, 8)
 
+    def test_parse_args_accepts_lives(self):
+        args = parse_args(["--lives", "3"])
+
+        self.assertEqual(args.lives, 3)
+
 
 if __name__ == "__main__":
     unittest.main()

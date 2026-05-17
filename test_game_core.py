@@ -85,6 +85,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.player_x, starting_x + 8)
 
+    def test_reset_uses_configured_initial_lives(self):
+        game = RockfallGame(self.screen, initial_lives=3)
+        game.lives = 1
+
+        game.reset()
+
+        self.assertEqual(game.lives, 3)
+
     def test_difficulty_preset_changes_initial_pressure(self):
         normal_game = RockfallGame(self.screen, difficulty_preset="normal")
         hard_game = RockfallGame(self.screen, difficulty_preset="hard")

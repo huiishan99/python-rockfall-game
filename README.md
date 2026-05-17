@@ -23,7 +23,7 @@ This is now in v0.3 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
+- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -60,6 +60,7 @@ Controls:
 - Add `--mute` to manual or model play commands to disable generated sound effects.
 - Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.
 - Add `--player-speed 8` to tune movement speed during manual play, model play, evaluation, comparison, and experiment commands.
+- Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
 
@@ -170,7 +171,7 @@ Local experiment outputs under `runs/` are also ignored by git.
 
 ## Next Steps
 
-- Do a real-window playtest and tune player speed, lives, and difficulty.
+- Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
 - Collect fresh lane-based gameplay data.
 - Retrain and compare the model with `evaluate_model.py`.
 - Tune visual polish after more real-window playtesting.

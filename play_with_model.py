@@ -10,7 +10,7 @@ MODE_NAME = "Model Play"
 
 def parse_args(argv=None):
     from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-    from settings import PLAYER_SPEED
+    from settings import INITIAL_LIVES, PLAYER_SPEED
 
     parser = argparse.ArgumentParser(description="Run Rockfall with a trained model.")
     parser.add_argument("--model", default=MODEL_FILE, help="Model file to load.")
@@ -21,6 +21,7 @@ def parse_args(argv=None):
         help="Difficulty preset.",
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
+    parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
@@ -48,6 +49,8 @@ def main(argv=None):
     args = parse_args(argv)
     if args.player_speed <= 0:
         raise ValueError("--player-speed must be greater than zero.")
+    if args.lives <= 0:
+        raise ValueError("--lives must be greater than zero.")
 
     import joblib
     import pygame
@@ -80,6 +83,7 @@ def main(argv=None):
         high_score=get_high_score(MODE_KEY),
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
+        initial_lives=args.lives,
     )
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()

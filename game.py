@@ -17,7 +17,7 @@ from game_core import (
     RockfallGame,
 )
 from scores import get_high_score, record_high_score
-from settings import FPS, PLAYER_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
+from settings import FPS, INITIAL_LIVES, PLAYER_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
 
 MODE_KEY = "manual"
 MODE_NAME = "Data Collection"
@@ -33,6 +33,7 @@ def parse_args(argv=None):
         help="Difficulty preset.",
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
+    parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
@@ -53,6 +54,8 @@ def main(argv=None):
     args = parse_args(argv)
     if args.player_speed <= 0:
         raise ValueError("--player-speed must be greater than zero.")
+    if args.lives <= 0:
+        raise ValueError("--lives must be greater than zero.")
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -64,6 +67,7 @@ def main(argv=None):
         high_score=get_high_score(MODE_KEY),
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
+        initial_lives=args.lives,
     )
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
