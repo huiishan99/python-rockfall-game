@@ -52,6 +52,11 @@ class CompareModelsTest(unittest.TestCase):
         self.assertEqual(args.models, ["base.pkl", "candidate.pkl"])
         self.assertTrue(args.json)
 
+    def test_parse_args_accepts_difficulty_preset(self):
+        args = parse_args(["base.pkl", "--difficulty", "hard"])
+
+        self.assertEqual(args.difficulty, "hard")
+
     def test_validate_model_paths_rejects_missing_model(self):
         with self.assertRaises(ValueError):
             validate_model_paths(["missing.pkl"])
@@ -103,10 +108,12 @@ class CompareModelsTest(unittest.TestCase):
             [SUMMARY_A, SUMMARY_B],
             max_frames=300,
             random_seed=42,
+            difficulty_preset="hard",
         )
 
         self.assertEqual(payload["max_frames"], 300)
         self.assertEqual(payload["random_seed"], 42)
+        self.assertEqual(payload["difficulty"], "hard")
         self.assertEqual(payload["best_model"], "candidate.pkl")
         self.assertEqual(payload["models"][0]["model"], "base.pkl")
         self.assertEqual(payload["models"][0]["score_delta"], 0)

@@ -1,8 +1,11 @@
 import unittest
 
 from difficulty import (
+    DEFAULT_DIFFICULTY_PRESET,
     difficulty_for_time,
     difficulty_level_for_time,
+    difficulty_preset_for_name,
+    difficulty_preset_names,
     obstacle_frequency_for_level,
     obstacle_speed_for_level,
 )
@@ -48,6 +51,27 @@ class DifficultyCurveTest(unittest.TestCase):
         self.assertEqual(difficulty.level, INITIAL_DIFFICULTY_LEVEL + 1)
         self.assertEqual(difficulty.obstacle_speed, INITIAL_OBSTACLE_SPEED + 1)
         self.assertLess(difficulty.obstacle_frequency, OBSTACLE_FREQUENCY)
+
+    def test_difficulty_presets_include_default(self):
+        self.assertIn(DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names())
+
+    def test_unknown_difficulty_preset_raises(self):
+        with self.assertRaises(ValueError):
+            difficulty_preset_for_name("impossible")
+
+    def test_hard_preset_increases_pressure(self):
+        normal = difficulty_for_time(0, "normal")
+        hard = difficulty_for_time(0, "hard")
+
+        self.assertGreaterEqual(hard.obstacle_speed, normal.obstacle_speed)
+        self.assertLessEqual(hard.obstacle_frequency, normal.obstacle_frequency)
+
+    def test_easy_preset_reduces_pressure(self):
+        normal = difficulty_for_time(0, "normal")
+        easy = difficulty_for_time(0, "easy")
+
+        self.assertLessEqual(easy.obstacle_speed, normal.obstacle_speed)
+        self.assertGreaterEqual(easy.obstacle_frequency, normal.obstacle_frequency)
 
 
 if __name__ == "__main__":

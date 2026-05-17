@@ -5,6 +5,7 @@ import sys
 import unittest
 
 from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, format_summary_lines, run_game, summarize_results
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from settings import VERSION
 
 DEFAULT_GAMES = 3
@@ -17,6 +18,12 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Number of evaluation games.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Base random seed.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset.",
+    )
     return parser.parse_args(argv)
 
 
@@ -26,7 +33,7 @@ def run_unittests():
     return result.wasSuccessful()
 
 
-def run_evaluation(model_path, games, max_frames, random_seed):
+def run_evaluation(model_path, games, max_frames, random_seed, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
     import joblib
 
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
@@ -41,7 +48,7 @@ def run_evaluation(model_path, games, max_frames, random_seed):
     results = []
     for game_index in range(games):
         random.seed(random_seed + game_index)
-        results.append(run_game(model, screen, max_frames))
+        results.append(run_game(model, screen, max_frames, difficulty_preset=difficulty_preset))
 
     pygame.quit()
     return summarize_results(results)
@@ -70,7 +77,8 @@ def main(argv=None):
 
     print("Running model evaluation...")
     sys.stdout.flush()
-    summary = run_evaluation(args.model, args.games, args.max_frames, args.random_seed)
+    summary = run_evaluation(args.model, args.games, args.max_frames, args.random_seed, args.difficulty)
+    print(f"Difficulty: {args.difficulty}")
     print_evaluation_summary(summary)
 
     print("Release check passed.")

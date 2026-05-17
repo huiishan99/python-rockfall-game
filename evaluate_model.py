@@ -5,6 +5,7 @@ import random
 from statistics import mean
 
 from play_with_model import MODEL_FILE
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
@@ -17,15 +18,21 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Number of games to simulate.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Base random seed.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset.",
+    )
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
 
-def run_game(model, screen, max_frames):
+def run_game(model, screen, max_frames, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
     from game_core import RockfallGame
     from play_with_model import predict_action
 
-    game = RockfallGame(screen)
+    game = RockfallGame(screen, difficulty_preset=difficulty_preset)
     frames = 0
 
     while not game.game_over and frames < max_frames:
@@ -73,12 +80,14 @@ def format_summary_lines(summary, games_label="Games"):
     ]
 
 
-def build_summary_payload(model_path, summary, max_frames=None, random_seed=None):
+def build_summary_payload(model_path, summary, max_frames=None, random_seed=None, difficulty_preset=None):
     payload = {"model": model_path, **summary}
     if max_frames is not None:
         payload["max_frames"] = max_frames
     if random_seed is not None:
         payload["random_seed"] = random_seed
+    if difficulty_preset is not None:
+        payload["difficulty"] = difficulty_preset
     return payload
 
 
@@ -103,7 +112,7 @@ def main(argv=None):
     results = []
     for game_index in range(args.games):
         random.seed(args.random_seed + game_index)
-        results.append(run_game(model, screen, args.max_frames))
+        results.append(run_game(model, screen, args.max_frames, difficulty_preset=args.difficulty))
 
     summary = summarize_results(results)
     if args.json:
@@ -112,10 +121,12 @@ def main(argv=None):
             summary,
             max_frames=args.max_frames,
             random_seed=args.random_seed,
+            difficulty_preset=args.difficulty,
         )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Model: {args.model}")
+        print(f"Difficulty: {args.difficulty}")
         for line in format_summary_lines(summary):
             print(line)
 

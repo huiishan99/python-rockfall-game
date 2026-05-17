@@ -11,6 +11,7 @@ from compare_models import (
     validate_model_paths,
 )
 from data_store import GAME_DATA_FILE, ensure_parent_dir
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
 from play_with_model import MODEL_FILE
@@ -54,6 +55,12 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Evaluation games per model.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--eval-random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Evaluation base seed.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset for model comparison.",
+    )
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
@@ -147,7 +154,7 @@ def train_candidate_model(
     }
 
 
-def evaluate_models(model_paths, games, max_frames, random_seed):
+def evaluate_models(model_paths, games, max_frames, random_seed, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
 
@@ -157,14 +164,28 @@ def evaluate_models(model_paths, games, max_frames, random_seed):
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     try:
         return [
-            evaluate_model_path(model_path, games, max_frames, random_seed, screen)
+            evaluate_model_path(
+                model_path,
+                games,
+                max_frames,
+                random_seed,
+                screen,
+                difficulty_preset=difficulty_preset,
+            )
             for model_path in model_paths
         ]
     finally:
         pygame.quit()
 
 
-def build_experiment_payload(training_summary, model_paths, comparison_summaries, max_frames, eval_random_seed):
+def build_experiment_payload(
+    training_summary,
+    model_paths,
+    comparison_summaries,
+    max_frames,
+    eval_random_seed,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+):
     return {
         "training": training_summary,
         "comparison": build_comparison_payload(
@@ -172,6 +193,7 @@ def build_experiment_payload(training_summary, model_paths, comparison_summaries
             comparison_summaries,
             max_frames=max_frames,
             random_seed=eval_random_seed,
+            difficulty_preset=difficulty_preset,
         ),
         "candidate_result": candidate_result(comparison_summaries[0], comparison_summaries[1]),
     }
@@ -243,13 +265,20 @@ def main(argv=None):
         max_skipped_ratio=args.max_skipped_ratio,
     )
     model_paths = [args.baseline, args.candidate]
-    comparison_summaries = evaluate_models(model_paths, args.games, args.max_frames, args.eval_random_seed)
+    comparison_summaries = evaluate_models(
+        model_paths,
+        args.games,
+        args.max_frames,
+        args.eval_random_seed,
+        difficulty_preset=args.difficulty,
+    )
     payload = build_experiment_payload(
         training_summary,
         model_paths,
         comparison_summaries,
         args.max_frames,
         args.eval_random_seed,
+        difficulty_preset=args.difficulty,
     )
 
     if args.report:
@@ -258,6 +287,7 @@ def main(argv=None):
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
+        print(f"Difficulty: {args.difficulty}")
         for line in format_experiment_lines(training_summary, model_paths, comparison_summaries):
             print(line)
         if args.report:

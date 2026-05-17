@@ -9,8 +9,16 @@ MODE_NAME = "Model Play"
 
 
 def parse_args(argv=None):
+    from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
+
     parser = argparse.ArgumentParser(description="Run Rockfall with a trained model.")
     parser.add_argument("--model", default=MODEL_FILE, help="Model file to load.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset.",
+    )
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
@@ -24,7 +32,9 @@ def predict_action(model, game):
     return ACTION_LEFT
 
 
-def model_mode_name(model_path):
+def model_mode_name(model_path, difficulty_preset=None):
+    if difficulty_preset:
+        return f"{MODE_NAME} ({os.path.basename(model_path)}, {difficulty_preset})"
     return f"{MODE_NAME} ({os.path.basename(model_path)})"
 
 
@@ -51,7 +61,7 @@ def main(argv=None):
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    mode_name = model_mode_name(args.model)
+    mode_name = model_mode_name(args.model, args.difficulty)
     pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
     try:
@@ -61,7 +71,7 @@ def main(argv=None):
         pygame.quit()
         return 1
 
-    game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
+    game = RockfallGame(screen, high_score=get_high_score(MODE_KEY), difficulty_preset=args.difficulty)
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
     screen_state = SCREEN_START

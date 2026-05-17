@@ -21,7 +21,7 @@ This is now in v0.3 development after the playable v0.1 release:
 
 - Manual play for data collection, with left/right or A/D movement, pause, restart, and local high scores.
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
-- Dynamic difficulty with faster falling speed, tighter spawn frequency, and lane-based rock spawning.
+- Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
 - Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
@@ -58,6 +58,7 @@ Controls:
 - Press R to restart from pause or game over.
 - Press Esc to quit.
 - Add `--mute` to manual or model play commands to disable generated sound effects.
+- Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
 

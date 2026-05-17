@@ -11,6 +11,7 @@ from evaluate_model import (
     run_game,
     summarize_results,
 )
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from play_with_model import MODEL_FILE
 
 
@@ -20,6 +21,12 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Number of games per model.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Base random seed.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset.",
+    )
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
 
@@ -30,27 +37,28 @@ def validate_model_paths(model_paths):
         raise ValueError("Model file not found: " + ", ".join(missing_paths))
 
 
-def evaluate_model_path(model_path, games, max_frames, random_seed, screen):
+def evaluate_model_path(model_path, games, max_frames, random_seed, screen, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
     import joblib
 
     model = joblib.load(model_path)
     results = []
     for game_index in range(games):
         random.seed(random_seed + game_index)
-        results.append(run_game(model, screen, max_frames))
+        results.append(run_game(model, screen, max_frames, difficulty_preset=difficulty_preset))
 
     return summarize_results(results)
 
 
-def build_comparison_payload(model_paths, summaries, max_frames, random_seed):
+def build_comparison_payload(model_paths, summaries, max_frames, random_seed, difficulty_preset=None):
     baseline_summary = summaries[0]
     return {
         "max_frames": max_frames,
         "random_seed": random_seed,
+        "difficulty": difficulty_preset,
         "best_model": comparison_winner(model_paths, summaries),
         "models": [
             {
-                **build_summary_payload(model_path, summary),
+                **build_summary_payload(model_path, summary, difficulty_preset=difficulty_preset),
                 "score_delta": score_delta(summary, baseline_summary),
             }
             for model_path, summary in zip(model_paths, summaries)
@@ -134,15 +142,29 @@ def main(argv=None):
     pygame.font.init()
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     summaries = [
-        evaluate_model_path(model_path, args.games, args.max_frames, args.random_seed, screen)
+        evaluate_model_path(
+            model_path,
+            args.games,
+            args.max_frames,
+            args.random_seed,
+            screen,
+            difficulty_preset=args.difficulty,
+        )
         for model_path in args.models
     ]
     pygame.quit()
 
     if args.json:
-        payload = build_comparison_payload(args.models, summaries, args.max_frames, args.random_seed)
+        payload = build_comparison_payload(
+            args.models,
+            summaries,
+            args.max_frames,
+            args.random_seed,
+            difficulty_preset=args.difficulty,
+        )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
+        print(f"Difficulty: {args.difficulty}")
         for line in format_comparison_lines(args.models, summaries):
             print(line)
 

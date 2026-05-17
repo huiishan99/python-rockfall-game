@@ -5,6 +5,7 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 
 from data_store import GAME_DATA_FILE, append_game_data
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from game_audio import GameSoundPlayer
 from game_core import (
     ACTION_LEFT,
@@ -25,6 +26,12 @@ MODE_NAME = "Data Collection"
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Play Rockfall and collect training data.")
     parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data file to append.")
+    parser.add_argument(
+        "--difficulty",
+        choices=difficulty_preset_names(),
+        default=DEFAULT_DIFFICULTY_PRESET,
+        help="Difficulty preset.",
+    )
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
 
@@ -46,9 +53,10 @@ def main(argv=None):
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption(f"Rockfall {VERSION} - Data Collection")
+    mode_name = f"{MODE_NAME} ({args.difficulty})"
+    pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
-    game = RockfallGame(screen, high_score=get_high_score(MODE_KEY))
+    game = RockfallGame(screen, high_score=get_high_score(MODE_KEY), difficulty_preset=args.difficulty)
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
     game_data = []
@@ -90,11 +98,11 @@ def main(argv=None):
                 screen_state = SCREEN_GAME_OVER
 
         if screen_state == SCREEN_START:
-            game.draw_start_screen(MODE_NAME)
+            game.draw_start_screen(mode_name)
         elif screen_state == SCREEN_PAUSED:
-            game.draw_pause_screen(MODE_NAME)
+            game.draw_pause_screen(mode_name)
         elif screen_state == SCREEN_GAME_OVER:
-            game.draw_game_over_screen(MODE_NAME)
+            game.draw_game_over_screen(mode_name)
         else:
             game.draw()
 

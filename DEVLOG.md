@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add difficulty presets
+
+- Changed: added `easy`, `normal`, and `hard` difficulty presets in `difficulty.py`; wired `--difficulty` through manual play, AI play, evaluation, comparison, experiments, and release checks; expanded tests across the affected entrypoints; updated `README.md`.
+- Why: v0.4 hand-feel tuning needs runtime difficulty selection instead of changing constants in source code.
+- Behavior: `--difficulty hard` increases pressure with faster rocks and tighter spawn frequency, while `--difficulty easy` reduces pressure.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile difficulty.py game_core.py game.py play_with_model.py evaluate_model.py compare_models.py run_model_experiment.py release_check.py test_difficulty.py test_game_core.py test_game.py test_play_with_model.py test_evaluate_model.py test_compare_models.py test_run_model_experiment.py test_release_check.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty hard`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --difficulty easy --json`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal`.
+- Risks/Notes: trained models are still tied to the data distribution they saw; comparing models across difficulty presets should be done explicitly.
+
 ## 2026-05-17 - Advance to v0.3 development
 
 - Changed: updated `settings.py` version to `0.3.0-dev`; updated `README.md` project status and feature summary.

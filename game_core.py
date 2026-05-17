@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from difficulty import difficulty_for_time
+from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_for_time
 from features import build_model_features
 from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from settings import (
@@ -67,9 +67,10 @@ SCREEN_GAME_OVER = "game_over"
 
 
 class RockfallGame:
-    def __init__(self, screen, high_score=0):
+    def __init__(self, screen, high_score=0, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
         self.screen = screen
         self.high_score = high_score
+        self.difficulty_preset = difficulty_preset
         self.font = pygame.font.Font(None, 36)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
@@ -89,7 +90,7 @@ class RockfallGame:
         self.player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 10
         self.obstacles = []
         self.obstacle_speed = INITIAL_OBSTACLE_SPEED
-        self.obstacle_frequency = difficulty_for_time(0).obstacle_frequency
+        self.obstacle_frequency = difficulty_for_time(0, self.difficulty_preset).obstacle_frequency
         self.last_spawn_x = None
         self.frame_count = 0
         self.game_time = 0
@@ -205,7 +206,7 @@ class RockfallGame:
     def _increase_difficulty(self):
         self.game_time += 1
         previous_level = self.difficulty_level
-        difficulty = difficulty_for_time(self.game_time)
+        difficulty = difficulty_for_time(self.game_time, self.difficulty_preset)
         self.obstacle_speed = difficulty.obstacle_speed
         self.obstacle_frequency = difficulty.obstacle_frequency
         self.difficulty_level = difficulty.level

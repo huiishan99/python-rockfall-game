@@ -9,6 +9,11 @@ class EvaluateModelTest(unittest.TestCase):
 
         self.assertTrue(args.json)
 
+    def test_parse_args_accepts_difficulty_preset(self):
+        args = parse_args(["--difficulty", "hard"])
+
+        self.assertEqual(args.difficulty, "hard")
+
     def test_summarizes_scores_and_timeouts(self):
         summary = summarize_results(
             [
@@ -60,11 +65,13 @@ class EvaluateModelTest(unittest.TestCase):
             },
             max_frames=300,
             random_seed=42,
+            difficulty_preset="hard",
         )
 
         self.assertEqual(payload["model"], "model.pkl")
         self.assertEqual(payload["max_frames"], 300)
         self.assertEqual(payload["random_seed"], 42)
+        self.assertEqual(payload["difficulty"], "hard")
         self.assertEqual(payload["games"], 2)
         self.assertEqual(payload["best_combo"], 6)
 

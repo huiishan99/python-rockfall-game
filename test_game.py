@@ -15,6 +15,11 @@ class GameEntrypointTest(unittest.TestCase):
 
         self.assertEqual(args.data, "runs/experiment.json")
 
+    def test_parse_args_accepts_difficulty_preset(self):
+        args = parse_args(["--difficulty", "hard"])
+
+        self.assertEqual(args.difficulty, "hard")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -82,6 +82,8 @@ class RunModelExperimentTest(unittest.TestCase):
                 "runs/v02.pkl",
                 "--report",
                 "runs/v02_report.json",
+                "--difficulty",
+                "hard",
                 "--json",
             ]
         )
@@ -89,6 +91,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.data, "runs/playtest.json")
         self.assertEqual(args.candidate, "runs/v02.pkl")
         self.assertEqual(args.report, "runs/v02_report.json")
+        self.assertEqual(args.difficulty, "hard")
         self.assertTrue(args.json)
 
     def test_validate_experiment_paths_rejects_baseline_overwrite(self):
@@ -152,10 +155,12 @@ class RunModelExperimentTest(unittest.TestCase):
             [BASELINE_SUMMARY, CANDIDATE_SUMMARY],
             max_frames=300,
             eval_random_seed=42,
+            difficulty_preset="hard",
         )
 
         self.assertEqual(payload["training"]["validation_accuracy"], 0.875)
         self.assertEqual(payload["candidate_result"], "candidate_outperformed_baseline")
+        self.assertEqual(payload["comparison"]["difficulty"], "hard")
         self.assertEqual(payload["comparison"]["max_frames"], 300)
         self.assertEqual(payload["comparison"]["best_model"], "runs/candidate_model.pkl")
         self.assertEqual(payload["comparison"]["models"][1]["model"], "runs/candidate_model.pkl")
