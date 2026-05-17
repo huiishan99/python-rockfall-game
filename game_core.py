@@ -67,10 +67,17 @@ SCREEN_GAME_OVER = "game_over"
 
 
 class RockfallGame:
-    def __init__(self, screen, high_score=0, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
+    def __init__(
+        self,
+        screen,
+        high_score=0,
+        difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+        player_speed=PLAYER_SPEED,
+    ):
         self.screen = screen
         self.high_score = high_score
         self.difficulty_preset = difficulty_preset
+        self.player_speed = max(1, int(player_speed))
         self.font = pygame.font.Font(None, 36)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
@@ -115,9 +122,9 @@ class RockfallGame:
 
     def apply_action(self, action):
         if action == ACTION_LEFT:
-            self.player_x = max(self.player_x - PLAYER_SPEED, 0)
+            self.player_x = max(self.player_x - self.player_speed, 0)
         elif action == ACTION_RIGHT:
-            self.player_x = min(self.player_x + PLAYER_SPEED, SCREEN_WIDTH - PLAYER_WIDTH)
+            self.player_x = min(self.player_x + self.player_speed, SCREEN_WIDTH - PLAYER_WIDTH)
 
     def update(self):
         if self.game_over:

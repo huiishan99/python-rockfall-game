@@ -13,6 +13,7 @@ from evaluate_model import (
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from play_with_model import MODEL_FILE
+from settings import PLAYER_SPEED
 
 
 def parse_args(argv=None):
@@ -27,6 +28,7 @@ def parse_args(argv=None):
         default=DEFAULT_DIFFICULTY_PRESET,
         help="Difficulty preset.",
     )
+    parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
 
@@ -37,28 +39,57 @@ def validate_model_paths(model_paths):
         raise ValueError("Model file not found: " + ", ".join(missing_paths))
 
 
-def evaluate_model_path(model_path, games, max_frames, random_seed, screen, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
+def evaluate_model_path(
+    model_path,
+    games,
+    max_frames,
+    random_seed,
+    screen,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+):
     import joblib
 
     model = joblib.load(model_path)
     results = []
     for game_index in range(games):
         random.seed(random_seed + game_index)
-        results.append(run_game(model, screen, max_frames, difficulty_preset=difficulty_preset))
+        results.append(
+            run_game(
+                model,
+                screen,
+                max_frames,
+                difficulty_preset=difficulty_preset,
+                player_speed=player_speed,
+            )
+        )
 
     return summarize_results(results)
 
 
-def build_comparison_payload(model_paths, summaries, max_frames, random_seed, difficulty_preset=None):
+def build_comparison_payload(
+    model_paths,
+    summaries,
+    max_frames,
+    random_seed,
+    difficulty_preset=None,
+    player_speed=None,
+):
     baseline_summary = summaries[0]
     return {
         "max_frames": max_frames,
         "random_seed": random_seed,
         "difficulty": difficulty_preset,
+        "player_speed": player_speed,
         "best_model": comparison_winner(model_paths, summaries),
         "models": [
             {
-                **build_summary_payload(model_path, summary, difficulty_preset=difficulty_preset),
+                **build_summary_payload(
+                    model_path,
+                    summary,
+                    difficulty_preset=difficulty_preset,
+                    player_speed=player_speed,
+                ),
                 "score_delta": score_delta(summary, baseline_summary),
             }
             for model_path, summary in zip(model_paths, summaries)
@@ -132,6 +163,8 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    if args.player_speed <= 0:
+        raise ValueError("--player-speed must be greater than zero.")
     validate_model_paths(args.models)
 
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
@@ -149,6 +182,7 @@ def main(argv=None):
             args.random_seed,
             screen,
             difficulty_preset=args.difficulty,
+            player_speed=args.player_speed,
         )
         for model_path in args.models
     ]
@@ -161,10 +195,12 @@ def main(argv=None):
             args.max_frames,
             args.random_seed,
             difficulty_preset=args.difficulty,
+            player_speed=args.player_speed,
         )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Difficulty: {args.difficulty}")
+        print(f"Player speed: {args.player_speed}")
         for line in format_comparison_lines(args.models, summaries):
             print(line)
 

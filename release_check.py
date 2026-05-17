@@ -7,6 +7,7 @@ import unittest
 from evaluate_model import DEFAULT_RANDOM_SEED, MODEL_FILE, format_summary_lines, run_game, summarize_results
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from settings import VERSION
+from settings import PLAYER_SPEED
 
 DEFAULT_GAMES = 3
 DEFAULT_MAX_FRAMES = 1800
@@ -24,6 +25,7 @@ def parse_args(argv=None):
         default=DEFAULT_DIFFICULTY_PRESET,
         help="Difficulty preset.",
     )
+    parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     return parser.parse_args(argv)
 
 
@@ -33,7 +35,14 @@ def run_unittests():
     return result.wasSuccessful()
 
 
-def run_evaluation(model_path, games, max_frames, random_seed, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
+def run_evaluation(
+    model_path,
+    games,
+    max_frames,
+    random_seed,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+):
     import joblib
 
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
@@ -48,7 +57,15 @@ def run_evaluation(model_path, games, max_frames, random_seed, difficulty_preset
     results = []
     for game_index in range(games):
         random.seed(random_seed + game_index)
-        results.append(run_game(model, screen, max_frames, difficulty_preset=difficulty_preset))
+        results.append(
+            run_game(
+                model,
+                screen,
+                max_frames,
+                difficulty_preset=difficulty_preset,
+                player_speed=player_speed,
+            )
+        )
 
     pygame.quit()
     return summarize_results(results)
@@ -65,6 +82,8 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    if args.player_speed <= 0:
+        raise ValueError("--player-speed must be greater than zero.")
 
     print(f"Rockfall {VERSION} release check")
     sys.stdout.flush()
@@ -77,8 +96,16 @@ def main(argv=None):
 
     print("Running model evaluation...")
     sys.stdout.flush()
-    summary = run_evaluation(args.model, args.games, args.max_frames, args.random_seed, args.difficulty)
+    summary = run_evaluation(
+        args.model,
+        args.games,
+        args.max_frames,
+        args.random_seed,
+        args.difficulty,
+        args.player_speed,
+    )
     print(f"Difficulty: {args.difficulty}")
+    print(f"Player speed: {args.player_speed}")
     print_evaluation_summary(summary)
 
     print("Release check passed.")

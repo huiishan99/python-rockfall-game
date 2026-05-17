@@ -59,6 +59,7 @@ Controls:
 - Press Esc to quit.
 - Add `--mute` to manual or model play commands to disable generated sound effects.
 - Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.
+- Add `--player-speed 8` to tune movement speed during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
 

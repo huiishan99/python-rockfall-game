@@ -15,6 +15,11 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(args.difficulty, "easy")
 
+    def test_parse_args_accepts_player_speed(self):
+        args = parse_args(["--player-speed", "8"])
+
+        self.assertEqual(args.player_speed, 8)
+
     def test_model_mode_name_uses_basename(self):
         mode_name = model_mode_name("experiments/alt_model.pkl")
 

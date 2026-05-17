@@ -6,6 +6,7 @@ from statistics import mean
 
 from play_with_model import MODEL_FILE
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
+from settings import PLAYER_SPEED
 
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
@@ -24,15 +25,16 @@ def parse_args(argv=None):
         default=DEFAULT_DIFFICULTY_PRESET,
         help="Difficulty preset.",
     )
+    parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
 
-def run_game(model, screen, max_frames, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
+def run_game(model, screen, max_frames, difficulty_preset=DEFAULT_DIFFICULTY_PRESET, player_speed=PLAYER_SPEED):
     from game_core import RockfallGame
     from play_with_model import predict_action
 
-    game = RockfallGame(screen, difficulty_preset=difficulty_preset)
+    game = RockfallGame(screen, difficulty_preset=difficulty_preset, player_speed=player_speed)
     frames = 0
 
     while not game.game_over and frames < max_frames:
@@ -80,7 +82,14 @@ def format_summary_lines(summary, games_label="Games"):
     ]
 
 
-def build_summary_payload(model_path, summary, max_frames=None, random_seed=None, difficulty_preset=None):
+def build_summary_payload(
+    model_path,
+    summary,
+    max_frames=None,
+    random_seed=None,
+    difficulty_preset=None,
+    player_speed=None,
+):
     payload = {"model": model_path, **summary}
     if max_frames is not None:
         payload["max_frames"] = max_frames
@@ -88,6 +97,8 @@ def build_summary_payload(model_path, summary, max_frames=None, random_seed=None
         payload["random_seed"] = random_seed
     if difficulty_preset is not None:
         payload["difficulty"] = difficulty_preset
+    if player_speed is not None:
+        payload["player_speed"] = player_speed
     return payload
 
 
@@ -97,6 +108,8 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    if args.player_speed <= 0:
+        raise ValueError("--player-speed must be greater than zero.")
 
     import joblib
 
@@ -112,7 +125,15 @@ def main(argv=None):
     results = []
     for game_index in range(args.games):
         random.seed(args.random_seed + game_index)
-        results.append(run_game(model, screen, args.max_frames, difficulty_preset=args.difficulty))
+        results.append(
+            run_game(
+                model,
+                screen,
+                args.max_frames,
+                difficulty_preset=args.difficulty,
+                player_speed=args.player_speed,
+            )
+        )
 
     summary = summarize_results(results)
     if args.json:
@@ -122,11 +143,13 @@ def main(argv=None):
             max_frames=args.max_frames,
             random_seed=args.random_seed,
             difficulty_preset=args.difficulty,
+            player_speed=args.player_speed,
         )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Model: {args.model}")
         print(f"Difficulty: {args.difficulty}")
+        print(f"Player speed: {args.player_speed}")
         for line in format_summary_lines(summary):
             print(line)
 

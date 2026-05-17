@@ -15,6 +15,7 @@ from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
 from play_with_model import MODEL_FILE
+from settings import PLAYER_SPEED
 from train_model import (
     N_ESTIMATORS,
     RANDOM_STATE,
@@ -61,6 +62,7 @@ def parse_args(argv=None):
         default=DEFAULT_DIFFICULTY_PRESET,
         help="Difficulty preset for model comparison.",
     )
+    parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
@@ -154,7 +156,14 @@ def train_candidate_model(
     }
 
 
-def evaluate_models(model_paths, games, max_frames, random_seed, difficulty_preset=DEFAULT_DIFFICULTY_PRESET):
+def evaluate_models(
+    model_paths,
+    games,
+    max_frames,
+    random_seed,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+):
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
 
@@ -171,6 +180,7 @@ def evaluate_models(model_paths, games, max_frames, random_seed, difficulty_pres
                 random_seed,
                 screen,
                 difficulty_preset=difficulty_preset,
+                player_speed=player_speed,
             )
             for model_path in model_paths
         ]
@@ -185,6 +195,7 @@ def build_experiment_payload(
     max_frames,
     eval_random_seed,
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
 ):
     return {
         "training": training_summary,
@@ -194,6 +205,7 @@ def build_experiment_payload(
             max_frames=max_frames,
             random_seed=eval_random_seed,
             difficulty_preset=difficulty_preset,
+            player_speed=player_speed,
         ),
         "candidate_result": candidate_result(comparison_summaries[0], comparison_summaries[1]),
     }
@@ -251,6 +263,8 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    if args.player_speed <= 0:
+        raise ValueError("--player-speed must be greater than zero.")
     validate_experiment_paths(args.baseline, args.candidate)
     validate_model_paths([args.baseline])
 
@@ -271,6 +285,7 @@ def main(argv=None):
         args.max_frames,
         args.eval_random_seed,
         difficulty_preset=args.difficulty,
+        player_speed=args.player_speed,
     )
     payload = build_experiment_payload(
         training_summary,
@@ -279,6 +294,7 @@ def main(argv=None):
         args.max_frames,
         args.eval_random_seed,
         difficulty_preset=args.difficulty,
+        player_speed=args.player_speed,
     )
 
     if args.report:
@@ -288,6 +304,7 @@ def main(argv=None):
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Difficulty: {args.difficulty}")
+        print(f"Player speed: {args.player_speed}")
         for line in format_experiment_lines(training_summary, model_paths, comparison_summaries):
             print(line)
         if args.report:
