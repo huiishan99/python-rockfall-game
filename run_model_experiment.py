@@ -3,7 +3,7 @@ import json
 import os
 from collections import Counter
 
-from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_lines
+from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_lines, score_delta
 from data_store import GAME_DATA_FILE, ensure_parent_dir
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
@@ -94,7 +94,17 @@ def build_experiment_payload(training_summary, model_paths, comparison_summaries
             max_frames=max_frames,
             random_seed=eval_random_seed,
         ),
+        "candidate_result": candidate_result(comparison_summaries[0], comparison_summaries[1]),
     }
+
+
+def candidate_result(baseline_summary, candidate_summary):
+    delta = score_delta(candidate_summary, baseline_summary)
+    if delta > 0:
+        return "candidate_outperformed_baseline"
+    if delta < 0:
+        return "candidate_underperformed_baseline"
+    return "candidate_matched_baseline"
 
 
 def write_experiment_report(payload, report_path):
@@ -125,6 +135,7 @@ def format_experiment_lines(training_summary, model_paths, comparison_summaries)
         + [""]
         + ["Model comparison:"]
         + format_comparison_lines(model_paths, comparison_summaries)
+        + [f"Candidate result: {candidate_result(comparison_summaries[0], comparison_summaries[1])}"]
     )
 
 

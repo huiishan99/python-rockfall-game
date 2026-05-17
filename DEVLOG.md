@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add candidate experiment result
+
+- Changed: updated `run_model_experiment.py` to classify the candidate model as outperforming, matching, or underperforming the baseline by average score; expanded `test_run_model_experiment.py`; updated `README.md`.
+- Why: experiment output should state the conclusion directly instead of requiring manual interpretation of score deltas.
+- Behavior: experiment text output and JSON reports now include a `candidate_result` value.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile run_model_experiment.py test_run_model_experiment.py`; ran `python3 run_model_experiment.py --candidate /private/tmp/rockfall-candidate-result.pkl --games 1 --max-frames 300 --report /private/tmp/rockfall-experiment-result.json`; ran `python3 -m json.tool /private/tmp/rockfall-experiment-result.json`.
+- Risks/Notes: this is a conservative score-only conclusion; combo and frame metrics remain visible for human review.
+
 ## 2026-05-17 - Save model experiment reports
 
 - Changed: updated `run_model_experiment.py` with a `--report` option that writes the structured experiment payload to JSON; expanded `test_run_model_experiment.py`; updated `README.md`.

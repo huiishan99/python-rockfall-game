@@ -6,6 +6,7 @@ import unittest
 from run_model_experiment import (
     DEFAULT_CANDIDATE_MODEL,
     build_experiment_payload,
+    candidate_result,
     format_experiment_lines,
     parse_args,
     write_experiment_report,
@@ -84,9 +85,15 @@ class RunModelExperimentTest(unittest.TestCase):
         )
 
         self.assertEqual(payload["training"]["validation_accuracy"], 0.875)
+        self.assertEqual(payload["candidate_result"], "candidate_outperformed_baseline")
         self.assertEqual(payload["comparison"]["max_frames"], 300)
         self.assertEqual(payload["comparison"]["best_model"], "runs/candidate_model.pkl")
         self.assertEqual(payload["comparison"]["models"][1]["model"], "runs/candidate_model.pkl")
+
+    def test_candidate_result_compares_average_score(self):
+        self.assertEqual(candidate_result(BASELINE_SUMMARY, CANDIDATE_SUMMARY), "candidate_outperformed_baseline")
+        self.assertEqual(candidate_result(CANDIDATE_SUMMARY, BASELINE_SUMMARY), "candidate_underperformed_baseline")
+        self.assertEqual(candidate_result(BASELINE_SUMMARY, BASELINE_SUMMARY), "candidate_matched_baseline")
 
     def test_formats_experiment_lines(self):
         lines = format_experiment_lines(
@@ -99,6 +106,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Validation accuracy: 0.875", lines)
         self.assertIn("Model comparison:", lines)
         self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)
+        self.assertIn("Candidate result: candidate_outperformed_baseline", lines)
         self.assertTrue(any("runs/candidate_model.pkl" in line for line in lines))
 
     def test_write_experiment_report_creates_parent_directory(self):
