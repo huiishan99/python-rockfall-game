@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Save model experiment reports
+
+- Changed: updated `run_model_experiment.py` with a `--report` option that writes the structured experiment payload to JSON; expanded `test_run_model_experiment.py`; updated `README.md`.
+- Why: model experiments should leave reproducible reports behind instead of only printing terminal output.
+- Behavior: `python3 run_model_experiment.py --report runs/v02_report.json` saves training and comparison metrics while still printing the normal table unless `--json` is also used.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile run_model_experiment.py test_run_model_experiment.py`; ran `python3 run_model_experiment.py --candidate /private/tmp/rockfall-candidate-report.pkl --games 1 --max-frames 300 --report /private/tmp/rockfall-experiment-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-experiment-report.json`.
+- Risks/Notes: report files under `runs/` remain ignored by git unless explicitly moved elsewhere.
+
 ## 2026-05-17 - Add model comparison deltas
 
 - Changed: updated `compare_models.py` to report score deltas against the first model and identify the best model by average score; updated `run_model_experiment.py` to include the same comparison conclusion; expanded `test_compare_models.py` and `test_run_model_experiment.py`; updated `README.md`.

@@ -4,7 +4,7 @@ import os
 from collections import Counter
 
 from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_lines
-from data_store import GAME_DATA_FILE
+from data_store import GAME_DATA_FILE, ensure_parent_dir
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
 from play_with_model import MODEL_FILE
@@ -32,6 +32,7 @@ def parse_args(argv=None):
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Evaluation games per model.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--eval-random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Evaluation base seed.")
+    parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
@@ -96,6 +97,12 @@ def build_experiment_payload(training_summary, model_paths, comparison_summaries
     }
 
 
+def write_experiment_report(payload, report_path):
+    ensure_parent_dir(report_path)
+    with open(report_path, "w") as report_file:
+        json.dump(payload, report_file, indent=2, sort_keys=True)
+
+
 def format_training_lines(training_summary):
     return [
         f"Data: {training_summary['data']}",
@@ -137,19 +144,24 @@ def main(argv=None):
     )
     model_paths = [args.baseline, args.candidate]
     comparison_summaries = evaluate_models(model_paths, args.games, args.max_frames, args.eval_random_seed)
+    payload = build_experiment_payload(
+        training_summary,
+        model_paths,
+        comparison_summaries,
+        args.max_frames,
+        args.eval_random_seed,
+    )
+
+    if args.report:
+        write_experiment_report(payload, args.report)
 
     if args.json:
-        payload = build_experiment_payload(
-            training_summary,
-            model_paths,
-            comparison_summaries,
-            args.max_frames,
-            args.eval_random_seed,
-        )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         for line in format_experiment_lines(training_summary, model_paths, comparison_summaries):
             print(line)
+        if args.report:
+            print(f"Report saved to {args.report}")
 
     return 0
 

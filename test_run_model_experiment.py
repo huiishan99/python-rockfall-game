@@ -1,3 +1,6 @@
+import json
+import os
+import tempfile
 import unittest
 
 from run_model_experiment import (
@@ -5,6 +8,7 @@ from run_model_experiment import (
     build_experiment_payload,
     format_experiment_lines,
     parse_args,
+    write_experiment_report,
 )
 
 
@@ -59,12 +63,15 @@ class RunModelExperimentTest(unittest.TestCase):
                 "game_model.pkl",
                 "--candidate",
                 "runs/v02.pkl",
+                "--report",
+                "runs/v02_report.json",
                 "--json",
             ]
         )
 
         self.assertEqual(args.data, "runs/playtest.json")
         self.assertEqual(args.candidate, "runs/v02.pkl")
+        self.assertEqual(args.report, "runs/v02_report.json")
         self.assertTrue(args.json)
 
     def test_builds_experiment_payload(self):
@@ -93,6 +100,16 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Model comparison:", lines)
         self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)
         self.assertTrue(any("runs/candidate_model.pkl" in line for line in lines))
+
+    def test_write_experiment_report_creates_parent_directory(self):
+        payload = {"training": {"model": "candidate.pkl"}}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_path = os.path.join(temp_dir, "reports", "experiment.json")
+
+            write_experiment_report(payload, report_path)
+
+            with open(report_path, "r") as report_file:
+                self.assertEqual(json.load(report_file), payload)
 
 
 if __name__ == "__main__":
