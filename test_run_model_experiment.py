@@ -10,6 +10,7 @@ from run_model_experiment import (
     build_experiment_payload,
     candidate_result,
     cli,
+    data_quality_summary,
     format_experiment_lines,
     parse_args,
     validate_experiment_paths,
@@ -28,6 +29,17 @@ TRAINING_SUMMARY = {
     "estimators": 100,
     "test_size": 0.2,
     "random_state": 42,
+    "data_quality": {
+        "status": "ready",
+        "warnings": [],
+        "valid_samples": 100,
+        "skipped_entries": 3,
+        "skipped_ratio": 0.02912621359223301,
+        "balance_ratio": 0.45,
+        "min_samples": 50,
+        "min_balance_ratio": 0.35,
+        "max_skipped_ratio": 0.10,
+    },
 }
 
 BASELINE_SUMMARY = {
@@ -86,6 +98,35 @@ class RunModelExperimentTest(unittest.TestCase):
     def test_validate_experiment_paths_allows_separate_candidate(self):
         validate_experiment_paths("game_model.pkl", "runs/candidate.pkl")
 
+    def test_data_quality_summary_is_ready_when_thresholds_pass(self):
+        quality = data_quality_summary(
+            valid_samples=1000,
+            skipped_entries=10,
+            action_counts={0: 450, 1: 550},
+            min_samples=500,
+            min_balance_ratio=0.35,
+            max_skipped_ratio=0.10,
+        )
+
+        self.assertEqual(quality["status"], "ready")
+        self.assertEqual(quality["warnings"], [])
+        self.assertAlmostEqual(quality["balance_ratio"], 0.45)
+
+    def test_data_quality_summary_warns_on_small_or_unbalanced_data(self):
+        quality = data_quality_summary(
+            valid_samples=51,
+            skipped_entries=20,
+            action_counts={0: 5, 1: 46},
+            min_samples=500,
+            min_balance_ratio=0.35,
+            max_skipped_ratio=0.10,
+        )
+
+        self.assertEqual(quality["status"], "needs_more_data")
+        self.assertIn("valid_samples_below_500", quality["warnings"])
+        self.assertIn("action_balance_below_0.35", quality["warnings"])
+        self.assertIn("skipped_ratio_above_0.10", quality["warnings"])
+
     def test_cli_reports_baseline_overwrite_without_traceback(self):
         output = StringIO()
 
@@ -133,6 +174,7 @@ class RunModelExperimentTest(unittest.TestCase):
 
         self.assertIn("Training candidate model:", lines)
         self.assertIn("Validation accuracy: 0.875", lines)
+        self.assertIn("Data quality: ready", lines)
         self.assertIn("Model comparison:", lines)
         self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)
         self.assertIn("Candidate result: candidate_outperformed_baseline", lines)

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add experiment data quality checks
+
+- Changed: updated `run_model_experiment.py` with data-quality thresholds for valid sample count, action balance, and skipped-entry ratio; expanded `test_run_model_experiment.py`; updated `README.md`.
+- Why: experiments should flag weak datasets before a high validation score creates false confidence.
+- Behavior: experiment text and JSON reports now include `data_quality` status and warnings such as `valid_samples_below_500`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile run_model_experiment.py test_run_model_experiment.py`; ran `python3 run_model_experiment.py --data runs/playtest_manual.json --candidate /private/tmp/rockfall-quality-model.pkl --games 1 --max-frames 300 --report /private/tmp/rockfall-quality-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-quality-report.json`.
+- Risks/Notes: quality warnings do not block training yet; they are decision support for v0.3 model iteration.
+
 ## 2026-05-17 - Run manual playtest experiment
 
 - Changed: launched `python3 game.py --data runs/playtest_manual.json --mute`, completed a short real-window manual playtest, and generated 51 ignored local samples in `runs/playtest_manual.json`; trained a temporary candidate model at `/private/tmp/rockfall-playtest-model.pkl`; wrote a temporary report at `/private/tmp/rockfall-playtest-report.json`.

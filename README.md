@@ -117,7 +117,7 @@ Train a candidate model and compare it against the current baseline with the sam
 python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02_model.pkl --games 10 --max-frames 3600
 ```
 
-Use `--report runs/v02_report.json` to save the training summary, candidate result, and comparison metrics, or `--json` to print the same structured payload.
+Use `--report runs/v02_report.json` to save the training summary, data-quality status, candidate result, and comparison metrics, or `--json` to print the same structured payload.
 The experiment command refuses to use the same path for `--baseline` and `--candidate`, so the baseline model is not overwritten accidentally.
 
 ### Play the Game with the Model

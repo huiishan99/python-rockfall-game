@@ -25,6 +25,9 @@ from train_model import (
 )
 
 DEFAULT_CANDIDATE_MODEL = "runs/candidate_model.pkl"
+DEFAULT_MIN_SAMPLES = 500
+DEFAULT_MIN_BALANCE_RATIO = 0.35
+DEFAULT_MAX_SKIPPED_RATIO = 0.10
 
 
 def parse_args(argv=None):
@@ -35,6 +38,19 @@ def parse_args(argv=None):
     parser.add_argument("--test-size", type=float, default=TEST_SIZE, help="Validation split size.")
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE, help="Training random seed.")
     parser.add_argument("--estimators", type=int, default=N_ESTIMATORS, help="Random forest tree count.")
+    parser.add_argument("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES, help="Recommended minimum valid samples.")
+    parser.add_argument(
+        "--min-balance-ratio",
+        type=float,
+        default=DEFAULT_MIN_BALANCE_RATIO,
+        help="Recommended minimum minority-action ratio.",
+    )
+    parser.add_argument(
+        "--max-skipped-ratio",
+        type=float,
+        default=DEFAULT_MAX_SKIPPED_RATIO,
+        help="Recommended maximum skipped-entry ratio.",
+    )
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES, help="Evaluation games per model.")
     parser.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES, help="Frame limit per game.")
     parser.add_argument("--eval-random-seed", type=int, default=DEFAULT_RANDOM_SEED, help="Evaluation base seed.")
@@ -48,7 +64,50 @@ def validate_experiment_paths(baseline_path, candidate_path):
         raise ValueError("--candidate must be different from --baseline to avoid overwriting the baseline model.")
 
 
-def train_candidate_model(data_path, model_path, estimators, test_size, random_state):
+def data_quality_summary(
+    valid_samples,
+    skipped_entries,
+    action_counts,
+    min_samples,
+    min_balance_ratio,
+    max_skipped_ratio,
+):
+    total_entries = valid_samples + skipped_entries
+    skipped_ratio = skipped_entries / total_entries if total_entries else 0
+    minority_count = min(action_counts.values()) if action_counts else 0
+    balance_ratio = minority_count / valid_samples if valid_samples else 0
+    warnings = []
+
+    if valid_samples < min_samples:
+        warnings.append(f"valid_samples_below_{min_samples}")
+    if balance_ratio < min_balance_ratio:
+        warnings.append(f"action_balance_below_{min_balance_ratio:.2f}")
+    if skipped_ratio > max_skipped_ratio:
+        warnings.append(f"skipped_ratio_above_{max_skipped_ratio:.2f}")
+
+    return {
+        "status": "ready" if not warnings else "needs_more_data",
+        "warnings": warnings,
+        "valid_samples": valid_samples,
+        "skipped_entries": skipped_entries,
+        "skipped_ratio": skipped_ratio,
+        "balance_ratio": balance_ratio,
+        "min_samples": min_samples,
+        "min_balance_ratio": min_balance_ratio,
+        "max_skipped_ratio": max_skipped_ratio,
+    }
+
+
+def train_candidate_model(
+    data_path,
+    model_path,
+    estimators,
+    test_size,
+    random_state,
+    min_samples=DEFAULT_MIN_SAMPLES,
+    min_balance_ratio=DEFAULT_MIN_BALANCE_RATIO,
+    max_skipped_ratio=DEFAULT_MAX_SKIPPED_RATIO,
+):
     X, y, skipped_entries = load_data(data_path)
     if len(X) < 2:
         raise ValueError("Need at least 2 valid training samples.")
@@ -56,6 +115,14 @@ def train_candidate_model(data_path, model_path, estimators, test_size, random_s
     action_counts = Counter(y)
     if len(action_counts) < 2:
         raise ValueError("Need both left and right samples to train a useful model.")
+    quality = data_quality_summary(
+        len(X),
+        skipped_entries,
+        action_counts,
+        min_samples,
+        min_balance_ratio,
+        max_skipped_ratio,
+    )
 
     X_train, X_test, y_train, y_test = split_data(X, y, test_size, random_state)
     model = train_model(X_train, y_train, estimators, random_state)
@@ -76,6 +143,7 @@ def train_candidate_model(data_path, model_path, estimators, test_size, random_s
         "estimators": estimators,
         "test_size": test_size,
         "random_state": random_state,
+        "data_quality": quality,
     }
 
 
@@ -125,7 +193,7 @@ def write_experiment_report(payload, report_path):
 
 
 def format_training_lines(training_summary):
-    return [
+    lines = [
         f"Data: {training_summary['data']}",
         f"Candidate model: {training_summary['model']}",
         f"Valid samples: {training_summary['valid_samples']} ({training_summary['skipped_entries']} skipped)",
@@ -136,7 +204,12 @@ def format_training_lines(training_summary):
             f"right={training_summary['action_balance']['right']}"
         ),
         f"Validation accuracy: {training_summary['validation_accuracy']:.3f}",
+        f"Data quality: {training_summary['data_quality']['status']}",
     ]
+    warnings = training_summary["data_quality"]["warnings"]
+    if warnings:
+        lines.append("Data quality warnings: " + ", ".join(warnings))
+    return lines
 
 
 def format_experiment_lines(training_summary, model_paths, comparison_summaries):
@@ -165,6 +238,9 @@ def main(argv=None):
         args.estimators,
         args.test_size,
         args.random_state,
+        min_samples=args.min_samples,
+        min_balance_ratio=args.min_balance_ratio,
+        max_skipped_ratio=args.max_skipped_ratio,
     )
     model_paths = [args.baseline, args.candidate]
     comparison_summaries = evaluate_models(model_paths, args.games, args.max_frames, args.eval_random_seed)
