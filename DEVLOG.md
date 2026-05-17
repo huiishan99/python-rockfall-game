@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add standalone data inspection
+
+- Changed: added `data_quality.py` for shared data-quality thresholds and summaries; added `inspect_data.py` with text, JSON, and `--report` output; updated `run_model_experiment.py` to reuse the shared quality helpers; added tests for data inspection and report writing; updated `README.md`.
+- Why: v0.6 data collection should have a quick pre-training check so weak datasets can be spotted before spending time on training and model comparison.
+- Behavior: `python3 inspect_data.py --data game_data.json` reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, and quality warnings.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile data_quality.py inspect_data.py run_model_experiment.py test_data_quality.py test_inspect_data.py test_run_model_experiment.py`; ran `python3 inspect_data.py --data game_data.json`; ran `python3 inspect_data.py --data game_data.json --report /private/tmp/rockfall-data-report.json --json`; ran `python3 -m json.tool /private/tmp/rockfall-data-report.json`; ran `python3 run_model_experiment.py --data game_data.json --candidate /private/tmp/rockfall-inspect-candidate.pkl --report /private/tmp/rockfall-inspect-experiment.json --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`; ran `python3 -m json.tool /private/tmp/rockfall-inspect-experiment.json`.
+- Risks/Notes: inspection uses the same feature extraction path as training, so changes to model features will affect both the inspector and trainer together.
+
 ## 2026-05-17 - Advance to v0.5 development
 
 - Changed: updated `settings.py` to `0.5.0-dev`; refreshed `README.md` project status to call out survival metrics and JSON report artifacts.

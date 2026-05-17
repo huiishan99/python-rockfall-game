@@ -25,7 +25,7 @@ This is now in v0.5 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -96,6 +96,14 @@ python3 game.py --data runs/experiment.json
 ```
 
 Missing parent directories for the selected data file are created automatically.
+
+Inspect collected data before training:
+
+```bash
+python3 inspect_data.py --data game_data.json
+```
+
+The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, and data-quality warnings. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
 
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:

@@ -10,6 +10,13 @@ from compare_models import (
     score_delta,
     validate_model_paths,
 )
+from data_quality import (
+    DEFAULT_MAX_SKIPPED_RATIO,
+    DEFAULT_MIN_BALANCE_RATIO,
+    DEFAULT_MIN_SAMPLES,
+    action_balance_payload,
+    data_quality_summary,
+)
 from data_store import GAME_DATA_FILE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
@@ -27,9 +34,6 @@ from train_model import (
 )
 
 DEFAULT_CANDIDATE_MODEL = "runs/candidate_model.pkl"
-DEFAULT_MIN_SAMPLES = 500
-DEFAULT_MIN_BALANCE_RATIO = 0.35
-DEFAULT_MAX_SKIPPED_RATIO = 0.10
 
 
 def parse_args(argv=None):
@@ -74,40 +78,6 @@ def validate_experiment_paths(baseline_path, candidate_path):
         raise ValueError("--candidate must be different from --baseline to avoid overwriting the baseline model.")
 
 
-def data_quality_summary(
-    valid_samples,
-    skipped_entries,
-    action_counts,
-    min_samples,
-    min_balance_ratio,
-    max_skipped_ratio,
-):
-    total_entries = valid_samples + skipped_entries
-    skipped_ratio = skipped_entries / total_entries if total_entries else 0
-    minority_count = min(action_counts.values()) if action_counts else 0
-    balance_ratio = minority_count / valid_samples if valid_samples else 0
-    warnings = []
-
-    if valid_samples < min_samples:
-        warnings.append(f"valid_samples_below_{min_samples}")
-    if balance_ratio < min_balance_ratio:
-        warnings.append(f"action_balance_below_{min_balance_ratio:.2f}")
-    if skipped_ratio > max_skipped_ratio:
-        warnings.append(f"skipped_ratio_above_{max_skipped_ratio:.2f}")
-
-    return {
-        "status": "ready" if not warnings else "needs_more_data",
-        "warnings": warnings,
-        "valid_samples": valid_samples,
-        "skipped_entries": skipped_entries,
-        "skipped_ratio": skipped_ratio,
-        "balance_ratio": balance_ratio,
-        "min_samples": min_samples,
-        "min_balance_ratio": min_balance_ratio,
-        "max_skipped_ratio": max_skipped_ratio,
-    }
-
-
 def train_candidate_model(
     data_path,
     model_path,
@@ -145,10 +115,7 @@ def train_candidate_model(
         "valid_samples": len(X),
         "skipped_entries": skipped_entries,
         "features": list(FEATURE_NAMES),
-        "action_balance": {
-            "left": int(action_counts[0]),
-            "right": int(action_counts[1]),
-        },
+        "action_balance": action_balance_payload(action_counts),
         "validation_accuracy": validation_accuracy,
         "estimators": estimators,
         "test_size": test_size,
