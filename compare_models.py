@@ -113,6 +113,8 @@ def comparison_winner(model_paths, summaries):
         key=lambda index: (
             summaries[index]["average_score"],
             summaries[index]["average_best_combo"],
+            summaries[index]["survival_rate"],
+            summaries[index]["average_lives_left"],
             summaries[index]["average_frames"],
         ),
     )
@@ -131,6 +133,8 @@ def format_comparison_table(model_paths, summaries):
             "Avg Combo",
             "Best Combo",
             "Avg Frames",
+            "Avg Lives",
+            "Survival",
             "Timeouts",
         )
     ]
@@ -145,6 +149,8 @@ def format_comparison_table(model_paths, summaries):
                 f"{summary['average_best_combo']:.2f}",
                 str(summary["best_combo"]),
                 f"{summary['average_frames']:.1f}",
+                f"{summary['average_lives_left']:.2f}",
+                f"{summary['survival_rate']:.1%}",
                 str(summary["timeouts"]),
             )
         )

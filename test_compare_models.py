@@ -25,6 +25,9 @@ SUMMARY_A = {
     "average_best_combo": 4,
     "best_combo": 6,
     "average_frames": 150,
+    "average_lives_left": 1,
+    "best_lives_left": 2,
+    "survival_rate": 0.5,
     "timeouts": 1,
 }
 
@@ -36,6 +39,9 @@ SUMMARY_B = {
     "average_best_combo": 5,
     "best_combo": 8,
     "average_frames": 180,
+    "average_lives_left": 3,
+    "best_lives_left": 4,
+    "survival_rate": 1.0,
     "timeouts": 0,
 }
 
@@ -94,11 +100,14 @@ class CompareModelsTest(unittest.TestCase):
         self.assertIn("Model", lines[0])
         self.assertIn("Avg Score", lines[0])
         self.assertIn("Score Delta", lines[0])
+        self.assertIn("Survival", lines[0])
         self.assertIn("base.pkl", lines[1])
         self.assertIn("5.00", lines[1])
+        self.assertIn("50.0%", lines[1])
         self.assertIn("+0.00", lines[1])
         self.assertIn("candidate.pkl", lines[2])
         self.assertIn("8.00", lines[2])
+        self.assertIn("100.0%", lines[2])
         self.assertIn("+3.00", lines[2])
 
     def test_formats_comparison_lines_with_winner(self):
@@ -132,6 +141,7 @@ class CompareModelsTest(unittest.TestCase):
         self.assertEqual(payload["models"][0]["model"], "base.pkl")
         self.assertEqual(payload["models"][0]["score_delta"], 0)
         self.assertEqual(payload["models"][1]["average_score"], 8)
+        self.assertEqual(payload["models"][1]["survival_rate"], 1.0)
         self.assertEqual(payload["models"][1]["score_delta"], 3)
 
 

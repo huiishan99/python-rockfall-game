@@ -68,6 +68,7 @@ def summarize_results(results):
     scores = [result["score"] for result in results]
     best_combos = [result["best_combo"] for result in results]
     frames = [result["frames"] for result in results]
+    lives_left = [result["lives"] for result in results]
     timeouts = sum(1 for result in results if result["timed_out"])
 
     return {
@@ -79,6 +80,9 @@ def summarize_results(results):
         "best_combo": max(best_combos),
         "average_frames": mean(frames),
         "timeouts": timeouts,
+        "average_lives_left": mean(lives_left),
+        "best_lives_left": max(lives_left),
+        "survival_rate": timeouts / len(results),
     }
 
 
@@ -91,6 +95,9 @@ def format_summary_lines(summary, games_label="Games"):
         f"Average best combo: {summary['average_best_combo']:.2f}",
         f"Best combo: {summary['best_combo']}",
         f"Average frames: {summary['average_frames']:.1f}",
+        f"Average lives left: {summary['average_lives_left']:.2f}",
+        f"Best lives left: {summary['best_lives_left']}",
+        f"Survival rate: {summary['survival_rate']:.1%}",
         f"Timed out games: {summary['timeouts']}",
     ]
 

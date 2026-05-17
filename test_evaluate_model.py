@@ -39,6 +39,9 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(summary["average_best_combo"], 4)
         self.assertEqual(summary["best_combo"], 6)
         self.assertEqual(summary["average_frames"], 150)
+        self.assertEqual(summary["average_lives_left"], 1)
+        self.assertEqual(summary["best_lives_left"], 2)
+        self.assertEqual(summary["survival_rate"], 0.5)
         self.assertEqual(summary["timeouts"], 1)
 
     def test_formats_summary_lines(self):
@@ -51,6 +54,9 @@ class EvaluateModelTest(unittest.TestCase):
                 "average_best_combo": 4,
                 "best_combo": 6,
                 "average_frames": 150,
+                "average_lives_left": 1,
+                "best_lives_left": 2,
+                "survival_rate": 0.5,
                 "timeouts": 1,
             },
             games_label="Evaluation games",
@@ -58,6 +64,8 @@ class EvaluateModelTest(unittest.TestCase):
 
         self.assertEqual(lines[0], "Evaluation games: 2")
         self.assertIn("Average best combo: 4.00", lines)
+        self.assertIn("Average lives left: 1.00", lines)
+        self.assertIn("Survival rate: 50.0%", lines)
         self.assertIn("Timed out games: 1", lines)
 
     def test_builds_summary_payload_with_model_path(self):
@@ -71,6 +79,9 @@ class EvaluateModelTest(unittest.TestCase):
                 "average_best_combo": 4,
                 "best_combo": 6,
                 "average_frames": 150,
+                "average_lives_left": 1,
+                "best_lives_left": 2,
+                "survival_rate": 0.5,
                 "timeouts": 1,
             },
             max_frames=300,
@@ -88,6 +99,7 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(payload["initial_lives"], 3)
         self.assertEqual(payload["games"], 2)
         self.assertEqual(payload["best_combo"], 6)
+        self.assertEqual(payload["survival_rate"], 0.5)
 
 
 if __name__ == "__main__":

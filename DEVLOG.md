@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add survival metrics to evaluation reports
+
+- Changed: updated `evaluate_model.py` summaries with average remaining lives, best remaining lives, and survival rate; added those fields to text/JSON output and comparison tables; updated model-comparison tie-breaking to consider survival and remaining lives; expanded tests; updated `README.md`.
+- Why: v0.5 reports should explain whether a model is barely surviving, comfortably surviving, or repeatedly reaching game over, not just its score.
+- Behavior: `evaluate_model.py`, `compare_models.py`, `run_model_experiment.py`, and `release_check.py` now surface survival/lives metrics through their shared summary formatting.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile evaluate_model.py compare_models.py run_model_experiment.py release_check.py test_evaluate_model.py test_compare_models.py test_run_model_experiment.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --difficulty hard --player-speed 8 --lives 3 --json`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --difficulty hard --player-speed 8 --lives 3`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: comparison winner rules changed only for ties after average score and combo; existing score-led comparisons remain stable.
+
 ## 2026-05-17 - Advance to v0.4 development
 
 - Changed: updated `settings.py` to `0.4.0-dev`; refreshed `README.md` project status to call out runtime hand-feel tuning for difficulty, player speed, and initial lives.

@@ -24,7 +24,7 @@ This is now in v0.4 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
+- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -148,7 +148,7 @@ Run headless simulations to compare model performance without opening a game win
 python3 evaluate_model.py --games 10 --max-frames 3600
 ```
 
-The evaluation summary reports score, best combo, frame survival, and timeout counts.
+The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, and timeout counts.
 
 For scripts or future charts, emit machine-readable JSON with the evaluation settings and summary metrics:
 
@@ -162,7 +162,7 @@ Compare multiple models with the same random seeds:
 python3 compare_models.py game_model.pkl runs/v02_model.pkl --games 10 --max-frames 3600
 ```
 
-Comparison output includes score deltas against the first model and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output.
+Comparison output includes score deltas, average remaining lives, survival rate, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output.
 
 ### Runtime Files
 

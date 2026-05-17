@@ -50,6 +50,9 @@ BASELINE_SUMMARY = {
     "average_best_combo": 4,
     "best_combo": 6,
     "average_frames": 150,
+    "average_lives_left": 1,
+    "best_lives_left": 2,
+    "survival_rate": 0.5,
     "timeouts": 1,
 }
 
@@ -61,6 +64,9 @@ CANDIDATE_SUMMARY = {
     "average_best_combo": 5,
     "best_combo": 8,
     "average_frames": 180,
+    "average_lives_left": 3,
+    "best_lives_left": 4,
+    "survival_rate": 1.0,
     "timeouts": 0,
 }
 
@@ -173,6 +179,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(payload["comparison"]["initial_lives"], 3)
         self.assertEqual(payload["comparison"]["max_frames"], 300)
         self.assertEqual(payload["comparison"]["best_model"], "runs/candidate_model.pkl")
+        self.assertEqual(payload["comparison"]["models"][1]["survival_rate"], 1.0)
         self.assertEqual(payload["comparison"]["models"][1]["model"], "runs/candidate_model.pkl")
 
     def test_candidate_result_compares_average_score(self):
