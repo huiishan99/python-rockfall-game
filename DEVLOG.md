@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Advance to v0.6 development
+
+- Changed: updated `settings.py` to `0.6.0-dev`; refreshed `README.md` project status to call out data inspection and quality reports.
+- Why: the project has moved from v0.5 evaluation/reporting improvements into v0.6 data collection and training workflow.
+- Behavior: window captions and release-check output now identify the build as `0.6.0-dev`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: this is a development marker, not a release tag.
+
 ## 2026-05-17 - Add standalone data inspection
 
 - Changed: added `data_quality.py` for shared data-quality thresholds and summaries; added `inspect_data.py` with text, JSON, and `--report` output; updated `run_model_experiment.py` to reuse the shared quality helpers; added tests for data inspection and report writing; updated `README.md`.
