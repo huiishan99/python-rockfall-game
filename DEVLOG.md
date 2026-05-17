@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Run manual playtest experiment
+
+- Changed: launched `python3 game.py --data runs/playtest_manual.json --mute`, completed a short real-window manual playtest, and generated 51 ignored local samples in `runs/playtest_manual.json`; trained a temporary candidate model at `/private/tmp/rockfall-playtest-model.pkl`; wrote a temporary report at `/private/tmp/rockfall-playtest-report.json`.
+- Why: the v0.2 experiment workflow needed a real smoke test using data collected from the current playable build.
+- Behavior: no tracked gameplay behavior changed. The short playtest dataset trained successfully but underperformed the baseline in a one-game smoke comparison: baseline average score 6.00, candidate average score 4.00, candidate result `candidate_underperformed_baseline`.
+- Verification: ran `python3 run_model_experiment.py --data runs/playtest_manual.json --candidate /private/tmp/rockfall-playtest-model.pkl --report /private/tmp/rockfall-playtest-report.json --games 1 --max-frames 300`.
+- Risks/Notes: 51 samples is far too small for a real replacement model; keep the default `game_model.pkl` until a larger playtest dataset beats the baseline.
+
 ## 2026-05-17 - Show run summary on pause
 
 - Changed: updated `game_core.py` pause-screen lines to include current score, best score, level, lives, and combo; expanded `test_game_core.py`; updated `README.md`.
