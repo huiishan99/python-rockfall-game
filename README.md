@@ -82,7 +82,7 @@ Full verification after installing dependencies:
 python3 release_check.py
 ```
 
-This runs the unit tests and a short headless model evaluation.
+This runs the unit tests and a short headless model evaluation. Use `--report runs/release_check.json` to save the version, unit-test result, evaluation settings, and evaluation summary as a release-check artifact.
 
 ### Data Collection
 To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be appended to `game_data.json`:

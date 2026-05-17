@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Save release check reports
+
+- Changed: added `--report` to `release_check.py`; added a structured release payload with version, unit-test pass status, evaluation settings, and evaluation summary; expanded release-check tests; updated `README.md`.
+- Why: v0.8 release prep needs a durable artifact that proves which build, settings, and checks were used.
+- Behavior: `python3 release_check.py --report runs/release_check.json` saves a JSON report after a passing check; if unit tests fail, the report still records the version and failed unit-test status.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile release_check.py test_release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-release-check.json`.
+- Risks/Notes: the report reuses evaluation summary payloads, so new evaluation metrics will automatically appear in future release reports.
+
 ## 2026-05-17 - Advance to v0.7 development
 
 - Changed: updated `settings.py` to `0.7.0-dev`; refreshed `README.md` project status to call out score milestone life recovery.
