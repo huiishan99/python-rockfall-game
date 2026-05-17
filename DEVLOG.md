@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Advance to v0.3 development
+
+- Changed: updated `settings.py` version to `0.3.0-dev`; updated `README.md` project status and feature summary.
+- Why: the model experiment workflow now includes comparison, reports, safety checks, and data-quality warnings, which completes the planned v0.3 foundation.
+- Behavior: window titles and release checks now identify local builds as `0.3.0-dev`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300`.
+- Risks/Notes: this is a development version, not a release tag.
+
 ## 2026-05-17 - Add experiment data quality checks
 
 - Changed: updated `run_model_experiment.py` with data-quality thresholds for valid sample count, action balance, and skipped-entry ratio; expanded `test_run_model_experiment.py`; updated `README.md`.

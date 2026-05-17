@@ -7,9 +7,9 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.2.0-dev`.
+Current version: `0.3.0-dev`.
 
-This is now in v0.2 development after the playable v0.1 release:
+This is now in v0.3 development after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
@@ -23,7 +23,7 @@ This is now in v0.2 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation, model comparison, and candidate-model experiments with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
+- Headless model evaluation, model comparison, and candidate-model experiments with data-quality checks and text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
