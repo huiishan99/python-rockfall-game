@@ -2,13 +2,17 @@ import json
 import os
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 
 from run_model_experiment import (
     DEFAULT_CANDIDATE_MODEL,
     build_experiment_payload,
     candidate_result,
+    cli,
     format_experiment_lines,
     parse_args,
+    validate_experiment_paths,
     write_experiment_report,
 )
 
@@ -74,6 +78,22 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.candidate, "runs/v02.pkl")
         self.assertEqual(args.report, "runs/v02_report.json")
         self.assertTrue(args.json)
+
+    def test_validate_experiment_paths_rejects_baseline_overwrite(self):
+        with self.assertRaises(ValueError):
+            validate_experiment_paths("game_model.pkl", "game_model.pkl")
+
+    def test_validate_experiment_paths_allows_separate_candidate(self):
+        validate_experiment_paths("game_model.pkl", "runs/candidate.pkl")
+
+    def test_cli_reports_baseline_overwrite_without_traceback(self):
+        output = StringIO()
+
+        with redirect_stdout(output):
+            status = cli(["--baseline", "game_model.pkl", "--candidate", "game_model.pkl"])
+
+        self.assertEqual(status, 1)
+        self.assertIn("Error: --candidate must be different from --baseline", output.getvalue())
 
     def test_builds_experiment_payload(self):
         payload = build_experiment_payload(

@@ -116,6 +116,7 @@ python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02
 ```
 
 Use `--report runs/v02_report.json` to save the training summary, candidate result, and comparison metrics, or `--json` to print the same structured payload.
+The experiment command refuses to use the same path for `--baseline` and `--candidate`, so the baseline model is not overwritten accidentally.
 
 ### Play the Game with the Model
 Once the model is trained, you can run the game with the model controlling the player movements using the `play_with_model.py` script:

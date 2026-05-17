@@ -37,6 +37,11 @@ def parse_args(argv=None):
     return parser.parse_args(argv)
 
 
+def validate_experiment_paths(baseline_path, candidate_path):
+    if os.path.abspath(baseline_path) == os.path.abspath(candidate_path):
+        raise ValueError("--candidate must be different from --baseline to avoid overwriting the baseline model.")
+
+
 def train_candidate_model(data_path, model_path, estimators, test_size, random_state):
     X, y, skipped_entries = load_data(data_path)
     if len(X) < 2:
@@ -145,6 +150,7 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    validate_experiment_paths(args.baseline, args.candidate)
 
     training_summary = train_candidate_model(
         args.data,
@@ -177,5 +183,13 @@ def main(argv=None):
     return 0
 
 
+def cli(argv=None):
+    try:
+        return main(argv)
+    except ValueError as error:
+        print(f"Error: {error}")
+        return 1
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli())

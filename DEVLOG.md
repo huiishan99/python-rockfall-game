@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Protect baseline model experiments
+
+- Changed: updated `run_model_experiment.py` to reject matching `--baseline` and `--candidate` paths; expanded `test_run_model_experiment.py`; updated `README.md`.
+- Why: a model experiment should never accidentally overwrite the baseline model before comparing it.
+- Behavior: passing the same path for baseline and candidate prints a concise error and exits nonzero.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile run_model_experiment.py test_run_model_experiment.py`; ran `python3 run_model_experiment.py --baseline game_model.pkl --candidate game_model.pkl --games 1 --max-frames 300` and confirmed it exits 1 with a concise error.
+- Risks/Notes: path comparison uses absolute paths and does not resolve symlinks.
+
 ## 2026-05-17 - Add candidate experiment result
 
 - Changed: updated `run_model_experiment.py` to classify the candidate model as outperforming, matching, or underperforming the baseline by average score; expanded `test_run_model_experiment.py`; updated `README.md`.
