@@ -1,6 +1,9 @@
+import json
+import os
+import tempfile
 import unittest
 
-from evaluate_model import build_summary_payload, format_summary_lines, parse_args, summarize_results
+from evaluate_model import build_summary_payload, format_summary_lines, parse_args, summarize_results, write_summary_report
 
 
 class EvaluateModelTest(unittest.TestCase):
@@ -23,6 +26,11 @@ class EvaluateModelTest(unittest.TestCase):
         args = parse_args(["--lives", "3"])
 
         self.assertEqual(args.lives, 3)
+
+    def test_parse_args_accepts_report_path(self):
+        args = parse_args(["--report", "runs/eval.json"])
+
+        self.assertEqual(args.report, "runs/eval.json")
 
     def test_summarizes_scores_and_timeouts(self):
         summary = summarize_results(
@@ -100,6 +108,16 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(payload["games"], 2)
         self.assertEqual(payload["best_combo"], 6)
         self.assertEqual(payload["survival_rate"], 0.5)
+
+    def test_write_summary_report_creates_parent_directory(self):
+        payload = {"model": "model.pkl", "games": 1}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report_path = os.path.join(temp_dir, "reports", "eval.json")
+
+            write_summary_report(payload, report_path)
+
+            with open(report_path, "r") as report_file:
+                self.assertEqual(json.load(report_file), payload)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from evaluate_model import (
     build_summary_payload,
     run_game,
     summarize_results,
+    write_summary_report,
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from play_with_model import MODEL_FILE
@@ -30,6 +31,7 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
 
@@ -203,16 +205,19 @@ def main(argv=None):
     ]
     pygame.quit()
 
+    payload = build_comparison_payload(
+        args.models,
+        summaries,
+        args.max_frames,
+        args.random_seed,
+        difficulty_preset=args.difficulty,
+        player_speed=args.player_speed,
+        initial_lives=args.lives,
+    )
+    if args.report:
+        write_summary_report(payload, args.report)
+
     if args.json:
-        payload = build_comparison_payload(
-            args.models,
-            summaries,
-            args.max_frames,
-            args.random_seed,
-            difficulty_preset=args.difficulty,
-            player_speed=args.player_speed,
-            initial_lives=args.lives,
-        )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Difficulty: {args.difficulty}")
@@ -220,6 +225,8 @@ def main(argv=None):
         print(f"Initial lives: {args.lives}")
         for line in format_comparison_lines(args.models, summaries):
             print(line)
+        if args.report:
+            print(f"Report saved to {args.report}")
 
     return 0
 

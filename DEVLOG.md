@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Save evaluation and comparison reports
+
+- Changed: added `--report` to `evaluate_model.py` and `compare_models.py`; added shared JSON report writing with parent-directory creation; expanded parser/report tests; updated `README.md`.
+- Why: v0.5 tuning work needs durable evaluation artifacts without manually copying terminal output.
+- Behavior: `evaluate_model.py --report runs/eval.json` and `compare_models.py --report runs/comparison.json` save the same structured payloads used by `--json`; text mode prints the report path after the summary.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile evaluate_model.py compare_models.py test_evaluate_model.py test_compare_models.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-eval-report.json`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --difficulty hard --player-speed 8 --lives 3 --report /private/tmp/rockfall-comparison-report.json --json`; ran `python3 -m json.tool /private/tmp/rockfall-eval-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-comparison-report.json`.
+- Risks/Notes: `--json` output remains pure JSON even when `--report` is also supplied.
+
 ## 2026-05-17 - Add survival metrics to evaluation reports
 
 - Changed: updated `evaluate_model.py` summaries with average remaining lives, best remaining lives, and survival rate; added those fields to text/JSON output and comparison tables; updated model-comparison tie-breaking to consider survival and remaining lives; expanded tests; updated `README.md`.

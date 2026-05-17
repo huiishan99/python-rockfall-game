@@ -156,13 +156,15 @@ For scripts or future charts, emit machine-readable JSON with the evaluation set
 python3 evaluate_model.py --games 10 --max-frames 3600 --json
 ```
 
+Use `--report runs/eval.json` to save the same evaluation payload while still printing the normal text summary.
+
 Compare multiple models with the same random seeds:
 
 ```bash
 python3 compare_models.py game_model.pkl runs/v02_model.pkl --games 10 --max-frames 3600
 ```
 
-Comparison output includes score deltas, average remaining lives, survival rate, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output.
+Comparison output includes score deltas, average remaining lives, survival rate, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
 ### Runtime Files
 

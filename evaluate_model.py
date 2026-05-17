@@ -4,6 +4,7 @@ import os
 import random
 from statistics import mean
 
+from data_store import ensure_parent_dir
 from play_with_model import MODEL_FILE
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from settings import INITIAL_LIVES, PLAYER_SPEED
@@ -27,6 +28,7 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
@@ -125,6 +127,12 @@ def build_summary_payload(
     return payload
 
 
+def write_summary_report(payload, report_path):
+    ensure_parent_dir(report_path)
+    with open(report_path, "w") as report_file:
+        json.dump(payload, report_file, indent=2, sort_keys=True)
+
+
 def main(argv=None):
     args = parse_args(argv)
     if args.games <= 0:
@@ -162,16 +170,19 @@ def main(argv=None):
         )
 
     summary = summarize_results(results)
+    payload = build_summary_payload(
+        args.model,
+        summary,
+        max_frames=args.max_frames,
+        random_seed=args.random_seed,
+        difficulty_preset=args.difficulty,
+        player_speed=args.player_speed,
+        initial_lives=args.lives,
+    )
+    if args.report:
+        write_summary_report(payload, args.report)
+
     if args.json:
-        payload = build_summary_payload(
-            args.model,
-            summary,
-            max_frames=args.max_frames,
-            random_seed=args.random_seed,
-            difficulty_preset=args.difficulty,
-            player_speed=args.player_speed,
-            initial_lives=args.lives,
-        )
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"Model: {args.model}")
@@ -180,6 +191,8 @@ def main(argv=None):
         print(f"Initial lives: {args.lives}")
         for line in format_summary_lines(summary):
             print(line)
+        if args.report:
+            print(f"Report saved to {args.report}")
 
     pygame.quit()
 

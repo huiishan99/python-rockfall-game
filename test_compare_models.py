@@ -73,6 +73,11 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_report_path(self):
+        args = parse_args(["base.pkl", "--report", "runs/comparison.json"])
+
+        self.assertEqual(args.report, "runs/comparison.json")
+
     def test_validate_model_paths_rejects_missing_model(self):
         with self.assertRaises(ValueError):
             validate_model_paths(["missing.pkl"])
