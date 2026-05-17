@@ -146,6 +146,7 @@ cython_debug/
 
 # Local game runtime files
 high_scores.json
+runs/
 
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can

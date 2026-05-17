@@ -23,7 +23,7 @@ This is now in v0.2 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
-- Headless model evaluation and model comparison with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
+- Headless model evaluation, model comparison, and candidate-model experiments with text or JSON output, including score, best combo, survival frames, timeouts, random seed, and frame limit.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -107,6 +107,16 @@ python3 train_model.py --data game_data.json --model game_model.pkl --estimators
 
 Missing parent directories for the selected model output are created automatically.
 
+### Run a Model Experiment
+
+Train a candidate model and compare it against the current baseline with the same evaluation seeds:
+
+```bash
+python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02_model.pkl --games 10 --max-frames 3600
+```
+
+Use `--json` to capture the training summary and comparison metrics for later review.
+
 ### Play the Game with the Model
 Once the model is trained, you can run the game with the model controlling the player movements using the `play_with_model.py` script:
 
@@ -150,6 +160,8 @@ Add `--json` to produce structured comparison output.
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
+
+Local experiment outputs under `runs/` are also ignored by git.
 
 ## Next Steps
 

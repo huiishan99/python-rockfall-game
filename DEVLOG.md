@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add model experiment pipeline
+
+- Changed: added `run_model_experiment.py` to train a candidate model and compare it against a baseline with shared evaluation seeds; added `test_run_model_experiment.py`; ignored local `runs/` outputs in `.gitignore`; updated `README.md`.
+- Why: v0.2 model iteration needs a single reproducible command for training and comparing candidates.
+- Behavior: `python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02_model.pkl` trains a candidate model, saves it, and prints baseline-vs-candidate metrics; `--json` emits structured training and comparison output.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile run_model_experiment.py test_run_model_experiment.py compare_models.py train_model.py evaluate_model.py`; ran `python3 run_model_experiment.py --candidate /private/tmp/rockfall-candidate.pkl --games 1 --max-frames 300`; ran `python3 run_model_experiment.py --candidate /private/tmp/rockfall-candidate-json.pkl --games 1 --max-frames 300 --json`.
+- Risks/Notes: compared models still must match the current feature shape; local experiment artifacts under `runs/` are intentionally untracked.
+
 ## 2026-05-16 - Add model comparison CLI
 
 - Changed: added `compare_models.py` for evaluating one or more model files with shared seeds; added `test_compare_models.py`; updated `README.md`.
