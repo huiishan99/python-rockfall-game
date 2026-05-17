@@ -19,6 +19,8 @@ from settings import (
     INVINCIBILITY_FRAMES,
     HIT_OVERLAY_MAX_ALPHA,
     LANE_HIGHLIGHT_COLOR,
+    LIFE_RESTORE_INTERVAL,
+    LIFE_RESTORE_MESSAGE_COLOR,
     MENU_ACCENT_COLOR,
     MENU_SECONDARY_COLOR,
     MESSAGE_DURATION_FRAMES,
@@ -92,6 +94,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.reset()
 
         self.assertEqual(game.lives, 3)
+
+    def test_reset_resets_life_restore_threshold(self):
+        game = RockfallGame(self.screen)
+        game.next_life_restore_score = LIFE_RESTORE_INTERVAL * 2
+
+        game.reset()
+
+        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL)
 
     def test_difficulty_preset_changes_initial_pressure(self):
         normal_game = RockfallGame(self.screen, difficulty_preset="normal")
@@ -251,6 +261,27 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("CLOSE!", messages)
         self.assertEqual(game.messages[-1]["color"], NEAR_MISS_MESSAGE_COLOR)
         self.assertEqual(game.score, 1)
+
+    def test_score_milestone_restores_life_when_damaged(self):
+        game = RockfallGame(self.screen, initial_lives=3)
+        game.lives = 2
+        game.score = LIFE_RESTORE_INTERVAL - 1
+
+        game._handle_avoid(100)
+
+        self.assertEqual(game.lives, 3)
+        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL * 2)
+        self.assertEqual(game.messages[-1]["text"], "LIFE +1")
+        self.assertEqual(game.messages[-1]["color"], LIFE_RESTORE_MESSAGE_COLOR)
+
+    def test_score_milestone_does_not_exceed_initial_lives(self):
+        game = RockfallGame(self.screen, initial_lives=3)
+        game.score = LIFE_RESTORE_INTERVAL - 1
+
+        game._handle_avoid(100)
+
+        self.assertEqual(game.lives, 3)
+        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL * 2)
 
     def test_lives_color_warns_when_low(self):
         game = RockfallGame(self.screen)

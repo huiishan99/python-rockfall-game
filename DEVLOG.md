@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add score milestone life recovery
+
+- Changed: added life-restore score milestones in `settings.py` and `game_core.py`; reset milestone state per run; added floating `LIFE +1` feedback; expanded gameplay tests; updated `README.md`.
+- Why: v0.7 gameplay should create longer-run comeback moments without adding new controls or changing the training-data action space.
+- Behavior: every 50 score, the game restores one lost life up to the run's starting lives; full-life runs advance the milestone without banking extra lives.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: long-run score and survival baselines may improve for damaged runs, so model comparisons after this commit should not be mixed with older gameplay-rule baselines.
+
 ## 2026-05-17 - Advance to v0.6 development
 
 - Changed: updated `settings.py` to `0.6.0-dev`; refreshed `README.md` project status to call out data inspection and quality reports.

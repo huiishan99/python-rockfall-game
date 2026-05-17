@@ -22,6 +22,8 @@ from settings import (
     HIT_OVERLAY_MAX_ALPHA,
     HIT_MESSAGE_COLOR,
     LEVEL_MESSAGE_COLOR,
+    LIFE_RESTORE_INTERVAL,
+    LIFE_RESTORE_MESSAGE_COLOR,
     LOW_LIVES_THRESHOLD,
     MAX_DIFFICULTY_LEVEL,
     MAX_COMBO_BONUS,
@@ -108,6 +110,7 @@ class RockfallGame:
         self.score = 0
         self.combo = 0
         self.best_combo = 0
+        self.next_life_restore_score = LIFE_RESTORE_INTERVAL
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.messages = []
         self.events = []
@@ -266,11 +269,19 @@ class RockfallGame:
         self.score += points
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
         self._emit_event(EVENT_AVOID)
+        self._maybe_restore_life()
 
         if points > 1:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
         if self.is_near_miss(obstacle_x):
             self._add_message("CLOSE!", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 165)
+
+    def _maybe_restore_life(self):
+        while self.score >= self.next_life_restore_score:
+            if self.lives < self.initial_lives:
+                self.lives += 1
+                self._add_message("LIFE +1", LIFE_RESTORE_MESSAGE_COLOR, self.player_x - 20, self.player_y - 65)
+            self.next_life_restore_score += LIFE_RESTORE_INTERVAL
 
     def combo_points(self):
         bonus = min(MAX_COMBO_BONUS, self.combo // COMBO_BONUS_INTERVAL)
