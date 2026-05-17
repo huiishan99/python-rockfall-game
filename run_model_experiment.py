@@ -3,7 +3,7 @@ import json
 import os
 from collections import Counter
 
-from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_table
+from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_lines
 from data_store import GAME_DATA_FILE
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
@@ -117,7 +117,7 @@ def format_experiment_lines(training_summary, model_paths, comparison_summaries)
         + format_training_lines(training_summary)
         + [""]
         + ["Model comparison:"]
-        + format_comparison_table(model_paths, comparison_summaries)
+        + format_comparison_lines(model_paths, comparison_summaries)
     )
 
 

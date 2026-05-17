@@ -155,7 +155,7 @@ Compare multiple models with the same random seeds:
 python3 compare_models.py game_model.pkl runs/v02_model.pkl --games 10 --max-frames 3600
 ```
 
-Add `--json` to produce structured comparison output.
+Comparison output includes score deltas against the first model and the best model by average score. Add `--json` to produce structured comparison output.
 
 ### Runtime Files
 

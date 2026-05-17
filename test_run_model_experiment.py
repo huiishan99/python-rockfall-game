@@ -78,6 +78,7 @@ class RunModelExperimentTest(unittest.TestCase):
 
         self.assertEqual(payload["training"]["validation_accuracy"], 0.875)
         self.assertEqual(payload["comparison"]["max_frames"], 300)
+        self.assertEqual(payload["comparison"]["best_model"], "runs/candidate_model.pkl")
         self.assertEqual(payload["comparison"]["models"][1]["model"], "runs/candidate_model.pkl")
 
     def test_formats_experiment_lines(self):
@@ -90,6 +91,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Training candidate model:", lines)
         self.assertIn("Validation accuracy: 0.875", lines)
         self.assertIn("Model comparison:", lines)
+        self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)
         self.assertTrue(any("runs/candidate_model.pkl" in line for line in lines))
 
 

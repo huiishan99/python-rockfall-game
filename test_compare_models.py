@@ -1,6 +1,13 @@
 import unittest
 
-from compare_models import build_comparison_payload, format_comparison_table, parse_args
+from compare_models import (
+    build_comparison_payload,
+    comparison_winner,
+    format_comparison_lines,
+    format_comparison_table,
+    parse_args,
+    score_delta,
+)
 from play_with_model import MODEL_FILE
 
 
@@ -44,10 +51,24 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertIn("Model", lines[0])
         self.assertIn("Avg Score", lines[0])
+        self.assertIn("Score Delta", lines[0])
         self.assertIn("base.pkl", lines[1])
         self.assertIn("5.00", lines[1])
+        self.assertIn("+0.00", lines[1])
         self.assertIn("candidate.pkl", lines[2])
         self.assertIn("8.00", lines[2])
+        self.assertIn("+3.00", lines[2])
+
+    def test_formats_comparison_lines_with_winner(self):
+        lines = format_comparison_lines(["base.pkl", "candidate.pkl"], [SUMMARY_A, SUMMARY_B])
+
+        self.assertEqual(lines[-1], "Best model by average score: candidate.pkl")
+
+    def test_score_delta_compares_to_baseline(self):
+        self.assertEqual(score_delta(SUMMARY_B, SUMMARY_A), 3)
+
+    def test_comparison_winner_uses_average_score(self):
+        self.assertEqual(comparison_winner(["base.pkl", "candidate.pkl"], [SUMMARY_A, SUMMARY_B]), "candidate.pkl")
 
     def test_builds_comparison_payload(self):
         payload = build_comparison_payload(
@@ -59,8 +80,11 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(payload["max_frames"], 300)
         self.assertEqual(payload["random_seed"], 42)
+        self.assertEqual(payload["best_model"], "candidate.pkl")
         self.assertEqual(payload["models"][0]["model"], "base.pkl")
+        self.assertEqual(payload["models"][0]["score_delta"], 0)
         self.assertEqual(payload["models"][1]["average_score"], 8)
+        self.assertEqual(payload["models"][1]["score_delta"], 3)
 
 
 if __name__ == "__main__":

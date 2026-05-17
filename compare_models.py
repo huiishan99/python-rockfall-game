@@ -37,21 +37,44 @@ def evaluate_model_path(model_path, games, max_frames, random_seed, screen):
 
 
 def build_comparison_payload(model_paths, summaries, max_frames, random_seed):
+    baseline_summary = summaries[0]
     return {
         "max_frames": max_frames,
         "random_seed": random_seed,
+        "best_model": comparison_winner(model_paths, summaries),
         "models": [
-            build_summary_payload(model_path, summary)
+            {
+                **build_summary_payload(model_path, summary),
+                "score_delta": score_delta(summary, baseline_summary),
+            }
             for model_path, summary in zip(model_paths, summaries)
         ],
     }
 
 
+def score_delta(summary, baseline_summary):
+    return summary["average_score"] - baseline_summary["average_score"]
+
+
+def comparison_winner(model_paths, summaries):
+    best_index = max(
+        range(len(summaries)),
+        key=lambda index: (
+            summaries[index]["average_score"],
+            summaries[index]["average_best_combo"],
+            summaries[index]["average_frames"],
+        ),
+    )
+    return model_paths[best_index]
+
+
 def format_comparison_table(model_paths, summaries):
+    baseline_summary = summaries[0]
     rows = [
         (
             "Model",
             "Avg Score",
+            "Score Delta",
             "Best",
             "Worst",
             "Avg Combo",
@@ -65,6 +88,7 @@ def format_comparison_table(model_paths, summaries):
             (
                 model_path,
                 f"{summary['average_score']:.2f}",
+                f"{score_delta(summary, baseline_summary):+.2f}",
                 str(summary["best_score"]),
                 str(summary["worst_score"]),
                 f"{summary['average_best_combo']:.2f}",
@@ -79,6 +103,13 @@ def format_comparison_table(model_paths, summaries):
         "  ".join(cell.ljust(widths[index]) for index, cell in enumerate(row))
         for row in rows
     ]
+
+
+def format_comparison_lines(model_paths, summaries):
+    return (
+        format_comparison_table(model_paths, summaries)
+        + [f"Best model by average score: {comparison_winner(model_paths, summaries)}"]
+    )
 
 
 def main(argv=None):
@@ -105,7 +136,7 @@ def main(argv=None):
         payload = build_comparison_payload(args.models, summaries, args.max_frames, args.random_seed)
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        for line in format_comparison_table(args.models, summaries):
+        for line in format_comparison_lines(args.models, summaries):
             print(line)
 
     return 0

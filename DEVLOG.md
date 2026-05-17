@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Add model comparison deltas
+
+- Changed: updated `compare_models.py` to report score deltas against the first model and identify the best model by average score; updated `run_model_experiment.py` to include the same comparison conclusion; expanded `test_compare_models.py` and `test_run_model_experiment.py`; updated `README.md`.
+- Why: model comparison should make candidate wins, ties, and losses obvious without hand-reading every metric.
+- Behavior: comparison tables now include a `Score Delta` column and a `Best model by average score` line; JSON payloads include `best_model` and per-model `score_delta`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile compare_models.py test_compare_models.py run_model_experiment.py test_run_model_experiment.py`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300`; ran `python3 compare_models.py game_model.pkl --games 1 --max-frames 300 --json`; ran `python3 run_model_experiment.py --candidate /private/tmp/rockfall-candidate-delta.pkl --games 1 --max-frames 300`.
+- Risks/Notes: the winner rule is intentionally simple: average score first, then average best combo and average frames as tie-breakers.
+
 ## 2026-05-17 - Add model experiment pipeline
 
 - Changed: added `run_model_experiment.py` to train a candidate model and compare it against a baseline with shared evaluation seeds; added `test_run_model_experiment.py`; ignored local `runs/` outputs in `.gitignore`; updated `README.md`.
