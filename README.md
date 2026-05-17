@@ -59,6 +59,8 @@ Controls:
 - Press Esc to quit.
 - Add `--mute` to manual or model play commands to disable generated sound effects.
 
+The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
+
 ### Run Tests
 
 Some tests use only the Python standard library and can run before installing pygame:

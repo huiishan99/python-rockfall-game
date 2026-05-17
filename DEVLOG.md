@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Show run summary on pause
+
+- Changed: updated `game_core.py` pause-screen lines to include current score, best score, level, lives, and combo; expanded `test_game_core.py`; updated `README.md`.
+- Why: real-window playtesting showed the pause screen looked clean but did not expose enough current-run state for mid-run review.
+- Behavior: pausing now shows compact run stats above the controls.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py test_game_core.py`.
+- Risks/Notes: pause screen has more text; real-window spacing should be rechecked after future menu typography changes.
+
 ## 2026-05-17 - Report missing model paths cleanly
 
 - Changed: updated `compare_models.py` with model path validation and concise CLI errors; updated `run_model_experiment.py` to validate the baseline before training; expanded `test_compare_models.py` and `test_run_model_experiment.py`; updated `README.md`.

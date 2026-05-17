@@ -169,6 +169,19 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("Press P to resume", lines)
         self.assertIn("Press R to restart", lines)
 
+    def test_pause_lines_include_current_run_summary(self):
+        game = RockfallGame(self.screen)
+        game.score = 12
+        game.high_score = 20
+        game.difficulty_level = 3
+        game.lives = 4
+        game.combo = 5
+
+        lines = game.pause_lines("Data Collection")
+
+        self.assertIn("Score: 12  Best: 20", lines)
+        self.assertIn("Level: 3  Lives: 4  Combo: 5", lines)
+
     def test_avoiding_obstacles_builds_combo_and_score(self):
         game = RockfallGame(self.screen)
 

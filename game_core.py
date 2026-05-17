@@ -178,7 +178,8 @@ class RockfallGame:
     def pause_lines(self, mode_name):
         return [
             mode_name,
-            f"High Score: {self.visible_high_score()}",
+            f"Score: {self.score}  Best: {self.visible_high_score()}",
+            f"Level: {self.difficulty_level}  Lives: {self.lives}  Combo: {self.combo}",
             "Move: Left/Right or A/D",
             "Press P to resume",
             "Press R to restart",
