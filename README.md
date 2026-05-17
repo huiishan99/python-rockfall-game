@@ -7,13 +7,14 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.3.0-dev`.
+Current version: `0.4.0-dev`.
 
-This is now in v0.3 development after the playable v0.1 release:
+This is now in v0.4 development after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
 - Headless evaluation reports model score baselines.
+- Runtime hand-feel tuning for difficulty, player speed, and initial lives is implemented across play, evaluation, comparison, experiments, and release checks.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
 

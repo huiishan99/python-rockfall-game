@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Advance to v0.4 development
+
+- Changed: updated `settings.py` to `0.4.0-dev`; refreshed `README.md` project status to call out runtime hand-feel tuning for difficulty, player speed, and initial lives.
+- Why: the project has moved past the v0.3 experiment-safety foundation into v0.4 tuning work.
+- Behavior: window captions and release-check output now identify the build as `0.4.0-dev`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game.py play_with_model.py release_check.py test_release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: this is a development marker, not a release tag.
+
 ## 2026-05-17 - Add runtime initial lives tuning
 
 - Changed: updated `game_core.py` to reset from configurable initial lives; wired `--lives` through manual play, AI play, evaluation, comparison, experiments, and release checks; included `initial_lives` in JSON reports; expanded tests across affected entrypoints; updated `README.md`.
