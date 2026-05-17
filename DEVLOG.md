@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Advance to v0.5 development
+
+- Changed: updated `settings.py` to `0.5.0-dev`; refreshed `README.md` project status to call out survival metrics and JSON report artifacts.
+- Why: the project has moved from v0.4 runtime tuning into v0.5 evaluation/reporting quality.
+- Behavior: window captions and release-check output now identify the build as `0.5.0-dev`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3`.
+- Risks/Notes: this is a development marker, not a release tag.
+
 ## 2026-05-17 - Save evaluation and comparison reports
 
 - Changed: added `--report` to `evaluate_model.py` and `compare_models.py`; added shared JSON report writing with parent-directory creation; expanded parser/report tests; updated `README.md`.
