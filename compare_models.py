@@ -24,6 +24,12 @@ def parse_args(argv=None):
     return parser.parse_args(argv)
 
 
+def validate_model_paths(model_paths):
+    missing_paths = [model_path for model_path in model_paths if not os.path.exists(model_path)]
+    if missing_paths:
+        raise ValueError("Model file not found: " + ", ".join(missing_paths))
+
+
 def evaluate_model_path(model_path, games, max_frames, random_seed, screen):
     import joblib
 
@@ -118,6 +124,7 @@ def main(argv=None):
         raise ValueError("--games must be greater than zero.")
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
+    validate_model_paths(args.models)
 
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
@@ -142,5 +149,13 @@ def main(argv=None):
     return 0
 
 
+def cli(argv=None):
+    try:
+        return main(argv)
+    except ValueError as error:
+        print(f"Error: {error}")
+        return 1
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli())

@@ -95,6 +95,15 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(status, 1)
         self.assertIn("Error: --candidate must be different from --baseline", output.getvalue())
 
+    def test_cli_reports_missing_baseline_before_training(self):
+        output = StringIO()
+
+        with redirect_stdout(output):
+            status = cli(["--baseline", "missing.pkl", "--candidate", "runs/candidate.pkl"])
+
+        self.assertEqual(status, 1)
+        self.assertIn("Error: Model file not found: missing.pkl", output.getvalue())
+
     def test_builds_experiment_payload(self):
         payload = build_experiment_payload(
             TRAINING_SUMMARY,

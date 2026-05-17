@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Report missing model paths cleanly
+
+- Changed: updated `compare_models.py` with model path validation and concise CLI errors; updated `run_model_experiment.py` to validate the baseline before training; expanded `test_compare_models.py` and `test_run_model_experiment.py`; updated `README.md`.
+- Why: model comparison and experiment commands should fail before expensive work when a model path is wrong.
+- Behavior: missing model paths now print `Error: Model file not found: ...` and exit nonzero without a traceback.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile compare_models.py test_compare_models.py run_model_experiment.py test_run_model_experiment.py`; ran `python3 compare_models.py missing.pkl --games 1 --max-frames 300`; ran `python3 run_model_experiment.py --baseline missing.pkl --candidate /private/tmp/rockfall-missing-baseline.pkl --games 1 --max-frames 300`.
+- Risks/Notes: this only checks path existence; invalid model contents still fail during load.
+
 ## 2026-05-17 - Protect baseline model experiments
 
 - Changed: updated `run_model_experiment.py` to reject matching `--baseline` and `--candidate` paths; expanded `test_run_model_experiment.py`; updated `README.md`.

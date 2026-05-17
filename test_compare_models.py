@@ -1,12 +1,18 @@
+import os
+import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 
 from compare_models import (
     build_comparison_payload,
+    cli,
     comparison_winner,
     format_comparison_lines,
     format_comparison_table,
     parse_args,
     score_delta,
+    validate_model_paths,
 )
 from play_with_model import MODEL_FILE
 
@@ -45,6 +51,27 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(args.models, ["base.pkl", "candidate.pkl"])
         self.assertTrue(args.json)
+
+    def test_validate_model_paths_rejects_missing_model(self):
+        with self.assertRaises(ValueError):
+            validate_model_paths(["missing.pkl"])
+
+    def test_validate_model_paths_accepts_existing_model(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            model_path = os.path.join(temp_dir, "model.pkl")
+            with open(model_path, "w") as model_file:
+                model_file.write("stub")
+
+            validate_model_paths([model_path])
+
+    def test_cli_reports_missing_model_without_traceback(self):
+        output = StringIO()
+
+        with redirect_stdout(output):
+            status = cli(["missing.pkl", "--games", "1", "--max-frames", "300"])
+
+        self.assertEqual(status, 1)
+        self.assertIn("Error: Model file not found: missing.pkl", output.getvalue())
 
     def test_formats_comparison_table(self):
         lines = format_comparison_table(["base.pkl", "candidate.pkl"], [SUMMARY_A, SUMMARY_B])

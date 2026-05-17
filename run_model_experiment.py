@@ -3,7 +3,13 @@ import json
 import os
 from collections import Counter
 
-from compare_models import build_comparison_payload, evaluate_model_path, format_comparison_lines, score_delta
+from compare_models import (
+    build_comparison_payload,
+    evaluate_model_path,
+    format_comparison_lines,
+    score_delta,
+    validate_model_paths,
+)
 from data_store import GAME_DATA_FILE, ensure_parent_dir
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
@@ -151,6 +157,7 @@ def main(argv=None):
     if args.max_frames <= 0:
         raise ValueError("--max-frames must be greater than zero.")
     validate_experiment_paths(args.baseline, args.candidate)
+    validate_model_paths([args.baseline])
 
     training_summary = train_candidate_model(
         args.data,
