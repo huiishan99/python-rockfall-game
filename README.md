@@ -7,9 +7,9 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.7.0-dev`.
+Current version: `0.8.0-dev`.
 
-This is now in v0.7 development after the playable v0.1 release:
+This is now in v0.8 development after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
@@ -18,6 +18,7 @@ This is now in v0.7 development after the playable v0.1 release:
 - Evaluation and comparison reports include survival metrics and can be saved as JSON artifacts.
 - Data inspection can check collected samples before training and save quality reports.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
+- Release checks can save versioned JSON artifacts for candidate builds.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
 

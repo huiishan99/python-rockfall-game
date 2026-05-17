@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-17 - Advance to v0.8 development
+
+- Changed: updated `settings.py` to `0.8.0-dev`; refreshed `README.md` project status to call out release-check JSON artifacts.
+- Why: the project has reached the requested v0.8 development line after runtime tuning, report quality, data inspection, gameplay recovery, and release-report work.
+- Behavior: window captions and release-check output now identify the build as `0.8.0-dev`.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py release_check.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-v08-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-v08-release-check.json`.
+- Risks/Notes: this is a development marker, not a release tag; a full hands-on playtest should precede any final `v0.8.0` tag.
+
 ## 2026-05-17 - Save release check reports
 
 - Changed: added `--report` to `release_check.py`; added a structured release payload with version, unit-test pass status, evaluation settings, and evaluation summary; expanded release-check tests; updated `README.md`.
