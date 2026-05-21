@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-21 - Add GUI smoke-test gameplay samples
+
+- Changed: updated `game_data.json` with 289 new manual-play samples collected while opening the polished GUI for a smoke test.
+- Why: the manual data collection path should keep useful real-window samples, especially after checking the start screen and first-run flow.
+- Behavior: the dataset now has 2,758 valid samples and 3 skipped entries; action balance remains close, with left=1,375 and right=1,383.
+- Verification: ran `python3 inspect_data.py --data game_data.json`.
+- Risks/Notes: this is data-only; no gameplay rules, model features, or trained model artifact changed.
+
 ## 2026-05-21 - Add start-screen machine learning help
 
 - Changed: added a `HOW IT WORKS` start-screen button, a help screen explaining gameplay and the machine-learning loop, mouse/keyboard navigation for help in manual and model play, rendering tests, and README documentation.
