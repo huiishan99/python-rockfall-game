@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-21 - Add start-screen machine learning help
+
+- Changed: added a `HOW IT WORKS` start-screen button, a help screen explaining gameplay and the machine-learning loop, mouse/keyboard navigation for help in manual and model play, rendering tests, and README documentation.
+- Why: the project is called a machine-learning game, but the running GUI did not explain how manual samples, training, model play, and evaluation connect.
+- Behavior: players can click `HOW IT WORKS` or press H from the start screen; the help page explains manual data collection, `train_model.py`, `game_model.pkl`, model prediction, and inspection/evaluation scripts; Back/Start buttons or B/Esc/Space navigate from help.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py game.py play_with_model.py test_game_core.py`; rendered pygame preview images to `/private/tmp/rockfall-help-start.png` and `/private/tmp/rockfall-help-screen.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-help-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-help-release-check.json`.
+- Risks/Notes: the help screen is informational and does not change gameplay rules or model features.
+
 ## 2026-05-21 - Polish game HUD and menu styling
 
 - Changed: updated the pygame color theme, added panel-backed HUD sections, panel-backed menu text, prompt button backgrounds, subtle background guide lines, and softer obstacle/progress colors; expanded rendering tests; updated `README.md`.

@@ -38,6 +38,8 @@ from settings import (
     PLAYER_HIT_COLOR,
     PLAYER_OUTLINE_COLOR,
     PLAYER_WIDTH,
+    PROMPT_BACK_COLOR,
+    PROMPT_BORDER_COLOR,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -195,6 +197,15 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("Move: Left/Right or A/D", lines)
         self.assertIn("Pause: P", lines)
         self.assertIn("Press SPACE to start", lines)
+
+    def test_help_lines_explain_machine_learning_loop(self):
+        game = RockfallGame(self.screen)
+
+        lines = game.help_lines()
+
+        self.assertTrue(any("records state" in line for line in lines))
+        self.assertTrue(any("train_model.py" in line for line in lines))
+        self.assertTrue(any("predicts movement" in line for line in lines))
 
     def test_pause_lines_include_controls(self):
         game = RockfallGame(self.screen)
@@ -384,6 +395,28 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 220))[:3], MENU_ACCENT_COLOR)
         self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 235))[:3], MENU_PANEL_BORDER_COLOR)
         self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 240))[:3], MENU_PANEL_COLOR)
+
+    def test_start_screen_draws_help_button(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_start_screen("Data Collection")
+
+        button_rect = game.help_button_rect()
+        self.assertEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((button_rect.x + 3, button_rect.y + 3))[:3], PROMPT_BACK_COLOR)
+
+    def test_help_screen_draws_panel_and_action_buttons(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_help_screen()
+
+        panel_rect = game.help_panel_rect()
+        back_rect = game.help_back_button_rect()
+        start_rect = game.help_start_button_rect()
+        self.assertEqual(self.screen.get_at(panel_rect.topleft)[:3], MENU_PANEL_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((panel_rect.x + 3, panel_rect.y + 3))[:3], MENU_PANEL_COLOR)
+        self.assertEqual(self.screen.get_at(back_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at(start_rect.topleft)[:3], PROMPT_BORDER_COLOR)
 
     def test_hud_draws_progress_background(self):
         game = RockfallGame(self.screen)

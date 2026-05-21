@@ -71,6 +71,7 @@ ACTION_LEFT = "left"
 ACTION_RIGHT = "right"
 
 SCREEN_START = "start"
+SCREEN_HELP = "help"
 SCREEN_PLAYING = "playing"
 SCREEN_PAUSED = "paused"
 SCREEN_GAME_OVER = "game_over"
@@ -91,6 +92,7 @@ class RockfallGame:
         self.player_speed = max(1, int(player_speed))
         self.initial_lives = max(1, int(initial_lives))
         self.font = pygame.font.Font(None, 36)
+        self.small_font = pygame.font.Font(None, 28)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
         self.progress_bar_x = SCREEN_WIDTH - PROGRESS_BAR_LENGTH - 10
@@ -167,6 +169,7 @@ class RockfallGame:
 
     def draw_start_screen(self, mode_name):
         self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
+        self._draw_button(self.help_button_rect(), "HOW IT WORKS")
 
     def start_lines(self, mode_name):
         return [
@@ -177,6 +180,54 @@ class RockfallGame:
             "Press SPACE to start",
             "Press ESC to quit",
         ]
+
+    def draw_help_screen(self):
+        self._draw_background()
+        title_y = 90
+        title_shadow = self.title_font.render("HOW IT WORKS", True, MENU_TITLE_SHADOW_COLOR)
+        title_surface = self.title_font.render("HOW IT WORKS", True, MENU_TITLE_COLOR)
+        self._blit_centered(title_shadow, title_y + 4)
+        self._blit_centered(title_surface, title_y)
+        pygame.draw.line(
+            self.screen,
+            MENU_ACCENT_COLOR,
+            (SCREEN_WIDTH // 2 - 145, 166),
+            (SCREEN_WIDTH // 2 + 145, 166),
+            2,
+        )
+
+        panel_rect = self.help_panel_rect()
+        self._draw_panel(panel_rect, MENU_PANEL_COLOR, MENU_PANEL_BORDER_COLOR)
+        for index, line in enumerate(self.help_lines()):
+            text_surface = self.small_font.render(line, True, self._help_line_color(index))
+            self._blit_centered(text_surface, panel_rect.y + 24 + index * 30)
+
+        self._draw_button(self.help_back_button_rect(), "BACK")
+        self._draw_button(self.help_start_button_rect(), "START")
+
+    def help_lines(self):
+        return [
+            "Dodge falling rocks and survive as long as you can.",
+            "Move with Left/Right or A/D. Avoid rocks to score.",
+            "Combos add bonus points; score milestones restore lost lives.",
+            "Manual play records state + action examples.",
+            "train_model.py learns left/right choices.",
+            "play_with_model.py predicts movement each frame.",
+            "inspect/evaluate/compare check data and model quality.",
+            "That loop is the machine-learning part of Rockfall.",
+        ]
+
+    def help_button_rect(self):
+        return pygame.Rect(SCREEN_WIDTH // 2 - 125, 518, 250, 34)
+
+    def help_back_button_rect(self):
+        return pygame.Rect(SCREEN_WIDTH // 2 - 190, 535, 150, 34)
+
+    def help_start_button_rect(self):
+        return pygame.Rect(SCREEN_WIDTH // 2 + 40, 535, 150, 34)
+
+    def help_panel_rect(self):
+        return pygame.Rect(85, 190, SCREEN_WIDTH - 170, 310)
 
     def draw_game_over_screen(self, mode_name):
         self._draw_message_screen("GAME OVER", self.game_over_lines(mode_name))
@@ -429,11 +480,28 @@ class RockfallGame:
         pygame.draw.rect(self.screen, PROMPT_BACK_COLOR, prompt_rect)
         pygame.draw.rect(self.screen, PROMPT_BORDER_COLOR, prompt_rect, 1)
 
+    def _draw_button(self, rect, text):
+        pygame.draw.rect(self.screen, PROMPT_BACK_COLOR, rect)
+        pygame.draw.rect(self.screen, PROMPT_BORDER_COLOR, rect, 2)
+        text_surface = self.font.render(text, True, HUD_COLOR)
+        self.screen.blit(
+            text_surface,
+            (
+                rect.x + (rect.width - text_surface.get_width()) // 2,
+                rect.y + (rect.height - text_surface.get_height()) // 2,
+            ),
+        )
+
     def _message_line_color(self, index, line):
         if index == 0:
             return MENU_ACCENT_COLOR
         if line.startswith(("Move:", "Pause:", "Press ")):
             return MENU_SECONDARY_COLOR
+        return HUD_COLOR
+
+    def _help_line_color(self, index):
+        if index in (3, 4, 5, 6):
+            return MENU_ACCENT_COLOR
         return HUD_COLOR
 
     def _draw_hud(self):

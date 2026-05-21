@@ -28,6 +28,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, incoming rocks, hit screen tint, panel-based HUD, and styled menu prompts.
+- Start-screen `HOW IT WORKS` help that explains the game rules and the machine-learning loop from manual data collection to model play.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
@@ -61,6 +62,7 @@ Controls:
 - Move left/right with arrow keys or A/D.
 - Press P to pause or resume.
 - Press R to restart from pause or game over.
+- Click `HOW IT WORKS` on the start screen, or press H, to see how gameplay data becomes a trained model.
 - Press Esc to quit.
 - Add `--mute` to manual or model play commands to disable generated sound effects.
 - Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.
@@ -68,6 +70,7 @@ Controls:
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
+The help screen explains that manual play records state/action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
 
 ### Run Tests
 

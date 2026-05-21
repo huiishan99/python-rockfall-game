@@ -11,6 +11,7 @@ from game_core import (
     ACTION_LEFT,
     ACTION_RIGHT,
     SCREEN_GAME_OVER,
+    SCREEN_HELP,
     SCREEN_PAUSED,
     SCREEN_PLAYING,
     SCREEN_START,
@@ -81,8 +82,18 @@ def main(argv=None):
                 app_running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    app_running = False
+                    if screen_state == SCREEN_HELP:
+                        screen_state = SCREEN_START
+                    else:
+                        app_running = False
                 elif screen_state == SCREEN_START and event.key == pygame.K_SPACE:
+                    game.reset()
+                    screen_state = SCREEN_PLAYING
+                elif screen_state == SCREEN_START and event.key == pygame.K_h:
+                    screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_HELP and event.key == pygame.K_b:
+                    screen_state = SCREEN_START
+                elif screen_state == SCREEN_HELP and event.key == pygame.K_SPACE:
                     game.reset()
                     screen_state = SCREEN_PLAYING
                 elif screen_state == SCREEN_PLAYING and event.key == pygame.K_p:
@@ -93,6 +104,14 @@ def main(argv=None):
                     game.reset()
                     screen_state = SCREEN_PLAYING
                 elif screen_state == SCREEN_GAME_OVER and event.key == pygame.K_r:
+                    game.reset()
+                    screen_state = SCREEN_PLAYING
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if screen_state == SCREEN_START and game.help_button_rect().collidepoint(event.pos):
+                    screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_HELP and game.help_back_button_rect().collidepoint(event.pos):
+                    screen_state = SCREEN_START
+                elif screen_state == SCREEN_HELP and game.help_start_button_rect().collidepoint(event.pos):
                     game.reset()
                     screen_state = SCREEN_PLAYING
 
@@ -111,6 +130,8 @@ def main(argv=None):
 
         if screen_state == SCREEN_START:
             game.draw_start_screen(mode_name)
+        elif screen_state == SCREEN_HELP:
+            game.draw_help_screen()
         elif screen_state == SCREEN_PAUSED:
             game.draw_pause_screen(mode_name)
         elif screen_state == SCREEN_GAME_OVER:
