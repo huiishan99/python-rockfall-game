@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-21 - Add model-to-training launcher
+
+- Changed: added a `TRAIN MANUALLY` button and T hotkey to the model-play start screen; launches `game.py` with the current difficulty, player speed, lives, and mute settings; added command/rendering tests; updated `README.md`.
+- Why: when the model performs poorly, players need a visible path back to manual data collection instead of quitting to the terminal.
+- Behavior: from model play, `TRAIN MANUALLY` exits the model window and opens data-collection mode with the same tuning settings.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py play_with_model.py test_game_core.py test_play_with_model.py`; rendered pygame preview image to `/private/tmp/rockfall-train-manually-start.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-training-launcher-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-training-launcher-release-check.json`.
+- Risks/Notes: like the model launcher, this starts a separate Python process and exits the current pygame window.
+
 ## 2026-05-21 - Add start-screen model play launcher
 
 - Changed: added a `PLAY WITH MODEL` start-screen button and M hotkey in manual play; added a missing-model prompt that points players to `train_model.py`; launches `play_with_model.py` with the current difficulty, player speed, lives, and mute settings when `game_model.pkl` exists; hides the launcher on the model-play start screen; expanded rendering and command tests; updated `README.md`.

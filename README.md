@@ -26,6 +26,7 @@ This is now in v0.8 development after the playable v0.1 release:
 
 - Manual play for data collection, with left/right or A/D movement, pause, restart, and local high scores.
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
+- Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, incoming rocks, hit screen tint, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules and the machine-learning loop from manual data collection to model play.
@@ -65,6 +66,7 @@ Controls:
 - Press R to restart from pause or game over.
 - Click `HOW IT WORKS` on the start screen, or press H, to see how gameplay data becomes a trained model.
 - Click `PLAY WITH MODEL` on the start screen, or press M, to switch into model-controlled play after training.
+- In model play, click `TRAIN MANUALLY` on the start screen, or press T, to return to data collection with the same tuning settings.
 - Press Esc to quit.
 - Add `--mute` to manual or model play commands to disable generated sound effects.
 - Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.

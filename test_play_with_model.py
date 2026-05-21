@@ -1,6 +1,7 @@
+import sys
 import unittest
 
-from play_with_model import MODEL_FILE, model_load_error_message, model_mode_name, parse_args
+from play_with_model import MODEL_FILE, manual_play_command, model_load_error_message, model_mode_name, parse_args
 
 
 class PlayWithModelTest(unittest.TestCase):
@@ -40,6 +41,18 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertIn("missing.pkl", message)
         self.assertIn("not found", message)
+
+    def test_manual_play_command_preserves_tuning_args(self):
+        args = parse_args(["--difficulty", "hard", "--player-speed", "8", "--lives", "3", "--mute"])
+
+        command = manual_play_command(args)
+
+        self.assertEqual(command[0], sys.executable)
+        self.assertIn("game.py", command)
+        self.assertIn("hard", command)
+        self.assertIn("8", command)
+        self.assertIn("3", command)
+        self.assertIn("--mute", command)
 
 
 if __name__ == "__main__":

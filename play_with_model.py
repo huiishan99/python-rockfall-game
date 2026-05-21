@@ -1,5 +1,7 @@
 import argparse
 import os
+import subprocess
+import sys
 
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
@@ -43,6 +45,26 @@ def model_mode_name(model_path, difficulty_preset=None):
 
 def model_load_error_message(model_path, error):
     return f"Could not load model '{model_path}': {error}"
+
+
+def manual_play_command(args):
+    command = [
+        sys.executable,
+        "game.py",
+        "--difficulty",
+        args.difficulty,
+        "--player-speed",
+        str(args.player_speed),
+        "--lives",
+        str(args.lives),
+    ]
+    if args.mute:
+        command.append("--mute")
+    return command
+
+
+def launch_manual_play(args):
+    subprocess.Popen(manual_play_command(args))
 
 
 def main(argv=None):
@@ -106,6 +128,10 @@ def main(argv=None):
                     screen_state = SCREEN_PLAYING
                 elif screen_state == SCREEN_START and event.key == pygame.K_h:
                     screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_START and event.key == pygame.K_t:
+                    pygame.quit()
+                    launch_manual_play(args)
+                    return 0
                 elif screen_state == SCREEN_HELP and event.key == pygame.K_b:
                     screen_state = SCREEN_START
                 elif screen_state == SCREEN_HELP and event.key == pygame.K_SPACE:
@@ -124,6 +150,10 @@ def main(argv=None):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if screen_state == SCREEN_START and game.help_button_rect().collidepoint(event.pos):
                     screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_START and game.training_button_rect().collidepoint(event.pos):
+                    pygame.quit()
+                    launch_manual_play(args)
+                    return 0
                 elif screen_state == SCREEN_HELP and game.help_back_button_rect().collidepoint(event.pos):
                     screen_state = SCREEN_START
                 elif screen_state == SCREEN_HELP and game.help_start_button_rect().collidepoint(event.pos):
@@ -140,7 +170,7 @@ def main(argv=None):
                 screen_state = SCREEN_GAME_OVER
 
         if screen_state == SCREEN_START:
-            game.draw_start_screen(mode_name, show_model_button=False)
+            game.draw_start_screen(mode_name, show_model_button=False, show_training_button=True)
         elif screen_state == SCREEN_HELP:
             game.draw_help_screen()
         elif screen_state == SCREEN_PAUSED:

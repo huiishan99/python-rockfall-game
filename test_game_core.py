@@ -430,6 +430,15 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         button_rect = game.model_button_rect()
         self.assertNotEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
 
+    def test_start_screen_draws_training_button_when_enabled(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_start_screen("Model Play", show_model_button=False, show_training_button=True)
+
+        button_rect = game.training_button_rect()
+        self.assertEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((button_rect.x + 3, button_rect.y + 3))[:3], PROMPT_BACK_COLOR)
+
     def test_help_screen_draws_panel_and_action_buttons(self):
         game = RockfallGame(self.screen)
 
