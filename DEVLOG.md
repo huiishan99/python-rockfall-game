@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-21 - Add start-screen model play launcher
+
+- Changed: added a `PLAY WITH MODEL` start-screen button and M hotkey in manual play; added a missing-model prompt that points players to `train_model.py`; launches `play_with_model.py` with the current difficulty, player speed, lives, and mute settings when `game_model.pkl` exists; hides the launcher on the model-play start screen; expanded rendering and command tests; updated `README.md`.
+- Why: the machine-learning path should be visible from the GUI, and players should get a clear explanation when the model has not been trained yet.
+- Behavior: from manual mode, clicking `PLAY WITH MODEL` switches to the model-controlled script if a model file is available; otherwise it opens an in-game `MODEL NOT READY` screen with next steps.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py game.py play_with_model.py test_game_core.py test_game.py`; rendered pygame preview images to `/private/tmp/rockfall-model-launch-start.png`, `/private/tmp/rockfall-model-missing.png`, and `/private/tmp/rockfall-model-start.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-model-launch-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-model-launch-release-check.json`.
+- Risks/Notes: launching model play starts a separate Python process and exits the manual window; this keeps manual data collection and model play logic separated.
+
 ## 2026-05-21 - Add GUI smoke-test gameplay samples
 
 - Changed: updated `game_data.json` with 289 new manual-play samples collected while opening the polished GUI for a smoke test.

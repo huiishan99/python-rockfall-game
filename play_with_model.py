@@ -140,7 +140,7 @@ def main(argv=None):
                 screen_state = SCREEN_GAME_OVER
 
         if screen_state == SCREEN_START:
-            game.draw_start_screen(mode_name)
+            game.draw_start_screen(mode_name, show_model_button=False)
         elif screen_state == SCREEN_HELP:
             game.draw_help_screen()
         elif screen_state == SCREEN_PAUSED:

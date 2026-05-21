@@ -1,5 +1,7 @@
 import argparse
 import os
+import subprocess
+import sys
 
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
@@ -12,11 +14,13 @@ from game_core import (
     ACTION_RIGHT,
     SCREEN_GAME_OVER,
     SCREEN_HELP,
+    SCREEN_MODEL_MISSING,
     SCREEN_PAUSED,
     SCREEN_PLAYING,
     SCREEN_START,
     RockfallGame,
 )
+from play_with_model import MODEL_FILE
 from scores import get_high_score, record_high_score
 from settings import FPS, INITIAL_LIVES, PLAYER_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
 
@@ -51,6 +55,28 @@ def read_manual_action():
     return ACTION_RIGHT
 
 
+def model_play_command(args):
+    command = [
+        sys.executable,
+        "play_with_model.py",
+        "--model",
+        MODEL_FILE,
+        "--difficulty",
+        args.difficulty,
+        "--player-speed",
+        str(args.player_speed),
+        "--lives",
+        str(args.lives),
+    ]
+    if args.mute:
+        command.append("--mute")
+    return command
+
+
+def launch_model_play(args):
+    subprocess.Popen(model_play_command(args))
+
+
 def main(argv=None):
     args = parse_args(argv)
     if args.player_speed <= 0:
@@ -82,7 +108,7 @@ def main(argv=None):
                 app_running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if screen_state == SCREEN_HELP:
+                    if screen_state in (SCREEN_HELP, SCREEN_MODEL_MISSING):
                         screen_state = SCREEN_START
                     else:
                         app_running = False
@@ -91,11 +117,19 @@ def main(argv=None):
                     screen_state = SCREEN_PLAYING
                 elif screen_state == SCREEN_START and event.key == pygame.K_h:
                     screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_START and event.key == pygame.K_m:
+                    if os.path.exists(MODEL_FILE):
+                        pygame.quit()
+                        launch_model_play(args)
+                        return 0
+                    screen_state = SCREEN_MODEL_MISSING
                 elif screen_state == SCREEN_HELP and event.key == pygame.K_b:
                     screen_state = SCREEN_START
                 elif screen_state == SCREEN_HELP and event.key == pygame.K_SPACE:
                     game.reset()
                     screen_state = SCREEN_PLAYING
+                elif screen_state == SCREEN_MODEL_MISSING and event.key == pygame.K_b:
+                    screen_state = SCREEN_START
                 elif screen_state == SCREEN_PLAYING and event.key == pygame.K_p:
                     screen_state = SCREEN_PAUSED
                 elif screen_state == SCREEN_PAUSED and event.key == pygame.K_p:
@@ -109,11 +143,19 @@ def main(argv=None):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if screen_state == SCREEN_START and game.help_button_rect().collidepoint(event.pos):
                     screen_state = SCREEN_HELP
+                elif screen_state == SCREEN_START and game.model_button_rect().collidepoint(event.pos):
+                    if os.path.exists(MODEL_FILE):
+                        pygame.quit()
+                        launch_model_play(args)
+                        return 0
+                    screen_state = SCREEN_MODEL_MISSING
                 elif screen_state == SCREEN_HELP and game.help_back_button_rect().collidepoint(event.pos):
                     screen_state = SCREEN_START
                 elif screen_state == SCREEN_HELP and game.help_start_button_rect().collidepoint(event.pos):
                     game.reset()
                     screen_state = SCREEN_PLAYING
+                elif screen_state == SCREEN_MODEL_MISSING and game.help_back_button_rect().collidepoint(event.pos):
+                    screen_state = SCREEN_START
 
         if screen_state == SCREEN_PLAYING:
             action = read_manual_action()
@@ -132,6 +174,8 @@ def main(argv=None):
             game.draw_start_screen(mode_name)
         elif screen_state == SCREEN_HELP:
             game.draw_help_screen()
+        elif screen_state == SCREEN_MODEL_MISSING:
+            game.draw_model_missing_screen(MODEL_FILE)
         elif screen_state == SCREEN_PAUSED:
             game.draw_pause_screen(mode_name)
         elif screen_state == SCREEN_GAME_OVER:

@@ -1,7 +1,8 @@
 import unittest
 
 from data_store import GAME_DATA_FILE
-from game import parse_args
+from game import model_play_command, parse_args
+from play_with_model import MODEL_FILE
 
 
 class GameEntrypointTest(unittest.TestCase):
@@ -29,6 +30,18 @@ class GameEntrypointTest(unittest.TestCase):
         args = parse_args(["--lives", "3"])
 
         self.assertEqual(args.lives, 3)
+
+    def test_model_play_command_preserves_tuning_args(self):
+        args = parse_args(["--difficulty", "hard", "--player-speed", "8", "--lives", "3", "--mute"])
+
+        command = model_play_command(args)
+
+        self.assertIn("play_with_model.py", command)
+        self.assertIn(MODEL_FILE, command)
+        self.assertIn("hard", command)
+        self.assertIn("8", command)
+        self.assertIn("3", command)
+        self.assertIn("--mute", command)
 
 
 if __name__ == "__main__":

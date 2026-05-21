@@ -198,6 +198,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("Pause: P", lines)
         self.assertIn("Press SPACE to start", lines)
 
+    def test_model_missing_lines_explain_training_step(self):
+        game = RockfallGame(self.screen)
+
+        lines = game.model_missing_lines("game_model.pkl")
+
+        self.assertIn("Missing model: game_model.pkl", lines)
+        self.assertTrue(any("train_model.py" in line for line in lines))
+
     def test_help_lines_explain_machine_learning_loop(self):
         game = RockfallGame(self.screen)
 
@@ -405,6 +413,23 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
         self.assertEqual(self.screen.get_at((button_rect.x + 3, button_rect.y + 3))[:3], PROMPT_BACK_COLOR)
 
+    def test_start_screen_draws_model_button_when_enabled(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_start_screen("Data Collection")
+
+        button_rect = game.model_button_rect()
+        self.assertEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((button_rect.x + 3, button_rect.y + 3))[:3], PROMPT_BACK_COLOR)
+
+    def test_start_screen_can_hide_model_button(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_start_screen("Model Play", show_model_button=False)
+
+        button_rect = game.model_button_rect()
+        self.assertNotEqual(self.screen.get_at(button_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+
     def test_help_screen_draws_panel_and_action_buttons(self):
         game = RockfallGame(self.screen)
 
@@ -417,6 +442,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at((panel_rect.x + 3, panel_rect.y + 3))[:3], MENU_PANEL_COLOR)
         self.assertEqual(self.screen.get_at(back_rect.topleft)[:3], PROMPT_BORDER_COLOR)
         self.assertEqual(self.screen.get_at(start_rect.topleft)[:3], PROMPT_BORDER_COLOR)
+
+    def test_model_missing_screen_draws_back_button(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_model_missing_screen("game_model.pkl")
+
+        back_rect = game.help_back_button_rect()
+        self.assertEqual(self.screen.get_at(back_rect.topleft)[:3], PROMPT_BORDER_COLOR)
 
     def test_hud_draws_progress_background(self):
         game = RockfallGame(self.screen)

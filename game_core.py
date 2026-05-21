@@ -72,6 +72,7 @@ ACTION_RIGHT = "right"
 
 SCREEN_START = "start"
 SCREEN_HELP = "help"
+SCREEN_MODEL_MISSING = "model_missing"
 SCREEN_PLAYING = "playing"
 SCREEN_PAUSED = "paused"
 SCREEN_GAME_OVER = "game_over"
@@ -167,9 +168,11 @@ class RockfallGame:
         self.events = []
         return events
 
-    def draw_start_screen(self, mode_name):
+    def draw_start_screen(self, mode_name, show_model_button=True):
         self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
         self._draw_button(self.help_button_rect(), "HOW IT WORKS")
+        if show_model_button:
+            self._draw_button(self.model_button_rect(), "PLAY WITH MODEL")
 
     def start_lines(self, mode_name):
         return [
@@ -205,6 +208,19 @@ class RockfallGame:
         self._draw_button(self.help_back_button_rect(), "BACK")
         self._draw_button(self.help_start_button_rect(), "START")
 
+    def draw_model_missing_screen(self, model_path):
+        self._draw_message_screen("MODEL NOT READY", self.model_missing_lines(model_path))
+        self._draw_button(self.help_back_button_rect(), "BACK")
+
+    def model_missing_lines(self, model_path):
+        return [
+            f"Missing model: {model_path}",
+            "Collect manual play samples first.",
+            "Run: python3 train_model.py",
+            "Then reopen and use PLAY WITH MODEL.",
+            "Press B or ESC to return",
+        ]
+
     def help_lines(self):
         return [
             "Dodge falling rocks and survive as long as you can.",
@@ -218,7 +234,10 @@ class RockfallGame:
         ]
 
     def help_button_rect(self):
-        return pygame.Rect(SCREEN_WIDTH // 2 - 125, 518, 250, 34)
+        return pygame.Rect(SCREEN_WIDTH // 2 - 270, 518, 250, 34)
+
+    def model_button_rect(self):
+        return pygame.Rect(SCREEN_WIDTH // 2 + 20, 518, 250, 34)
 
     def help_back_button_rect(self):
         return pygame.Rect(SCREEN_WIDTH // 2 - 190, 535, 150, 34)
