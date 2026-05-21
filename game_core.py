@@ -6,11 +6,15 @@ from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_for_time
 from features import build_model_features
 from game_events import EVENT_AVOID, EVENT_HIT, EVENT_LEVEL_UP
 from settings import (
+    BACKGROUND_ACCENT_COLOR,
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
     HUD_COLOR,
     HUD_COMBO_COLOR,
+    HUD_PANEL_BORDER_COLOR,
+    HUD_PANEL_COLOR,
+    HUD_PANEL_SHADOW_COLOR,
     HUD_PROGRESS_BACK_COLOR,
     HUD_WARNING_COLOR,
     INITIAL_DIFFICULTY_LEVEL,
@@ -40,6 +44,8 @@ from settings import (
     LANE_COLOR,
     LANE_HIGHLIGHT_COLOR,
     MENU_ACCENT_COLOR,
+    MENU_PANEL_BORDER_COLOR,
+    MENU_PANEL_COLOR,
     MENU_SECONDARY_COLOR,
     MENU_TITLE_COLOR,
     MENU_TITLE_SHADOW_COLOR,
@@ -50,6 +56,8 @@ from settings import (
     PLAYER_SHADOW_COLOR,
     PLAYER_SPEED,
     PLAYER_WIDTH,
+    PROMPT_BACK_COLOR,
+    PROMPT_BORDER_COLOR,
     PROGRESS_BAR_HEIGHT,
     PROGRESS_BAR_LENGTH,
     PROGRESS_COLOR,
@@ -336,6 +344,8 @@ class RockfallGame:
 
     def _draw_background(self):
         self.screen.fill(BACKGROUND_COLOR)
+        for y in range(48, SCREEN_HEIGHT, 72):
+            pygame.draw.line(self.screen, BACKGROUND_ACCENT_COLOR, (0, y), (SCREEN_WIDTH, y), 1)
 
         lanes = build_spawn_lanes()
         for lane_index, lane_x in enumerate(lanes):
@@ -388,13 +398,36 @@ class RockfallGame:
             2,
         )
 
+        panel_height = 40 + len(lines) * 38
+        panel_rect = pygame.Rect(135, 235, SCREEN_WIDTH - 270, panel_height)
+        self._draw_panel(panel_rect, MENU_PANEL_COLOR, MENU_PANEL_BORDER_COLOR)
+
         for index, line in enumerate(lines):
             text_surface = self.font.render(line, True, self._message_line_color(index, line))
-            self._blit_centered(text_surface, 250 + index * 38)
+            line_y = 255 + index * 38
+            if line.startswith("Press "):
+                self._draw_prompt_back(text_surface, line_y)
+            self._blit_centered(text_surface, line_y)
 
     def _blit_centered(self, surface, y):
         x = (SCREEN_WIDTH - surface.get_width()) // 2
         self.screen.blit(surface, (x, y))
+
+    def _draw_panel(self, rect, fill_color, border_color):
+        shadow_rect = rect.move(6, 7)
+        pygame.draw.rect(self.screen, HUD_PANEL_SHADOW_COLOR, shadow_rect)
+        pygame.draw.rect(self.screen, fill_color, rect)
+        pygame.draw.rect(self.screen, border_color, rect, 2)
+
+    def _draw_prompt_back(self, text_surface, y):
+        prompt_rect = pygame.Rect(
+            (SCREEN_WIDTH - text_surface.get_width()) // 2 - 16,
+            y - 4,
+            text_surface.get_width() + 32,
+            text_surface.get_height() + 8,
+        )
+        pygame.draw.rect(self.screen, PROMPT_BACK_COLOR, prompt_rect)
+        pygame.draw.rect(self.screen, PROMPT_BORDER_COLOR, prompt_rect, 1)
 
     def _message_line_color(self, index, line):
         if index == 0:
@@ -404,18 +437,23 @@ class RockfallGame:
         return HUD_COLOR
 
     def _draw_hud(self):
+        stats_panel = pygame.Rect(8, 8, 190, 142)
+        self._draw_panel(stats_panel, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)
+
         lives_text = self.font.render(f"Lives: {self.lives}", True, self.lives_color())
-        self.screen.blit(lives_text, (10, 10))
+        self.screen.blit(lives_text, (22, 20))
 
         score_text = self.font.render(f"Score: {self.score}", True, HUD_COLOR)
-        self.screen.blit(score_text, (10, 45))
+        self.screen.blit(score_text, (22, 54))
 
         high_score_text = self.font.render(f"Best: {self.visible_high_score()}", True, HUD_COLOR)
-        self.screen.blit(high_score_text, (10, 80))
+        self.screen.blit(high_score_text, (22, 88))
 
         combo_text = self.font.render(f"Combo: {self.combo}", True, self.combo_color())
-        self.screen.blit(combo_text, (10, 115))
+        self.screen.blit(combo_text, (22, 122))
 
+        progress_panel = pygame.Rect(self.progress_bar_x - 92, 8, PROGRESS_BAR_LENGTH + 102, 44)
+        self._draw_panel(progress_panel, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)
         progress = (self.difficulty_level / MAX_DIFFICULTY_LEVEL) * PROGRESS_BAR_LENGTH
         pygame.draw.rect(
             self.screen,

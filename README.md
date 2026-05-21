@@ -27,7 +27,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Manual play for data collection, with left/right or A/D movement, pause, restart, and local high scores.
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
-- Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, incoming rocks, and hit screen tint.
+- Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, incoming rocks, hit screen tint, panel-based HUD, and styled menu prompts.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
@@ -54,7 +54,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Incoming rocks briefly mark the top of their lane before fully entering the screen. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD highlights low lives and active combo, while the playfield and menu screens draw subtle lane guides, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Incoming rocks briefly mark the top of their lane before fully entering the screen. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, player outline/shadow, and rock highlights so the lane rhythm is easier to read.
 
 Controls:
 

@@ -13,6 +13,8 @@ from settings import (
     DIFFICULTY_INTERVAL_FRAMES,
     HUD_COMBO_COLOR,
     HUD_COLOR,
+    HUD_PANEL_BORDER_COLOR,
+    HUD_PANEL_COLOR,
     HUD_PROGRESS_BACK_COLOR,
     HUD_WARNING_COLOR,
     INITIAL_LIVES,
@@ -22,6 +24,8 @@ from settings import (
     LIFE_RESTORE_INTERVAL,
     LIFE_RESTORE_MESSAGE_COLOR,
     MENU_ACCENT_COLOR,
+    MENU_PANEL_BORDER_COLOR,
+    MENU_PANEL_COLOR,
     MENU_SECONDARY_COLOR,
     MESSAGE_DURATION_FRAMES,
     NEAR_MISS_MESSAGE_COLOR,
@@ -346,13 +350,13 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
     def test_draw_adds_obstacle_highlight_and_shadow(self):
         game = RockfallGame(self.screen)
-        game.obstacles = [[100, 100]]
+        game.obstacles = [[260, 180]]
 
         game.draw()
 
-        self.assertEqual(self.screen.get_at((101, 101))[:3], OBSTACLE_HIGHLIGHT_COLOR)
+        self.assertEqual(self.screen.get_at((261, 181))[:3], OBSTACLE_HIGHLIGHT_COLOR)
         self.assertEqual(
-            self.screen.get_at((100 + OBSTACLE_WIDTH + 1, 100 + OBSTACLE_WIDTH + 1))[:3],
+            self.screen.get_at((260 + OBSTACLE_WIDTH + 1, 180 + OBSTACLE_WIDTH + 1))[:3],
             OBSTACLE_SHADOW_COLOR,
         )
 
@@ -378,6 +382,8 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(self.screen.get_at((25, 3))[:3], LANE_HIGHLIGHT_COLOR)
         self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 220))[:3], MENU_ACCENT_COLOR)
+        self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 235))[:3], MENU_PANEL_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((SCREEN_WIDTH // 2, 240))[:3], MENU_PANEL_COLOR)
 
     def test_hud_draws_progress_background(self):
         game = RockfallGame(self.screen)
@@ -386,6 +392,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         progress_back_pixel = (game.progress_bar_x + 120, game.progress_bar_y + 5)
         self.assertEqual(self.screen.get_at(progress_back_pixel)[:3], HUD_PROGRESS_BACK_COLOR)
+
+    def test_hud_draws_stats_panel(self):
+        game = RockfallGame(self.screen)
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at((8, 8))[:3], HUD_PANEL_BORDER_COLOR)
+        self.assertEqual(self.screen.get_at((12, 12))[:3], HUD_PANEL_COLOR)
 
 
 if __name__ == "__main__":

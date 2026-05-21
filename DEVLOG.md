@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-21 - Polish game HUD and menu styling
+
+- Changed: updated the pygame color theme, added panel-backed HUD sections, panel-backed menu text, prompt button backgrounds, subtle background guide lines, and softer obstacle/progress colors; expanded rendering tests; updated `README.md`.
+- Why: the old pure-rectangle UI looked too raw for the current gameplay loop, and v0.8 needs a cleaner first impression.
+- Behavior: gameplay now has framed stats/progress panels, while start/pause/game-over screens present their text inside a centered panel with highlighted prompts.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; rendered pygame preview images to `/private/tmp/rockfall-ui-gameplay.png` and `/private/tmp/rockfall-ui-start.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-ui-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-ui-release-check.json`.
+- Risks/Notes: this is still asset-free pygame drawing; a live window playtest should check spacing on the actual display.
+
 ## 2026-05-17 - Advance to v0.8 development
 
 - Changed: updated `settings.py` to `0.8.0-dev`; refreshed `README.md` project status to call out release-check JSON artifacts.
