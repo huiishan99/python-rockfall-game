@@ -355,10 +355,22 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         messages = [message["text"] for message in game.messages]
         self.assertEqual(game.score, 4)
+        self.assertEqual(
+            game.score_breakdown,
+            {"base": 1, "combo_bonus": 0, "variant_bonus": 2, "risk_bonus": 1},
+        )
         self.assertIn("+4", messages)
         self.assertIn("ORE +2", messages)
         self.assertIn("RISK +1", messages)
         self.assertIn("CLOSE!", messages)
+
+    def test_score_breakdown_payload_is_a_copy(self):
+        game = RockfallGame(self.screen)
+
+        payload = game.score_breakdown_payload()
+        payload["base"] = 99
+
+        self.assertEqual(game.score_breakdown["base"], 0)
 
     def test_variant_stats_payload_is_a_copy(self):
         game = RockfallGame(self.screen)
@@ -377,6 +389,8 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.combo, COMBO_BONUS_INTERVAL)
         self.assertEqual(game.combo_points(), 2)
         self.assertEqual(game.score, COMBO_BONUS_INTERVAL + 1)
+        self.assertEqual(game.score_breakdown["base"], COMBO_BONUS_INTERVAL)
+        self.assertEqual(game.score_breakdown["combo_bonus"], 1)
 
     def test_hit_resets_combo(self):
         game = RockfallGame(self.screen)

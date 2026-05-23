@@ -8,6 +8,7 @@ from evaluate_model import (
     format_summary_lines,
     parse_args,
     summarize_results,
+    summarize_score_breakdown,
     summarize_variant_stats,
     write_summary_report,
 )
@@ -59,6 +60,20 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(summary["survival_rate"], 0.5)
         self.assertEqual(summary["timeouts"], 1)
         self.assertIn("ore", summary["variant_stats"])
+        self.assertIn("risk_bonus", summary["score_breakdown"])
+
+    def test_summarizes_score_breakdown(self):
+        score_breakdown = summarize_score_breakdown(
+            [
+                {"score_breakdown": {"base": 3, "combo_bonus": 1, "variant_bonus": 2, "risk_bonus": 1}},
+                {"score_breakdown": {"base": 2, "combo_bonus": 0, "variant_bonus": 1, "risk_bonus": 0}},
+            ]
+        )
+
+        self.assertEqual(score_breakdown["base"]["total"], 5)
+        self.assertEqual(score_breakdown["base"]["average"], 2.5)
+        self.assertEqual(score_breakdown["variant_bonus"]["total"], 3)
+        self.assertEqual(score_breakdown["risk_bonus"]["total"], 1)
 
     def test_summarizes_variant_stats(self):
         variant_stats = summarize_variant_stats(
@@ -120,6 +135,32 @@ class EvaluateModelTest(unittest.TestCase):
 
         self.assertIn("Variant outcomes:", lines)
         self.assertIn("  ore: spawned=2, avoided=1, hits=1, avoid_rate=50.0%", lines)
+
+    def test_formats_score_breakdown_lines(self):
+        lines = format_summary_lines(
+            {
+                "games": 1,
+                "average_score": 5,
+                "best_score": 5,
+                "worst_score": 5,
+                "average_best_combo": 4,
+                "best_combo": 4,
+                "average_frames": 150,
+                "average_lives_left": 1,
+                "best_lives_left": 1,
+                "survival_rate": 1,
+                "timeouts": 1,
+                "score_breakdown": {
+                    "base": {"total": 3, "average": 3},
+                    "combo_bonus": {"total": 1, "average": 1},
+                    "variant_bonus": {"total": 2, "average": 2},
+                    "risk_bonus": {"total": 1, "average": 1},
+                },
+            }
+        )
+
+        self.assertIn("Score breakdown:", lines)
+        self.assertIn("  risk_bonus: total=1, avg=1.00", lines)
 
     def test_builds_summary_payload_with_model_path(self):
         payload = build_summary_payload(

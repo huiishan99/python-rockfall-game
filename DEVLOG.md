@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add evaluation score-source breakdowns
+
+- Changed: added score-source tracking to `RockfallGame`, included score breakdown payloads in headless evaluation summaries, expanded evaluation and gameplay tests, and updated `README.md`.
+- Why: model improvements should be explainable by source, especially now that ore and close-dodge risk rewards can affect score separately from survival.
+- Behavior: evaluation text and JSON reports can show total and per-game average base dodge points, combo bonuses, variant bonuses, and risk bonuses.
+- Verification: ran `python3 -m unittest test_game_core.py test_evaluate_model.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py evaluate_model.py test_game_core.py test_evaluate_model.py`; ran `python3 -m unittest test_game_core.py test_evaluate_model.py test_compare_models.py test_release_check.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py evaluate_model.py compare_models.py release_check.py test_game_core.py test_evaluate_model.py test_compare_models.py test_release_check.py`; ran `python3 -m unittest`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-score-breakdown-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-score-breakdown-release-check.json`; ran `git diff --check`.
+- Risks/Notes: old saved report files will not have `score_breakdown`; new reports include it automatically, including release-check artifacts.
+
 ## 2026-05-24 - Add ore close-dodge risk bonus
 
 - Changed: added `near_miss_bonus` to rock variant settings, updated ore scoring in `game_core.py`, refreshed the help legend and README gameplay notes, and expanded gameplay tests.

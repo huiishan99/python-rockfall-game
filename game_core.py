@@ -131,6 +131,7 @@ class RockfallGame:
         self.messages = []
         self.events = []
         self.variant_stats = self.empty_variant_stats()
+        self.score_breakdown = self.empty_score_breakdown()
         self.game_over = False
 
     def snapshot(self):
@@ -188,6 +189,17 @@ class RockfallGame:
             variant_key: dict(stats)
             for variant_key, stats in self.variant_stats.items()
         }
+
+    def empty_score_breakdown(self):
+        return {
+            "base": 0,
+            "combo_bonus": 0,
+            "variant_bonus": 0,
+            "risk_bonus": 0,
+        }
+
+    def score_breakdown_payload(self):
+        return dict(self.score_breakdown)
 
     def tracked_variant_key(self, variant_key):
         if variant_key in self.variant_stats:
@@ -439,8 +451,13 @@ class RockfallGame:
         self.combo += 1
         self.best_combo = max(self.best_combo, self.combo)
         base_points = self.combo_points()
+        combo_bonus = base_points - 1
         points = base_points + score_bonus + near_miss_bonus
         self.score += points
+        self.score_breakdown["base"] += 1
+        self.score_breakdown["combo_bonus"] += combo_bonus
+        self.score_breakdown["variant_bonus"] += score_bonus
+        self.score_breakdown["risk_bonus"] += near_miss_bonus
         self.variant_stats[variant_key]["avoided"] += 1
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
         self._emit_event(EVENT_AVOID)

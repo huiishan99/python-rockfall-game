@@ -13,6 +13,7 @@ from settings import INITIAL_LIVES, OBSTACLE_VARIANTS, PLAYER_SPEED
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
 DEFAULT_RANDOM_SEED = 42
+SCORE_BREAKDOWN_KEYS = ("base", "combo_bonus", "variant_bonus", "risk_bonus")
 
 
 def parse_args(argv=None):
@@ -102,6 +103,7 @@ def run_game_with_action_provider(
         "lives": game.lives,
         "timed_out": not game.game_over,
         "variant_stats": game.variant_stats_payload(),
+        "score_breakdown": game.score_breakdown_payload(),
     }
 
 
@@ -129,6 +131,23 @@ def summarize_variant_stats(results):
     return variant_stats
 
 
+def summarize_score_breakdown(results):
+    totals = {key: 0 for key in SCORE_BREAKDOWN_KEYS}
+    for result in results:
+        score_breakdown = result.get("score_breakdown", {})
+        for key in totals:
+            totals[key] += score_breakdown.get(key, 0)
+
+    game_count = len(results)
+    return {
+        key: {
+            "total": totals[key],
+            "average": totals[key] / game_count if game_count else 0,
+        }
+        for key in SCORE_BREAKDOWN_KEYS
+    }
+
+
 def summarize_results(results):
     scores = [result["score"] for result in results]
     best_combos = [result["best_combo"] for result in results]
@@ -149,6 +168,7 @@ def summarize_results(results):
         "best_lives_left": max(lives_left),
         "survival_rate": timeouts / len(results),
         "variant_stats": summarize_variant_stats(results),
+        "score_breakdown": summarize_score_breakdown(results),
     }
 
 
@@ -177,6 +197,12 @@ def format_summary_lines(summary, games_label="Games"):
                 f"hits={stats['hits']}, "
                 f"avoid_rate={stats['avoid_rate']:.1%}"
             )
+    score_breakdown = summary.get("score_breakdown")
+    if score_breakdown:
+        lines.append("Score breakdown:")
+        for key in SCORE_BREAKDOWN_KEYS:
+            stats = score_breakdown.get(key, {"total": 0, "average": 0})
+            lines.append(f"  {key}: total={stats['total']}, avg={stats['average']:.2f}")
     return lines
 
 

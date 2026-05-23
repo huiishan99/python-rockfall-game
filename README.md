@@ -13,9 +13,9 @@ This is now in v0.8 development after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
-- Headless evaluation reports score baselines and rock-variant outcomes.
+- Headless evaluation reports score baselines, score-source breakdowns, and rock-variant outcomes.
 - Runtime hand-feel tuning for difficulty, player speed, and initial lives is implemented across play, evaluation, comparison, experiments, and release checks.
-- Evaluation and comparison reports include survival metrics, variant outcomes, and can be saved as JSON artifacts.
+- Evaluation and comparison reports include survival metrics, score-source breakdowns, variant outcomes, and can be saved as JSON artifacts.
 - Data inspection can check collected samples, action balance, and rock-variant coverage before training.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
 - Variant rocks add different fall speeds and score rewards; ore now adds an extra close-dodge risk bonus, and new training features expose the nearest three rocks while old four- and six-feature models still run.
@@ -35,7 +35,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
 - Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
-- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, score-source breakdowns, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -176,7 +176,7 @@ Run headless simulations to compare model performance without opening a game win
 python3 evaluate_model.py --games 10 --max-frames 3600
 ```
 
-The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, timeout counts, and per-variant spawned/avoided/hit counts with avoid rates.
+The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, timeout counts, per-variant spawned/avoided/hit counts with avoid rates, and a score breakdown for base dodge points, combo bonuses, variant bonuses, and risk bonuses.
 
 For scripts or future charts, emit machine-readable JSON with the evaluation settings and summary metrics:
 
@@ -198,7 +198,7 @@ Add `--include-rule-baseline` to compare against the built-in `policy:safe-rule`
 python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --max-frames 3600
 ```
 
-Comparison output includes score deltas, average remaining lives, survival rate, per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
+Comparison output includes score deltas, average remaining lives, survival rate, score-source breakdowns and per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
 ### Runtime Files
 
