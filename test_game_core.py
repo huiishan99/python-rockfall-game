@@ -164,6 +164,13 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.messages[-1]["text"], "HIT!")
         self.assertEqual(game.pop_events(), [EVENT_HIT])
 
+    def test_hit_tracks_variant_stat(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_hit("swift")
+
+        self.assertEqual(game.variant_stats["swift"]["hits"], 1)
+
     def test_messages_tick_down_and_float(self):
         game = RockfallGame(self.screen)
         game._add_message("+1", (255, 255, 255), 10, 20)
@@ -274,7 +281,39 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.player_x = 100
         game.obstacles = [[120, 200, "ore"]]
 
-        self.assertEqual(game.model_features(), [100, 120, 200, 20, 0, 2])
+        self.assertEqual(game.model_features(), [100, 120, 200, 20, 0, 2, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0])
+
+    def test_model_features_include_three_nearest_obstacles(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+        game.obstacles = [
+            [400, 20, "normal"],
+            [120, 200, "ore"],
+            [80, 160, "heavy"],
+            [200, 120, "swift"],
+        ]
+
+        self.assertEqual(
+            game.model_features(),
+            [
+                100,
+                120,
+                200,
+                20,
+                0,
+                2,
+                80,
+                160,
+                -20,
+                -1,
+                1,
+                200,
+                120,
+                100,
+                2,
+                0,
+            ],
+        )
 
     def test_spawned_obstacles_include_variant_key(self):
         game = RockfallGame(self.screen)
@@ -284,6 +323,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._spawn_obstacle()
 
         self.assertEqual(game.obstacles[0][2], "ore")
+        self.assertEqual(game.variant_stats["ore"]["spawned"], 1)
 
     def test_variant_speed_changes_fall_rate(self):
         game = RockfallGame(self.screen)
@@ -303,8 +343,17 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         messages = [message["text"] for message in game.messages]
         self.assertEqual(game.score, 3)
+        self.assertEqual(game.variant_stats["ore"]["avoided"], 1)
         self.assertIn("+3", messages)
         self.assertIn("ORE +2", messages)
+
+    def test_variant_stats_payload_is_a_copy(self):
+        game = RockfallGame(self.screen)
+
+        payload = game.variant_stats_payload()
+        payload["normal"]["hits"] = 99
+
+        self.assertEqual(game.variant_stats["normal"]["hits"], 0)
 
     def test_combo_bonus_increases_score_after_interval(self):
         game = RockfallGame(self.screen)

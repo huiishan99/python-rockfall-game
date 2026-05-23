@@ -3,7 +3,14 @@ import os
 import tempfile
 import unittest
 
-from evaluate_model import build_summary_payload, format_summary_lines, parse_args, summarize_results, write_summary_report
+from evaluate_model import (
+    build_summary_payload,
+    format_summary_lines,
+    parse_args,
+    summarize_results,
+    summarize_variant_stats,
+    write_summary_report,
+)
 
 
 class EvaluateModelTest(unittest.TestCase):
@@ -51,6 +58,21 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(summary["best_lives_left"], 2)
         self.assertEqual(summary["survival_rate"], 0.5)
         self.assertEqual(summary["timeouts"], 1)
+        self.assertIn("ore", summary["variant_stats"])
+
+    def test_summarizes_variant_stats(self):
+        variant_stats = summarize_variant_stats(
+            [
+                {"variant_stats": {"ore": {"spawned": 2, "avoided": 1, "hits": 1}}},
+                {"variant_stats": {"ore": {"spawned": 1, "avoided": 1, "hits": 0}}},
+            ]
+        )
+
+        self.assertEqual(variant_stats["ore"]["spawned"], 3)
+        self.assertEqual(variant_stats["ore"]["avoided"], 2)
+        self.assertEqual(variant_stats["ore"]["hits"], 1)
+        self.assertEqual(variant_stats["ore"]["encounters"], 3)
+        self.assertAlmostEqual(variant_stats["ore"]["avoid_rate"], 2 / 3)
 
     def test_formats_summary_lines(self):
         lines = format_summary_lines(
@@ -75,6 +97,29 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertIn("Average lives left: 1.00", lines)
         self.assertIn("Survival rate: 50.0%", lines)
         self.assertIn("Timed out games: 1", lines)
+
+    def test_formats_variant_summary_lines(self):
+        lines = format_summary_lines(
+            {
+                "games": 1,
+                "average_score": 5,
+                "best_score": 5,
+                "worst_score": 5,
+                "average_best_combo": 4,
+                "best_combo": 4,
+                "average_frames": 150,
+                "average_lives_left": 1,
+                "best_lives_left": 1,
+                "survival_rate": 1,
+                "timeouts": 1,
+                "variant_stats": {
+                    "ore": {"spawned": 2, "avoided": 1, "hits": 1, "avoid_rate": 0.5},
+                },
+            }
+        )
+
+        self.assertIn("Variant outcomes:", lines)
+        self.assertIn("  ore: spawned=2, avoided=1, hits=1, avoid_rate=50.0%", lines)
 
     def test_builds_summary_payload_with_model_path(self):
         payload = build_summary_payload(

@@ -5,6 +5,7 @@ import unittest
 
 import joblib
 
+from features import MAX_MODEL_OBSTACLES
 from train_model import MODEL_FILE, format_variant_coverage_line, load_data, parse_args, save_model
 
 
@@ -33,7 +34,7 @@ class TrainModelTest(unittest.TestCase):
 
             X, y, skipped_entries = load_data(data_path)
 
-        self.assertEqual(X.tolist(), [[100, 120, 40, 20, 0, 2]])
+        self.assertEqual(X.tolist(), [[100, 120, 40, 20, 0, 2] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)])
         self.assertEqual(y.tolist(), [1])
         self.assertEqual(skipped_entries, 0)
 

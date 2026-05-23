@@ -1,6 +1,7 @@
 import sys
 import unittest
 
+from features import FEATURE_NAMES, SINGLE_OBSTACLE_FEATURE_NAMES
 from play_with_model import (
     MODEL_FILE,
     manual_play_command,
@@ -63,16 +64,26 @@ class PlayWithModelTest(unittest.TestCase):
 
     def test_predict_action_adapts_features_for_legacy_model(self):
         model = RecordingModel(n_features_in=4, prediction=1)
-        game = StubGame([200, 260, 300, 60, 0, 2])
+        game = StubGame([200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0])
 
         action = predict_action(model, game)
 
         self.assertEqual(action, "right")
         self.assertEqual(model.seen_features, [200, 260, 300, 60])
 
-    def test_predict_action_uses_variant_features_for_current_model(self):
-        features = [200, 260, 300, 60, 0, 2]
-        model = RecordingModel(n_features_in=6, prediction=0)
+    def test_predict_action_adapts_features_for_single_obstacle_model(self):
+        features = [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
+        model = RecordingModel(n_features_in=len(SINGLE_OBSTACLE_FEATURE_NAMES), prediction=0)
+        game = StubGame(features)
+
+        action = predict_action(model, game)
+
+        self.assertEqual(action, "left")
+        self.assertEqual(model.seen_features, features[: len(SINGLE_OBSTACLE_FEATURE_NAMES)])
+
+    def test_predict_action_uses_multi_obstacle_features_for_current_model(self):
+        features = [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
+        model = RecordingModel(n_features_in=len(FEATURE_NAMES), prediction=0)
         game = StubGame(features)
 
         action = predict_action(model, game)

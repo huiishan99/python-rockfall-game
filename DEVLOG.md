@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add multi-rock features and variant outcome metrics
+
+- Changed: expanded `features.py` from one nearest rock to the nearest three rocks while keeping four-feature and six-feature model compatibility; updated `data_quality.py` to measure variant coverage across the same nearest-three rocks; added per-variant spawned, avoided, hit, and avoid-rate metrics in `game_core.py` and `evaluate_model.py`; expanded feature, gameplay, prediction, training, data-quality, and evaluation tests; updated `README.md`.
+- Why: models need more than one rock to learn competing threats, and evaluation needs per-variant outcomes to show whether ore, heavy, and swift rocks are actually handled well.
+- Behavior: newly trained models now receive player x-position plus three ranked rock feature groups; evaluation JSON/text summaries include variant outcome counts and avoid rates.
+- Verification: ran `python3 -m unittest test_features.py test_game_core.py test_play_with_model.py test_train_model.py`; ran `python3 -m unittest test_evaluate_model.py test_game_core.py test_features.py test_play_with_model.py test_train_model.py`; ran `python3 -m unittest test_data_quality.py test_features.py test_game_core.py test_evaluate_model.py test_play_with_model.py test_train_model.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile features.py data_quality.py game_core.py evaluate_model.py play_with_model.py train_model.py test_features.py test_data_quality.py test_game_core.py test_evaluate_model.py test_play_with_model.py test_train_model.py`; ran `python3 inspect_data.py --data game_data.json`; ran `python3 train_model.py --data game_data.json --model /private/tmp/rockfall-multirock-model.pkl --estimators 20`; ran `python3 evaluate_model.py --model /private/tmp/rockfall-multirock-model.pkl --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --json`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-multirock-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-multirock-release-check.json`.
+- Risks/Notes: old `game_model.pkl` and six-feature candidate models still run through feature adaptation, but newly trained 16-feature models should be compared only against reports that record this feature version.
+
 ## 2026-05-23 - Report rock variant coverage in data tools
 
 - Changed: added rock-variant coverage summaries to `data_quality.py`, `inspect_data.py`, `train_model.py`, and `run_model_experiment.py`; expanded data inspection, training, and experiment tests; updated `README.md`.

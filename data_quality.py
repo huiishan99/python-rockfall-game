@@ -1,7 +1,7 @@
 from collections import Counter
 
 from data_store import load_game_data
-from features import FEATURE_NAMES
+from features import FEATURE_NAMES, MAX_MODEL_OBSTACLES
 from settings import DEFAULT_OBSTACLE_VARIANT, OBSTACLE_VARIANTS
 
 DEFAULT_MIN_SAMPLES = 500
@@ -29,7 +29,7 @@ def recorded_variant_for_obstacle(obstacle):
     return None
 
 
-def nearest_training_obstacle_variant(obstacles):
+def ranked_training_obstacle_variants(obstacles, limit=MAX_MODEL_OBSTACLES):
     valid_obstacles = []
     for obstacle in obstacles:
         try:
@@ -41,9 +41,10 @@ def nearest_training_obstacle_variant(obstacles):
             continue
         valid_obstacles.append((obstacle_y, recorded_variant_for_obstacle(obstacle)))
 
-    if not valid_obstacles:
-        return (False, None)
-    return (True, max(valid_obstacles, key=lambda obstacle: obstacle[0])[1])
+    return [
+        variant_key
+        for _, variant_key in sorted(valid_obstacles, key=lambda obstacle: obstacle[0], reverse=True)[:limit]
+    ]
 
 
 def variant_coverage_summary(entries):
@@ -65,16 +66,17 @@ def variant_coverage_summary(entries):
         if not obstacles or action not in ("left", "right"):
             continue
 
-        has_nearest_obstacle, variant_key = nearest_training_obstacle_variant(obstacles)
-        if not has_nearest_obstacle:
+        variant_keys = ranked_training_obstacle_variants(obstacles)
+        if not variant_keys:
             invalid_obstacle_samples += 1
             continue
 
-        total_obstacle_samples += 1
-        if variant_key is None:
-            legacy_obstacle_samples += 1
-        else:
-            variant_counts[variant_key] += 1
+        for variant_key in variant_keys:
+            total_obstacle_samples += 1
+            if variant_key is None:
+                legacy_obstacle_samples += 1
+            else:
+                variant_counts[variant_key] += 1
 
     recorded_variant_samples = sum(variant_counts.values())
     variant_sample_ratio = recorded_variant_samples / total_obstacle_samples if total_obstacle_samples else 0

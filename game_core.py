@@ -130,6 +130,7 @@ class RockfallGame:
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.messages = []
         self.events = []
+        self.variant_stats = self.empty_variant_stats()
         self.game_over = False
 
     def snapshot(self):
@@ -175,6 +176,23 @@ class RockfallGame:
         events = self.events
         self.events = []
         return events
+
+    def empty_variant_stats(self):
+        return {
+            variant_key: {"spawned": 0, "avoided": 0, "hits": 0}
+            for variant_key in OBSTACLE_VARIANTS
+        }
+
+    def variant_stats_payload(self):
+        return {
+            variant_key: dict(stats)
+            for variant_key, stats in self.variant_stats.items()
+        }
+
+    def tracked_variant_key(self, variant_key):
+        if variant_key in self.variant_stats:
+            return variant_key
+        return DEFAULT_OBSTACLE_VARIANT
 
     def draw_start_screen(self, mode_name, show_model_button=True, show_training_button=False):
         self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
@@ -360,7 +378,9 @@ class RockfallGame:
         self.frame_count += 1
         if self.frame_count % self.obstacle_frequency == 0:
             obstacle_x = choose_spawn_x(self.last_spawn_x, self.difficulty_level, random)
-            self.obstacles.append([obstacle_x, -OBSTACLE_HEIGHT, self.choose_obstacle_variant()])
+            variant_key = self.choose_obstacle_variant()
+            self.obstacles.append([obstacle_x, -OBSTACLE_HEIGHT, variant_key])
+            self.variant_stats[variant_key]["spawned"] += 1
             self.last_spawn_x = obstacle_x
 
     def choose_obstacle_variant(self):
@@ -388,30 +408,34 @@ class RockfallGame:
 
             obstacle[1] += self.obstacle_fall_speed(obstacle)
             if player_rect.colliderect(self.obstacle_rect(obstacle)):
-                self._handle_hit()
+                self._handle_hit(self.obstacle_variant(obstacle))
             else:
                 remaining_obstacles.append(obstacle)
 
         self.obstacles = remaining_obstacles
 
-    def _handle_hit(self):
+    def _handle_hit(self, variant_key=DEFAULT_OBSTACLE_VARIANT):
         if self.invincibility_frames > 0:
             return
 
+        variant_key = self.tracked_variant_key(variant_key)
         self.lives -= 1
         self.invincibility_frames = INVINCIBILITY_FRAMES
         self.combo = 0
+        self.variant_stats[variant_key]["hits"] += 1
         self._add_message("HIT!", HIT_MESSAGE_COLOR, self.player_x - 5, self.player_y - 35)
         self._emit_event(EVENT_HIT)
         if self.lives <= 0:
             self.game_over = True
 
     def _handle_avoid(self, obstacle_x, score_bonus=0, variant_key=DEFAULT_OBSTACLE_VARIANT):
+        variant_key = self.tracked_variant_key(variant_key)
         self.combo += 1
         self.best_combo = max(self.best_combo, self.combo)
         base_points = self.combo_points()
         points = base_points + score_bonus
         self.score += points
+        self.variant_stats[variant_key]["avoided"] += 1
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
         self._emit_event(EVENT_AVOID)
         self._maybe_restore_life()

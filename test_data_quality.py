@@ -47,9 +47,9 @@ class DataQualityTest(unittest.TestCase):
 
         coverage = variant_coverage_summary(entries)
 
-        self.assertEqual(coverage["recorded_variant_samples"], 3)
+        self.assertEqual(coverage["recorded_variant_samples"], 4)
         self.assertEqual(coverage["legacy_obstacle_samples"], 1)
-        self.assertEqual(coverage["variant_counts"]["ore"], 1)
+        self.assertEqual(coverage["variant_counts"]["ore"], 2)
         self.assertEqual(coverage["variant_counts"]["heavy"], 1)
         self.assertEqual(coverage["variant_counts"]["swift"], 1)
         self.assertEqual(coverage["status"], "variant_ready")

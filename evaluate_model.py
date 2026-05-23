@@ -7,7 +7,7 @@ from statistics import mean
 from data_store import ensure_parent_dir
 from play_with_model import MODEL_FILE
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-from settings import INITIAL_LIVES, PLAYER_SPEED
+from settings import INITIAL_LIVES, OBSTACLE_VARIANTS, PLAYER_SPEED
 
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
@@ -63,7 +63,32 @@ def run_game(
         "frames": frames,
         "lives": game.lives,
         "timed_out": not game.game_over,
+        "variant_stats": game.variant_stats_payload(),
     }
+
+
+def empty_variant_stats():
+    return {
+        variant_key: {"spawned": 0, "avoided": 0, "hits": 0, "encounters": 0, "avoid_rate": 0}
+        for variant_key in OBSTACLE_VARIANTS
+    }
+
+
+def summarize_variant_stats(results):
+    variant_stats = empty_variant_stats()
+    for result in results:
+        for variant_key, stats in result.get("variant_stats", {}).items():
+            if variant_key not in variant_stats:
+                continue
+            for stat_key in ("spawned", "avoided", "hits"):
+                variant_stats[variant_key][stat_key] += stats.get(stat_key, 0)
+
+    for stats in variant_stats.values():
+        encounters = stats["avoided"] + stats["hits"]
+        stats["encounters"] = encounters
+        stats["avoid_rate"] = stats["avoided"] / encounters if encounters else 0
+
+    return variant_stats
 
 
 def summarize_results(results):
@@ -85,11 +110,12 @@ def summarize_results(results):
         "average_lives_left": mean(lives_left),
         "best_lives_left": max(lives_left),
         "survival_rate": timeouts / len(results),
+        "variant_stats": summarize_variant_stats(results),
     }
 
 
 def format_summary_lines(summary, games_label="Games"):
-    return [
+    lines = [
         f"{games_label}: {summary['games']}",
         f"Average score: {summary['average_score']:.2f}",
         f"Best score: {summary['best_score']}",
@@ -102,6 +128,18 @@ def format_summary_lines(summary, games_label="Games"):
         f"Survival rate: {summary['survival_rate']:.1%}",
         f"Timed out games: {summary['timeouts']}",
     ]
+    variant_stats = summary.get("variant_stats")
+    if variant_stats:
+        lines.append("Variant outcomes:")
+        for variant_key, stats in variant_stats.items():
+            lines.append(
+                f"  {variant_key}: "
+                f"spawned={stats['spawned']}, "
+                f"avoided={stats['avoided']}, "
+                f"hits={stats['hits']}, "
+                f"avoid_rate={stats['avoid_rate']:.1%}"
+            )
+    return lines
 
 
 def build_summary_payload(
