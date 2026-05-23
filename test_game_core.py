@@ -10,6 +10,7 @@ from game_core import ACTION_LEFT, ACTION_RIGHT, RockfallGame
 from settings import (
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
+    DEFAULT_OBSTACLE_VARIANT,
     DIFFICULTY_INTERVAL_FRAMES,
     HUD_COMBO_COLOR,
     HUD_COLOR,
@@ -34,6 +35,7 @@ from settings import (
     OBSTACLE_CRACK_COLOR,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
+    OBSTACLE_VARIANTS,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_OUTLINE_COLOR,
@@ -250,6 +252,47 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.score, 1)
         self.assertEqual(game.pop_events(), [EVENT_AVOID])
 
+    def test_old_obstacles_default_to_normal_variant(self):
+        game = RockfallGame(self.screen)
+
+        self.assertEqual(game.obstacle_variant([100, 200]), DEFAULT_OBSTACLE_VARIANT)
+
+    def test_snapshot_keeps_variant_out_of_training_state(self):
+        game = RockfallGame(self.screen)
+        game.obstacles = [[100, 200, "ore"]]
+
+        self.assertEqual(game.snapshot()["obstacles"], [(100, 200)])
+
+    def test_spawned_obstacles_include_variant_key(self):
+        game = RockfallGame(self.screen)
+        game.choose_obstacle_variant = lambda: "ore"
+        game.frame_count = game.obstacle_frequency - 1
+
+        game._spawn_obstacle()
+
+        self.assertEqual(game.obstacles[0][2], "ore")
+
+    def test_variant_speed_changes_fall_rate(self):
+        game = RockfallGame(self.screen)
+        game.obstacle_speed = 5
+
+        normal_speed = game.obstacle_fall_speed([100, 0, "normal"])
+        heavy_speed = game.obstacle_fall_speed([100, 0, "heavy"])
+        swift_speed = game.obstacle_fall_speed([100, 0, "swift"])
+
+        self.assertLess(heavy_speed, normal_speed)
+        self.assertGreater(swift_speed, normal_speed)
+
+    def test_ore_avoid_adds_score_bonus_message(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_avoid(20, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
+
+        messages = [message["text"] for message in game.messages]
+        self.assertEqual(game.score, 3)
+        self.assertIn("+3", messages)
+        self.assertIn("ORE +2", messages)
+
     def test_combo_bonus_increases_score_after_interval(self):
         game = RockfallGame(self.screen)
 
@@ -383,6 +426,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at((286, 210))[:3], OBSTACLE_COLOR)
         self.assertEqual(self.screen.get_at((310, 205))[:3], OBSTACLE_SHADOW_COLOR)
         self.assertEqual(self.screen.get_at((290, 207))[:3], OBSTACLE_CRACK_COLOR)
+
+    def test_draw_adds_ore_variant_marker(self):
+        game = RockfallGame(self.screen)
+        game.obstacles = [[260, 180, "ore"]]
+
+        game.draw()
+
+        self.assertEqual(self.screen.get_at((280, 206))[:3], OBSTACLE_VARIANTS["ore"]["mark"])
 
     def test_incoming_obstacle_draws_clipped_rock_without_warning_strip(self):
         game = RockfallGame(self.screen)

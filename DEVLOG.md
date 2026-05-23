@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Add rock variants with distinct effects
+
+- Changed: added normal, heavy, swift, and ore obstacle variants in `settings.py` and `game_core.py`; gave variants different colors, markings, fall-speed modifiers, and score bonuses; added a help-screen line for variant effects; expanded core gameplay/rendering tests; updated `README.md`.
+- Why: Rockfall's obstacles now read as rocks, so the next step is to make them mechanically interesting instead of all behaving the same.
+- Behavior: normal stones keep the baseline behavior, heavy stones fall more slowly and award +1 score when avoided, swift stones fall faster, and ore stones award +2 score when avoided. Training snapshots still record only obstacle x/y positions, keeping existing model-data shape compatible.
+- Verification: ran `python3 -m unittest test_game_core.py`; rendered pygame preview image to `/private/tmp/rockfall-rock-variants.png`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-variant-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-variant-release-check.json`.
+- Risks/Notes: the active model does not receive rock variant labels as features, so variant speed changes may affect model play quality until fresh data is collected and the model is compared again.
+
 ## 2026-05-23 - Add rock-art smoke-test gameplay samples
 
 - Changed: updated `game_data.json` with 144 new manual-play samples collected while opening the rock-art build for a smoke test.

@@ -10,6 +10,7 @@ from settings import (
     BACKGROUND_COLOR,
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
+    DEFAULT_OBSTACLE_VARIANT,
     HUD_COLOR,
     HUD_COMBO_COLOR,
     HUD_PANEL_BORDER_COLOR,
@@ -39,6 +40,8 @@ from settings import (
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
+    OBSTACLE_VARIANT_WEIGHTS,
+    OBSTACLE_VARIANTS,
     OBSTACLE_WIDTH,
     LANE_COLOR,
     LANE_HIGHLIGHT_COLOR,
@@ -228,6 +231,7 @@ class RockfallGame:
         return [
             "Dodge falling rocks and survive as long as you can.",
             "Move with Left/Right or A/D. Avoid rocks to score.",
+            "Heavy and ore rocks give bonus score; swift rocks fall fast.",
             "Combos add bonus points; score milestones restore lost lives.",
             "Manual play records state + action examples.",
             "train_model.py learns left/right choices.",
@@ -290,6 +294,21 @@ class RockfallGame:
     def obstacle_rect(self, obstacle):
         return pygame.Rect(obstacle[0], obstacle[1], OBSTACLE_WIDTH, OBSTACLE_HEIGHT)
 
+    def obstacle_variant(self, obstacle):
+        if len(obstacle) >= 3 and obstacle[2] in OBSTACLE_VARIANTS:
+            return obstacle[2]
+        return DEFAULT_OBSTACLE_VARIANT
+
+    def obstacle_variant_config(self, obstacle):
+        return OBSTACLE_VARIANTS[self.obstacle_variant(obstacle)]
+
+    def obstacle_fall_speed(self, obstacle):
+        speed = self.obstacle_speed + self.obstacle_variant_config(obstacle)["speed_delta"]
+        return max(1, speed)
+
+    def obstacle_score_bonus(self, obstacle):
+        return self.obstacle_variant_config(obstacle)["score_bonus"]
+
     def player_color(self):
         if self.invincibility_frames <= 0:
             return PLAYER_COLOR
@@ -314,8 +333,18 @@ class RockfallGame:
         self.frame_count += 1
         if self.frame_count % self.obstacle_frequency == 0:
             obstacle_x = choose_spawn_x(self.last_spawn_x, self.difficulty_level, random)
-            self.obstacles.append([obstacle_x, -OBSTACLE_HEIGHT])
+            self.obstacles.append([obstacle_x, -OBSTACLE_HEIGHT, self.choose_obstacle_variant()])
             self.last_spawn_x = obstacle_x
+
+    def choose_obstacle_variant(self):
+        total_weight = sum(weight for _, weight in OBSTACLE_VARIANT_WEIGHTS)
+        roll = random.randint(1, total_weight)
+        running_weight = 0
+        for variant_key, weight in OBSTACLE_VARIANT_WEIGHTS:
+            running_weight += weight
+            if roll <= running_weight:
+                return variant_key
+        return DEFAULT_OBSTACLE_VARIANT
 
     def _move_obstacles_and_check_collisions(self):
         player_rect = self.player_rect
@@ -323,10 +352,14 @@ class RockfallGame:
 
         for obstacle in self.obstacles:
             if obstacle[1] >= SCREEN_HEIGHT:
-                self._handle_avoid(obstacle[0])
+                self._handle_avoid(
+                    obstacle[0],
+                    self.obstacle_score_bonus(obstacle),
+                    self.obstacle_variant(obstacle),
+                )
                 continue
 
-            obstacle[1] += self.obstacle_speed
+            obstacle[1] += self.obstacle_fall_speed(obstacle)
             if player_rect.colliderect(self.obstacle_rect(obstacle)):
                 self._handle_hit()
             else:
@@ -346,16 +379,20 @@ class RockfallGame:
         if self.lives <= 0:
             self.game_over = True
 
-    def _handle_avoid(self, obstacle_x):
+    def _handle_avoid(self, obstacle_x, score_bonus=0, variant_key=DEFAULT_OBSTACLE_VARIANT):
         self.combo += 1
         self.best_combo = max(self.best_combo, self.combo)
-        points = self.combo_points()
+        base_points = self.combo_points()
+        points = base_points + score_bonus
         self.score += points
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
         self._emit_event(EVENT_AVOID)
         self._maybe_restore_life()
 
-        if points > 1:
+        if score_bonus > 0:
+            label = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])["label"]
+            self._add_message(f"{label} +{score_bonus}", COMBO_MESSAGE_COLOR, obstacle_x - 15, SCREEN_HEIGHT - 115)
+        if base_points > 1:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
         if self.is_near_miss(obstacle_x):
             self._add_message("CLOSE!", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 165)
@@ -462,6 +499,8 @@ class RockfallGame:
 
     def _draw_obstacle(self, obstacle):
         obstacle_rect = self.obstacle_rect(obstacle)
+        variant_key = self.obstacle_variant(obstacle)
+        variant = self.obstacle_variant_config(obstacle)
         rock_points = self._rock_points(obstacle_rect)
         shadow_points = [(x + 4, y + 5) for x, y in rock_points]
         highlight_points = [
@@ -477,12 +516,40 @@ class RockfallGame:
             (obstacle_rect.x + 25, obstacle_rect.y + 31),
         ]
 
-        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, shadow_points)
-        pygame.draw.polygon(self.screen, OBSTACLE_COLOR, rock_points)
-        pygame.draw.polygon(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_points)
-        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, dark_facet_points)
-        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, rock_points, 2)
-        self._draw_rock_cracks(obstacle_rect)
+        pygame.draw.polygon(self.screen, variant["shadow"], shadow_points)
+        pygame.draw.polygon(self.screen, variant["color"], rock_points)
+        pygame.draw.polygon(self.screen, variant["highlight"], highlight_points)
+        pygame.draw.polygon(self.screen, variant["shadow"], dark_facet_points)
+        self._draw_rock_variant_marks(obstacle_rect, variant_key, variant)
+        pygame.draw.polygon(self.screen, variant["shadow"], rock_points, 2)
+        self._draw_rock_cracks(obstacle_rect, variant["crack"])
+
+    def _draw_rock_variant_marks(self, obstacle_rect, variant_key, variant):
+        if variant_key == "heavy":
+            band_points = [
+                (obstacle_rect.x + 10, obstacle_rect.y + 27),
+                (obstacle_rect.x + 40, obstacle_rect.y + 23),
+                (obstacle_rect.x + 38, obstacle_rect.y + 31),
+                (obstacle_rect.x + 13, obstacle_rect.y + 36),
+            ]
+            pygame.draw.polygon(self.screen, variant["mark"], band_points)
+        elif variant_key == "swift":
+            streaks = (
+                ((obstacle_rect.x + 13, obstacle_rect.y + 35), (obstacle_rect.x + 35, obstacle_rect.y + 12)),
+                ((obstacle_rect.x + 21, obstacle_rect.y + 42), (obstacle_rect.x + 43, obstacle_rect.y + 18)),
+            )
+            for start, end in streaks:
+                pygame.draw.line(self.screen, variant["mark"], start, end, 2)
+        elif variant_key == "ore":
+            ore_points = [
+                (obstacle_rect.x + 23, obstacle_rect.y + 21),
+                (obstacle_rect.x + 31, obstacle_rect.y + 25),
+                (obstacle_rect.x + 28, obstacle_rect.y + 34),
+                (obstacle_rect.x + 18, obstacle_rect.y + 32),
+                (obstacle_rect.x + 16, obstacle_rect.y + 24),
+            ]
+            pygame.draw.polygon(self.screen, variant["mark"], ore_points)
+            pygame.draw.polygon(self.screen, variant["highlight"], ore_points, 1)
 
     def _rock_points(self, obstacle_rect):
         return [
@@ -495,7 +562,7 @@ class RockfallGame:
             (obstacle_rect.x, obstacle_rect.y + 24),
         ]
 
-    def _draw_rock_cracks(self, obstacle_rect):
+    def _draw_rock_cracks(self, obstacle_rect, crack_color=OBSTACLE_CRACK_COLOR):
         crack_a = [
             (obstacle_rect.x + 23, obstacle_rect.y + 18),
             (obstacle_rect.x + 30, obstacle_rect.y + 27),
@@ -505,8 +572,8 @@ class RockfallGame:
             (obstacle_rect.x + 34, obstacle_rect.y + 28),
             (obstacle_rect.x + 40, obstacle_rect.y + 33),
         ]
-        pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_a, 2)
-        pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_b, 2)
+        pygame.draw.lines(self.screen, crack_color, False, crack_a, 2)
+        pygame.draw.lines(self.screen, crack_color, False, crack_b, 2)
 
     def _draw_hit_overlay(self):
         alpha = self.hit_overlay_alpha()
@@ -583,7 +650,7 @@ class RockfallGame:
         return HUD_COLOR
 
     def _help_line_color(self, index):
-        if index in (3, 4, 5, 6):
+        if index in (4, 5, 6, 7):
             return MENU_ACCENT_COLOR
         return HUD_COLOR
 

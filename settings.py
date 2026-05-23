@@ -59,6 +59,55 @@ OBSTACLE_COLOR = (136, 104, 84)
 OBSTACLE_SHADOW_COLOR = (48, 38, 36)
 OBSTACLE_HIGHLIGHT_COLOR = (196, 158, 120)
 OBSTACLE_CRACK_COLOR = (32, 26, 24)
+DEFAULT_OBSTACLE_VARIANT = "normal"
+OBSTACLE_VARIANTS = {
+    "normal": {
+        "label": "STONE",
+        "color": OBSTACLE_COLOR,
+        "shadow": OBSTACLE_SHADOW_COLOR,
+        "highlight": OBSTACLE_HIGHLIGHT_COLOR,
+        "crack": OBSTACLE_CRACK_COLOR,
+        "mark": (172, 132, 98),
+        "speed_delta": 0,
+        "score_bonus": 0,
+    },
+    "heavy": {
+        "label": "HEAVY",
+        "color": (92, 88, 86),
+        "shadow": (30, 31, 34),
+        "highlight": (154, 148, 138),
+        "crack": (18, 20, 22),
+        "mark": (60, 58, 58),
+        "speed_delta": -1,
+        "score_bonus": 1,
+    },
+    "swift": {
+        "label": "SWIFT",
+        "color": (98, 116, 128),
+        "shadow": (28, 42, 54),
+        "highlight": (148, 214, 228),
+        "crack": (28, 78, 94),
+        "mark": (106, 232, 248),
+        "speed_delta": 2,
+        "score_bonus": 0,
+    },
+    "ore": {
+        "label": "ORE",
+        "color": (124, 94, 78),
+        "shadow": (46, 32, 30),
+        "highlight": (226, 182, 106),
+        "crack": (74, 44, 30),
+        "mark": (255, 214, 80),
+        "speed_delta": 0,
+        "score_bonus": 2,
+    },
+}
+OBSTACLE_VARIANT_WEIGHTS = (
+    ("normal", 64),
+    ("heavy", 15),
+    ("swift", 13),
+    ("ore", 8),
+)
 INITIAL_OBSTACLE_SPEED = 5
 OBSTACLE_FREQUENCY = 25
 MIN_OBSTACLE_FREQUENCY = 12

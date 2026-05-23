@@ -18,6 +18,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Evaluation and comparison reports include survival metrics and can be saved as JSON artifacts.
 - Data inspection can check collected samples before training and save quality reports.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
+- Variant rocks add different fall speeds and score rewards while keeping the model feature format compatible.
 - Release checks can save versioned JSON artifacts for candidate builds.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
@@ -28,7 +29,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
-- Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
+- Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules and the machine-learning loop from manual data collection to model play.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
@@ -57,7 +58,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, and cracks.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly and award +1 score when avoided, swift stones fall faster, and ore stones award +2 score when avoided. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
 
 Controls:
 
@@ -122,7 +123,7 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
-The current model uses these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, and horizontal distance to that obstacle.
+The current model uses these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, and horizontal distance to that obstacle. Rock variants are kept inside the live game state and are not written into the training feature vector, so existing datasets and models remain structurally compatible.
 
 You can also experiment with alternate data or model files:
 
@@ -196,7 +197,7 @@ Local experiment outputs under `runs/` are also ignored by git.
 - Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
 - Collect fresh lane-based gameplay data.
 - Retrain and compare the model with `evaluate_model.py`.
-- Tune visual polish after more real-window playtesting.
+- Tune rock variant spawn rates and rewards after more real-window playtesting.
 - Continue collecting fresh play data and compare future models with `evaluate_model.py`.
 
 
