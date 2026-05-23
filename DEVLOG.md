@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Add rock-art smoke-test gameplay samples
+
+- Changed: updated `game_data.json` with 144 new manual-play samples collected while opening the rock-art build for a smoke test.
+- Why: real-window checks can produce useful data samples, and keeping them logged makes dataset changes traceable.
+- Behavior: the dataset now has 2,902 valid samples and 3 skipped entries; action balance remains close, with left=1,444 and right=1,458.
+- Verification: ran `python3 inspect_data.py --data game_data.json`.
+- Risks/Notes: this is data-only; no gameplay rules, model features, or trained model artifact changed.
+
 ## 2026-05-23 - Replace warning strip and square player art
 
 - Changed: removed the yellow top-edge incoming-rock warning strip; redrew the player as a small mine cart with a rim, angled body, shaded side, and wheels; expanded rendering tests; updated `README.md`.
