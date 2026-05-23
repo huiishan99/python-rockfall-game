@@ -347,6 +347,19 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertIn("+3", messages)
         self.assertIn("ORE +2", messages)
 
+    def test_close_ore_avoid_adds_risk_bonus(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+
+        game._handle_avoid(160, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
+
+        messages = [message["text"] for message in game.messages]
+        self.assertEqual(game.score, 4)
+        self.assertIn("+4", messages)
+        self.assertIn("ORE +2", messages)
+        self.assertIn("RISK +1", messages)
+        self.assertIn("CLOSE!", messages)
+
     def test_variant_stats_payload_is_a_copy(self):
         game = RockfallGame(self.screen)
 

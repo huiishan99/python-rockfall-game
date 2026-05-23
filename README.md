@@ -18,7 +18,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Evaluation and comparison reports include survival metrics, variant outcomes, and can be saved as JSON artifacts.
 - Data inspection can check collected samples, action balance, and rock-variant coverage before training.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
-- Variant rocks add different fall speeds and score rewards; new training features expose the nearest three rocks while old four- and six-feature models still run.
+- Variant rocks add different fall speeds and score rewards; ore now adds an extra close-dodge risk bonus, and new training features expose the nearest three rocks while old four- and six-feature models still run.
 - Release checks can save versioned JSON artifacts for candidate builds.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
@@ -33,7 +33,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
-- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through speed and reward features.
+- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
@@ -61,7 +61,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly and award +1 score when avoided, swift stones fall faster, and ore stones award +2 score when avoided. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message without changing the score. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly and award +1 score when avoided, swift stones fall faster, and ore stones award +2 score when avoided. Ore also gives an extra +1 risk bonus when avoided as a close dodge, so chasing ore can become a real risk/reward decision. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message, and ore close dodges also show `RISK +1`. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
 
 Controls:
 
@@ -78,7 +78,7 @@ Controls:
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
-The help screen shows the rock variant legend and explains that manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
+The help screen shows the rock variant legend, including ore's +2 reward and close-dodge +1 risk bonus, and explains that manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
 
 ### Run Tests
 

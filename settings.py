@@ -70,6 +70,7 @@ OBSTACLE_VARIANTS = {
         "mark": (172, 132, 98),
         "speed_delta": 0,
         "score_bonus": 0,
+        "near_miss_bonus": 0,
     },
     "heavy": {
         "label": "HEAVY",
@@ -80,6 +81,7 @@ OBSTACLE_VARIANTS = {
         "mark": (60, 58, 58),
         "speed_delta": -1,
         "score_bonus": 1,
+        "near_miss_bonus": 0,
     },
     "swift": {
         "label": "SWIFT",
@@ -90,6 +92,7 @@ OBSTACLE_VARIANTS = {
         "mark": (106, 232, 248),
         "speed_delta": 2,
         "score_bonus": 0,
+        "near_miss_bonus": 0,
     },
     "ore": {
         "label": "ORE",
@@ -100,6 +103,7 @@ OBSTACLE_VARIANTS = {
         "mark": (255, 214, 80),
         "speed_delta": 0,
         "score_bonus": 2,
+        "near_miss_bonus": 1,
     },
 }
 OBSTACLE_VARIANT_WEIGHTS = (

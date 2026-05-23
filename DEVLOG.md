@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add ore close-dodge risk bonus
+
+- Changed: added `near_miss_bonus` to rock variant settings, updated ore scoring in `game_core.py`, refreshed the help legend and README gameplay notes, and expanded gameplay tests.
+- Why: ore should feel meaningfully different from a normal rock by offering a tempting risk/reward choice instead of only being a flat score bonus.
+- Behavior: avoiding ore still awards +2 score, while close-dodging ore adds one more point and shows `RISK +1` alongside `CLOSE!`; normal close dodges remain feedback-only.
+- Verification: ran `python3 -m unittest test_game_core.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; ran `python3 -m unittest`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-ore-risk-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-ore-risk-release-check.json`; ran `git diff --check`.
+- Risks/Notes: scoring baselines can shift after ore-rich fresh data; current tracked training data still predates the newest risk-reward behavior.
+
 ## 2026-05-24 - Add model play debug overlay
 
 - Changed: added `play_with_model.py --debug-ai`, model prediction debug helpers, and `RockfallGame.draw_ai_debug_overlay`; expanded model-play and rendering tests; updated `README.md`.

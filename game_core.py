@@ -267,7 +267,7 @@ class RockfallGame:
             ("normal", "Baseline"),
             ("heavy", "Slower +1"),
             ("swift", "Fast fall"),
-            ("ore", "Bonus +2"),
+            ("ore", "+2, close +1"),
         ]
 
     def help_button_rect(self):
@@ -354,6 +354,10 @@ class RockfallGame:
     def obstacle_score_bonus(self, obstacle):
         return self.obstacle_variant_config(obstacle)["score_bonus"]
 
+    def obstacle_near_miss_bonus(self, variant_key):
+        variant = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])
+        return variant["near_miss_bonus"]
+
     def player_color(self):
         if self.invincibility_frames <= 0:
             return PLAYER_COLOR
@@ -430,10 +434,12 @@ class RockfallGame:
 
     def _handle_avoid(self, obstacle_x, score_bonus=0, variant_key=DEFAULT_OBSTACLE_VARIANT):
         variant_key = self.tracked_variant_key(variant_key)
+        near_miss = self.is_near_miss(obstacle_x)
+        near_miss_bonus = self.obstacle_near_miss_bonus(variant_key) if near_miss else 0
         self.combo += 1
         self.best_combo = max(self.best_combo, self.combo)
         base_points = self.combo_points()
-        points = base_points + score_bonus
+        points = base_points + score_bonus + near_miss_bonus
         self.score += points
         self.variant_stats[variant_key]["avoided"] += 1
         self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
@@ -443,9 +449,11 @@ class RockfallGame:
         if score_bonus > 0:
             label = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])["label"]
             self._add_message(f"{label} +{score_bonus}", COMBO_MESSAGE_COLOR, obstacle_x - 15, SCREEN_HEIGHT - 115)
+        if near_miss_bonus > 0:
+            self._add_message(f"RISK +{near_miss_bonus}", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 18, SCREEN_HEIGHT - 148)
         if base_points > 1:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
-        if self.is_near_miss(obstacle_x):
+        if near_miss:
             self._add_message("CLOSE!", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 165)
 
     def _maybe_restore_life(self):
