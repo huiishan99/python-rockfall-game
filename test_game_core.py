@@ -30,10 +30,11 @@ from settings import (
     MESSAGE_DURATION_FRAMES,
     NEAR_MISS_MESSAGE_COLOR,
     LOW_LIVES_THRESHOLD,
+    OBSTACLE_COLOR,
+    OBSTACLE_CRACK_COLOR,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
     OBSTACLE_WARNING_COLOR,
-    OBSTACLE_WIDTH,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_OUTLINE_COLOR,
@@ -367,17 +368,16 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertNotEqual(self.screen.get_at((3, 3))[:3], BACKGROUND_COLOR)
 
-    def test_draw_adds_obstacle_highlight_and_shadow(self):
+    def test_draw_adds_rock_highlight_shadow_and_cracks(self):
         game = RockfallGame(self.screen)
         game.obstacles = [[260, 180]]
 
         game.draw()
 
-        self.assertEqual(self.screen.get_at((261, 181))[:3], OBSTACLE_HIGHLIGHT_COLOR)
-        self.assertEqual(
-            self.screen.get_at((260 + OBSTACLE_WIDTH + 1, 180 + OBSTACLE_WIDTH + 1))[:3],
-            OBSTACLE_SHADOW_COLOR,
-        )
+        self.assertEqual(self.screen.get_at((272, 188))[:3], OBSTACLE_HIGHLIGHT_COLOR)
+        self.assertEqual(self.screen.get_at((286, 210))[:3], OBSTACLE_COLOR)
+        self.assertEqual(self.screen.get_at((310, 205))[:3], OBSTACLE_SHADOW_COLOR)
+        self.assertEqual(self.screen.get_at((290, 207))[:3], OBSTACLE_CRACK_COLOR)
 
     def test_draw_adds_top_warning_for_incoming_obstacle(self):
         game = RockfallGame(self.screen)

@@ -35,6 +35,7 @@ from settings import (
     NEAR_MISS_DISTANCE,
     NEAR_MISS_MESSAGE_COLOR,
     OBSTACLE_COLOR,
+    OBSTACLE_CRACK_COLOR,
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
@@ -436,14 +437,53 @@ class RockfallGame:
 
     def _draw_obstacle(self, obstacle):
         obstacle_rect = self.obstacle_rect(obstacle)
-        shadow_rect = obstacle_rect.move(4, 5)
-        highlight_rect = pygame.Rect(obstacle_rect.x, obstacle_rect.y, obstacle_rect.width, 8)
+        rock_points = self._rock_points(obstacle_rect)
+        shadow_points = [(x + 4, y + 5) for x, y in rock_points]
+        highlight_points = [
+            (obstacle_rect.x + 9, obstacle_rect.y + 5),
+            (obstacle_rect.x + 31, obstacle_rect.y + 3),
+            (obstacle_rect.x + 25, obstacle_rect.y + 18),
+            (obstacle_rect.x + 11, obstacle_rect.y + 21),
+        ]
+        dark_facet_points = [
+            (obstacle_rect.x + 41, obstacle_rect.y + 24),
+            (obstacle_rect.x + 43, obstacle_rect.y + 39),
+            (obstacle_rect.x + 28, obstacle_rect.y + 48),
+            (obstacle_rect.x + 25, obstacle_rect.y + 31),
+        ]
 
-        pygame.draw.rect(self.screen, OBSTACLE_SHADOW_COLOR, shadow_rect)
-        pygame.draw.rect(self.screen, OBSTACLE_COLOR, obstacle_rect)
-        pygame.draw.rect(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_rect)
+        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, shadow_points)
+        pygame.draw.polygon(self.screen, OBSTACLE_COLOR, rock_points)
+        pygame.draw.polygon(self.screen, OBSTACLE_HIGHLIGHT_COLOR, highlight_points)
+        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, dark_facet_points)
+        pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, rock_points, 2)
+        self._draw_rock_cracks(obstacle_rect)
         if obstacle_rect.y < 0:
             self._draw_obstacle_warning(obstacle_rect)
+
+    def _rock_points(self, obstacle_rect):
+        return [
+            (obstacle_rect.x + 8, obstacle_rect.y + 2),
+            (obstacle_rect.x + 34, obstacle_rect.y),
+            (obstacle_rect.x + 48, obstacle_rect.y + 13),
+            (obstacle_rect.x + 44, obstacle_rect.y + 38),
+            (obstacle_rect.x + 28, obstacle_rect.y + 50),
+            (obstacle_rect.x + 7, obstacle_rect.y + 44),
+            (obstacle_rect.x, obstacle_rect.y + 24),
+        ]
+
+    def _draw_rock_cracks(self, obstacle_rect):
+        crack_a = [
+            (obstacle_rect.x + 23, obstacle_rect.y + 18),
+            (obstacle_rect.x + 30, obstacle_rect.y + 27),
+            (obstacle_rect.x + 27, obstacle_rect.y + 38),
+        ]
+        crack_b = [
+            (obstacle_rect.x + 34, obstacle_rect.y + 28),
+            (obstacle_rect.x + 40, obstacle_rect.y + 33),
+        ]
+        pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_a, 2)
+        pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_b, 2)
 
     def _draw_obstacle_warning(self, obstacle_rect):
         warning_rect = pygame.Rect(obstacle_rect.x, 0, obstacle_rect.width, OBSTACLE_WARNING_HEIGHT)

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Draw falling rocks as irregular stones
+
+- Changed: replaced rectangular obstacle rendering with irregular rock polygons, offset shadows, warm stone colors, highlight facets, dark facets, and crack lines; expanded rendering tests; updated `README.md`.
+- Why: the game is called Rockfall, but the old obstacles still read as colored blocks rather than falling rocks.
+- Behavior: obstacle collision boxes and model features are unchanged; only the visual rendering now looks like faceted stones.
+- Verification: ran `python3 -m unittest test_game_core.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; rendered pygame preview image to `/private/tmp/rockfall-rock-obstacles.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-rock-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-rock-release-check.json`.
+- Risks/Notes: tests now sample specific rock facet pixels, so future art tweaks should update those samples intentionally.
+
 ## 2026-05-21 - Add model-to-training launcher
 
 - Changed: added a `TRAIN MANUALLY` button and T hotkey to the model-play start screen; launches `game.py` with the current difficulty, player speed, lives, and mute settings; added command/rendering tests; updated `README.md`.
