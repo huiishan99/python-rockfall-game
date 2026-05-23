@@ -25,18 +25,42 @@ def parse_args(argv=None):
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
+    parser.add_argument("--debug-ai", action="store_true", help="Show model action and feature debug overlay.")
     return parser.parse_args(argv)
 
 
 def predict_action(model, game):
+    action, _, _ = predict_action_with_debug(model, game)
+    return action
+
+
+def predict_action_with_debug(model, game):
     from game_core import ACTION_LEFT, ACTION_RIGHT
     from features import adapt_features_for_model
 
-    model_features = adapt_features_for_model(game.model_features(), model)
+    raw_features = game.model_features()
+    model_features = adapt_features_for_model(raw_features, model)
     predicted_action = model.predict([model_features])[0]
     if predicted_action == 1:
-        return ACTION_RIGHT
-    return ACTION_LEFT
+        return (ACTION_RIGHT, raw_features, model_features)
+    return (ACTION_LEFT, raw_features, model_features)
+
+
+def model_debug_lines(action, raw_features, model_features):
+    lines = [
+        f"AI: {action.upper()}",
+        f"Features: {len(model_features)}/{len(raw_features)}",
+    ]
+    rock_labels = ("near", "second", "third")
+    offset = 1
+    for label in rock_labels:
+        if len(raw_features) < offset + 5:
+            break
+        _, y, dx, speed_delta, score_bonus = raw_features[offset : offset + 5]
+        if y != 0:
+            lines.append(f"{label}: dx={dx} y={y} sp={speed_delta} +{score_bonus}")
+        offset += 5
+    return lines
 
 
 def model_mode_name(model_path, difficulty_preset=None):
@@ -113,6 +137,7 @@ def main(argv=None):
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()
     screen_state = SCREEN_START
+    debug_lines = []
     app_running = True
 
     while app_running:
@@ -163,7 +188,12 @@ def main(argv=None):
                     screen_state = SCREEN_PLAYING
 
         if screen_state == SCREEN_PLAYING:
-            game.apply_action(predict_action(model, game))
+            if args.debug_ai:
+                action, raw_features, model_features = predict_action_with_debug(model, game)
+                debug_lines = model_debug_lines(action, raw_features, model_features)
+            else:
+                action = predict_action(model, game)
+            game.apply_action(action)
             game.update()
             sound_player.play_events(game.pop_events())
             if game.game_over:
@@ -181,6 +211,8 @@ def main(argv=None):
             game.draw_game_over_screen(mode_name)
         else:
             game.draw()
+            if args.debug_ai:
+                game.draw_ai_debug_overlay(debug_lines)
 
         pygame.display.flip()
         clock.tick(FPS)

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add model play debug overlay
+
+- Changed: added `play_with_model.py --debug-ai`, model prediction debug helpers, and `RockfallGame.draw_ai_debug_overlay`; expanded model-play and rendering tests; updated `README.md`.
+- Why: the machine-learning behavior should be visible in the game window, not only in terminal reports, so players can see what action the model chose and what rock features it is using.
+- Behavior: model play can show the predicted direction, adapted/raw feature counts, and nearest rock dx/y/speed/reward values while the run is active.
+- Verification: ran `python3 -m unittest test_play_with_model.py test_game_core.py`; rendered pygame preview image to `/private/tmp/rockfall-ai-debug-overlay.png`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py play_with_model.py test_game_core.py test_play_with_model.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-ai-debug-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-ai-debug-release-check.json`.
+- Risks/Notes: the overlay is opt-in and does not change model predictions, gameplay rules, or collected training data.
+
 ## 2026-05-24 - Add safe-rule baseline policy comparison
 
 - Changed: added `policies.py` with a deterministic `safe-rule` dodging policy; refactored `evaluate_model.py` so evaluation can run models or built-in policies; added `compare_models.py --include-rule-baseline`; added policy and comparison tests; updated `README.md`.

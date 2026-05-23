@@ -693,6 +693,20 @@ class RockfallGame:
             ),
         )
 
+    def draw_ai_debug_overlay(self, lines):
+        if not lines:
+            return
+
+        line_height = 20
+        overlay_width = 280
+        overlay_height = 18 + line_height * len(lines)
+        overlay_rect = pygame.Rect(SCREEN_WIDTH - overlay_width - 10, 58, overlay_width, overlay_height)
+        self._draw_panel(overlay_rect, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)
+        for index, line in enumerate(lines):
+            color = MENU_ACCENT_COLOR if index == 0 else HUD_COLOR
+            text_surface = self.tiny_font.render(line, True, color)
+            self.screen.blit(text_surface, (overlay_rect.x + 10, overlay_rect.y + 9 + index * line_height))
+
     def _draw_rock_legend(self, panel_rect):
         title_surface = self.small_font.render("Rock types", True, MENU_ACCENT_COLOR)
         self._blit_centered(title_surface, panel_rect.y + 202)

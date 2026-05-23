@@ -583,6 +583,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
             OBSTACLE_VARIANTS["ore"]["mark"],
         )
 
+    def test_ai_debug_overlay_draws_panel(self):
+        game = RockfallGame(self.screen)
+
+        game.draw()
+        game.draw_ai_debug_overlay(["AI: LEFT", "Features: 4/16"])
+
+        self.assertEqual(self.screen.get_at((SCREEN_WIDTH - 290, 58))[:3], HUD_PANEL_BORDER_COLOR)
+
     def test_model_missing_screen_draws_back_button(self):
         game = RockfallGame(self.screen)
 

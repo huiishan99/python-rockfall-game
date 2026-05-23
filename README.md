@@ -29,6 +29,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
+- Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
@@ -161,6 +162,11 @@ python3 play_with_model.py --model game_model.pkl
 
 Model play screens and the window title show the active model filename.
 If the model file cannot be loaded, the command prints a concise error and exits nonzero.
+Use `--debug-ai` to show the model's current action, feature count, and nearest rock feature groups during play:
+
+```bash
+python3 play_with_model.py --debug-ai
+```
 
 ### Evaluate the Model
 
