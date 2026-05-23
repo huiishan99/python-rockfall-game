@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add safe-rule baseline policy comparison
+
+- Changed: added `policies.py` with a deterministic `safe-rule` dodging policy; refactored `evaluate_model.py` so evaluation can run models or built-in policies; added `compare_models.py --include-rule-baseline`; added policy and comparison tests; updated `README.md`.
+- Why: model scores need a simple non-ML baseline so future training runs can prove they beat more than random guessing or human imitation artifacts.
+- Behavior: `python3 compare_models.py game_model.pkl --include-rule-baseline` compares the trained model against `policy:safe-rule` with the same seeds, settings, survival metrics, and variant outcome JSON.
+- Verification: ran `python3 -m unittest test_policies.py test_compare_models.py test_evaluate_model.py`; ran `python3 compare_models.py game_model.pkl --include-rule-baseline --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-rule-baseline-comparison.json`; ran `python3 -m json.tool /private/tmp/rockfall-rule-baseline-comparison.json`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile policies.py evaluate_model.py compare_models.py test_policies.py test_evaluate_model.py test_compare_models.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-rule-baseline-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-rule-baseline-release-check.json`.
+- Risks/Notes: `safe-rule` is deliberately simple and deterministic; it is a baseline for comparison, not intended to be the final game AI.
+
 ## 2026-05-24 - Add multi-rock features and variant outcome metrics
 
 - Changed: expanded `features.py` from one nearest rock to the nearest three rocks while keeping four-feature and six-feature model compatibility; updated `data_quality.py` to measure variant coverage across the same nearest-three rocks; added per-variant spawned, avoided, hit, and avoid-rate metrics in `game_core.py` and `evaluate_model.py`; expanded feature, gameplay, prediction, training, data-quality, and evaluation tests; updated `README.md`.

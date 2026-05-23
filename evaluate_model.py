@@ -7,6 +7,7 @@ from statistics import mean
 from data_store import ensure_parent_dir
 from play_with_model import MODEL_FILE
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
+from policies import choose_policy_action
 from settings import INITIAL_LIVES, OBSTACLE_VARIANTS, PLAYER_SPEED
 
 DEFAULT_GAMES = 10
@@ -41,8 +42,45 @@ def run_game(
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
 ):
-    from game_core import RockfallGame
     from play_with_model import predict_action
+
+    return run_game_with_action_provider(
+        lambda game: predict_action(model, game),
+        screen,
+        max_frames,
+        difficulty_preset=difficulty_preset,
+        player_speed=player_speed,
+        initial_lives=initial_lives,
+    )
+
+
+def run_policy(
+    policy_name,
+    screen,
+    max_frames,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
+):
+    return run_game_with_action_provider(
+        lambda game: choose_policy_action(policy_name, game),
+        screen,
+        max_frames,
+        difficulty_preset=difficulty_preset,
+        player_speed=player_speed,
+        initial_lives=initial_lives,
+    )
+
+
+def run_game_with_action_provider(
+    action_provider,
+    screen,
+    max_frames,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
+):
+    from game_core import RockfallGame
 
     game = RockfallGame(
         screen,
@@ -53,7 +91,7 @@ def run_game(
     frames = 0
 
     while not game.game_over and frames < max_frames:
-        game.apply_action(predict_action(model, game))
+        game.apply_action(action_provider(game))
         game.update()
         frames += 1
 

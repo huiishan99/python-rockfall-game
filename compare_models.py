@@ -8,11 +8,13 @@ from evaluate_model import (
     DEFAULT_MAX_FRAMES,
     DEFAULT_RANDOM_SEED,
     build_summary_payload,
+    run_policy,
     run_game,
     summarize_results,
     write_summary_report,
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
+from policies import POLICY_SAFE_RULE, policy_label
 from play_with_model import MODEL_FILE
 from settings import INITIAL_LIVES, PLAYER_SPEED
 
@@ -31,6 +33,11 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--include-rule-baseline",
+        action="store_true",
+        help="Compare models against the built-in safe-rule baseline policy.",
+    )
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
@@ -61,6 +68,33 @@ def evaluate_model_path(
         results.append(
             run_game(
                 model,
+                screen,
+                max_frames,
+                difficulty_preset=difficulty_preset,
+                player_speed=player_speed,
+                initial_lives=initial_lives,
+            )
+        )
+
+    return summarize_results(results)
+
+
+def evaluate_policy(
+    policy_name,
+    games,
+    max_frames,
+    random_seed,
+    screen,
+    difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
+    player_speed=PLAYER_SPEED,
+    initial_lives=INITIAL_LIVES,
+):
+    results = []
+    for game_index in range(games):
+        random.seed(random_seed + game_index)
+        results.append(
+            run_policy(
+                policy_name,
                 screen,
                 max_frames,
                 difficulty_preset=difficulty_preset,
@@ -190,6 +224,7 @@ def main(argv=None):
 
     pygame.font.init()
     screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    labels = list(args.models)
     summaries = [
         evaluate_model_path(
             model_path,
@@ -203,10 +238,24 @@ def main(argv=None):
         )
         for model_path in args.models
     ]
+    if args.include_rule_baseline:
+        labels.append(policy_label(POLICY_SAFE_RULE))
+        summaries.append(
+            evaluate_policy(
+                POLICY_SAFE_RULE,
+                args.games,
+                args.max_frames,
+                args.random_seed,
+                screen,
+                difficulty_preset=args.difficulty,
+                player_speed=args.player_speed,
+                initial_lives=args.lives,
+            )
+        )
     pygame.quit()
 
     payload = build_comparison_payload(
-        args.models,
+        labels,
         summaries,
         args.max_frames,
         args.random_seed,
@@ -223,7 +272,7 @@ def main(argv=None):
         print(f"Difficulty: {args.difficulty}")
         print(f"Player speed: {args.player_speed}")
         print(f"Initial lives: {args.lives}")
-        for line in format_comparison_lines(args.models, summaries):
+        for line in format_comparison_lines(labels, summaries):
             print(line)
         if args.report:
             print(f"Report saved to {args.report}")

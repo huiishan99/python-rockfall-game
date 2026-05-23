@@ -28,6 +28,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Manual play for data collection, with left/right or A/D movement, pause, restart, and local high scores.
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
+- Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
@@ -183,6 +184,12 @@ Compare multiple models with the same random seeds:
 
 ```bash
 python3 compare_models.py game_model.pkl runs/v02_model.pkl --games 10 --max-frames 3600
+```
+
+Add `--include-rule-baseline` to compare against the built-in `policy:safe-rule` deterministic dodger:
+
+```bash
+python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --max-frames 3600
 ```
 
 Comparison output includes score deltas, average remaining lives, survival rate, per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.

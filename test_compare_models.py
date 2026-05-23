@@ -14,6 +14,7 @@ from compare_models import (
     score_delta,
     validate_model_paths,
 )
+from policies import POLICY_SAFE_RULE, policy_label
 from play_with_model import MODEL_FILE
 
 
@@ -78,6 +79,11 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(args.report, "runs/comparison.json")
 
+    def test_parse_args_accepts_rule_baseline(self):
+        args = parse_args(["base.pkl", "--include-rule-baseline"])
+
+        self.assertTrue(args.include_rule_baseline)
+
     def test_validate_model_paths_rejects_missing_model(self):
         with self.assertRaises(ValueError):
             validate_model_paths(["missing.pkl"])
@@ -119,6 +125,11 @@ class CompareModelsTest(unittest.TestCase):
         lines = format_comparison_lines(["base.pkl", "candidate.pkl"], [SUMMARY_A, SUMMARY_B])
 
         self.assertEqual(lines[-1], "Best model by average score: candidate.pkl")
+
+    def test_formats_comparison_lines_with_policy_label(self):
+        lines = format_comparison_lines(["base.pkl", policy_label(POLICY_SAFE_RULE)], [SUMMARY_A, SUMMARY_B])
+
+        self.assertTrue(any("policy:safe-rule" in line for line in lines))
 
     def test_score_delta_compares_to_baseline(self):
         self.assertEqual(score_delta(SUMMARY_B, SUMMARY_A), 3)
