@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Add latest GUI smoke-test gameplay samples
+
+- Changed: updated `game_data.json` with 412 new manual-play samples collected while opening the current GUI build for smoke testing.
+- Why: real-window checks continue to produce useful left/right examples, and tracked data changes should be searchable separately from gameplay code changes.
+- Behavior: the dataset now has 3,314 valid samples and 3 skipped entries; action balance remains close, with left=1,656 and right=1,658.
+- Verification: ran `python3 inspect_data.py --data game_data.json`.
+- Risks/Notes: this is data-only and was collected before the rock-variant gameplay change, so it does not include variant-specific player behavior.
+
 ## 2026-05-23 - Add rock variants with distinct effects
 
 - Changed: added normal, heavy, swift, and ore obstacle variants in `settings.py` and `game_core.py`; gave variants different colors, markings, fall-speed modifiers, and score bonuses; added a help-screen line for variant effects; expanded core gameplay/rendering tests; updated `README.md`.
