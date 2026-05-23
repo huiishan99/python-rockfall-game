@@ -22,7 +22,17 @@ from game_core import (
 )
 from play_with_model import MODEL_FILE
 from scores import get_high_score, record_high_score
-from settings import FPS, INITIAL_LIVES, PLAYER_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH, SOUND_ENABLED, VERSION
+from settings import (
+    DEFAULT_VARIANT_PROFILE,
+    FPS,
+    INITIAL_LIVES,
+    PLAYER_SPEED,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    SOUND_ENABLED,
+    VERSION,
+    variant_profile_names,
+)
 
 MODE_KEY = "manual"
 MODE_NAME = "Data Collection"
@@ -39,8 +49,20 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--variant-profile",
+        choices=variant_profile_names(),
+        default=DEFAULT_VARIANT_PROFILE,
+        help="Rock variant spawn profile.",
+    )
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     return parser.parse_args(argv)
+
+
+def manual_mode_name(difficulty_preset, variant_profile=DEFAULT_VARIANT_PROFILE):
+    if variant_profile != DEFAULT_VARIANT_PROFILE:
+        return f"{MODE_NAME} ({difficulty_preset}, {variant_profile})"
+    return f"{MODE_NAME} ({difficulty_preset})"
 
 
 def read_manual_action():
@@ -67,6 +89,8 @@ def model_play_command(args):
         str(args.player_speed),
         "--lives",
         str(args.lives),
+        "--variant-profile",
+        args.variant_profile,
     ]
     if args.mute:
         command.append("--mute")
@@ -86,7 +110,7 @@ def main(argv=None):
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    mode_name = f"{MODE_NAME} ({args.difficulty})"
+    mode_name = manual_mode_name(args.difficulty, args.variant_profile)
     pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
     game = RockfallGame(
@@ -95,6 +119,7 @@ def main(argv=None):
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
         initial_lives=args.lives,
+        variant_profile=args.variant_profile,
     )
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()

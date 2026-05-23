@@ -36,6 +36,11 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_variant_profile(self):
+        args = parse_args(["--variant-profile", "variant-rich"])
+
+        self.assertEqual(args.variant_profile, "variant-rich")
+
     def test_parse_args_accepts_debug_ai(self):
         args = parse_args(["--debug-ai"])
 
@@ -51,6 +56,11 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(mode_name, "Model Play (alt_model.pkl, hard)")
 
+    def test_model_mode_name_can_include_variant_profile(self):
+        mode_name = model_mode_name("experiments/alt_model.pkl", "hard", "variant-rich")
+
+        self.assertEqual(mode_name, "Model Play (alt_model.pkl, hard, variant-rich)")
+
     def test_model_load_error_message_includes_path_and_error(self):
         message = model_load_error_message("missing.pkl", FileNotFoundError("not found"))
 
@@ -58,7 +68,19 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertIn("not found", message)
 
     def test_manual_play_command_preserves_tuning_args(self):
-        args = parse_args(["--difficulty", "hard", "--player-speed", "8", "--lives", "3", "--mute"])
+        args = parse_args(
+            [
+                "--difficulty",
+                "hard",
+                "--player-speed",
+                "8",
+                "--lives",
+                "3",
+                "--variant-profile",
+                "variant-rich",
+                "--mute",
+            ]
+        )
 
         command = manual_play_command(args)
 
@@ -67,6 +89,7 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertIn("hard", command)
         self.assertIn("8", command)
         self.assertIn("3", command)
+        self.assertIn("variant-rich", command)
         self.assertIn("--mute", command)
 
     def test_predict_action_adapts_features_for_legacy_model(self):

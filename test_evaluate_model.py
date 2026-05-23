@@ -35,6 +35,11 @@ class EvaluateModelTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_variant_profile(self):
+        args = parse_args(["--variant-profile", "variant-rich"])
+
+        self.assertEqual(args.variant_profile, "variant-rich")
+
     def test_parse_args_accepts_report_path(self):
         args = parse_args(["--report", "runs/eval.json"])
 
@@ -183,6 +188,7 @@ class EvaluateModelTest(unittest.TestCase):
             difficulty_preset="hard",
             player_speed=8,
             initial_lives=3,
+            variant_profile="variant-rich",
         )
 
         self.assertEqual(payload["model"], "model.pkl")
@@ -191,6 +197,7 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(payload["difficulty"], "hard")
         self.assertEqual(payload["player_speed"], 8)
         self.assertEqual(payload["initial_lives"], 3)
+        self.assertEqual(payload["variant_profile"], "variant-rich")
         self.assertEqual(payload["games"], 2)
         self.assertEqual(payload["best_combo"], 6)
         self.assertEqual(payload["survival_rate"], 0.5)

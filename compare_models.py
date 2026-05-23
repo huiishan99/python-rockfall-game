@@ -16,7 +16,7 @@ from evaluate_model import (
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from policies import POLICY_SAFE_RULE, policy_label
 from play_with_model import MODEL_FILE
-from settings import INITIAL_LIVES, PLAYER_SPEED
+from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
 
 
 def parse_args(argv=None):
@@ -33,6 +33,12 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--variant-profile",
+        choices=variant_profile_names(),
+        default=DEFAULT_VARIANT_PROFILE,
+        help="Rock variant spawn profile.",
+    )
     parser.add_argument(
         "--include-rule-baseline",
         action="store_true",
@@ -58,6 +64,7 @@ def evaluate_model_path(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
+    variant_profile=DEFAULT_VARIANT_PROFILE,
 ):
     import joblib
 
@@ -73,6 +80,7 @@ def evaluate_model_path(
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
                 initial_lives=initial_lives,
+                variant_profile=variant_profile,
             )
         )
 
@@ -88,6 +96,7 @@ def evaluate_policy(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
+    variant_profile=DEFAULT_VARIANT_PROFILE,
 ):
     results = []
     for game_index in range(games):
@@ -100,6 +109,7 @@ def evaluate_policy(
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
                 initial_lives=initial_lives,
+                variant_profile=variant_profile,
             )
         )
 
@@ -114,6 +124,7 @@ def build_comparison_payload(
     difficulty_preset=None,
     player_speed=None,
     initial_lives=None,
+    variant_profile=None,
 ):
     baseline_summary = summaries[0]
     return {
@@ -122,6 +133,7 @@ def build_comparison_payload(
         "difficulty": difficulty_preset,
         "player_speed": player_speed,
         "initial_lives": initial_lives,
+        "variant_profile": variant_profile,
         "best_model": comparison_winner(model_paths, summaries),
         "models": [
             {
@@ -131,6 +143,7 @@ def build_comparison_payload(
                     difficulty_preset=difficulty_preset,
                     player_speed=player_speed,
                     initial_lives=initial_lives,
+                    variant_profile=variant_profile,
                 ),
                 "score_delta": score_delta(summary, baseline_summary),
             }
@@ -235,6 +248,7 @@ def main(argv=None):
             difficulty_preset=args.difficulty,
             player_speed=args.player_speed,
             initial_lives=args.lives,
+            variant_profile=args.variant_profile,
         )
         for model_path in args.models
     ]
@@ -250,6 +264,7 @@ def main(argv=None):
                 difficulty_preset=args.difficulty,
                 player_speed=args.player_speed,
                 initial_lives=args.lives,
+                variant_profile=args.variant_profile,
             )
         )
     pygame.quit()
@@ -262,6 +277,7 @@ def main(argv=None):
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
         initial_lives=args.lives,
+        variant_profile=args.variant_profile,
     )
     if args.report:
         write_summary_report(payload, args.report)
@@ -272,6 +288,7 @@ def main(argv=None):
         print(f"Difficulty: {args.difficulty}")
         print(f"Player speed: {args.player_speed}")
         print(f"Initial lives: {args.lives}")
+        print(f"Variant profile: {args.variant_profile}")
         for line in format_comparison_lines(labels, summaries):
             print(line)
         if args.report:

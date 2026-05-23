@@ -1,7 +1,7 @@
 import unittest
 
 from data_store import GAME_DATA_FILE
-from game import model_play_command, parse_args
+from game import manual_mode_name, model_play_command, parse_args
 from play_with_model import MODEL_FILE
 
 
@@ -31,8 +31,28 @@ class GameEntrypointTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_variant_profile(self):
+        args = parse_args(["--variant-profile", "variant-rich"])
+
+        self.assertEqual(args.variant_profile, "variant-rich")
+
+    def test_manual_mode_name_shows_non_default_variant_profile(self):
+        self.assertEqual(manual_mode_name("hard", "variant-rich"), "Data Collection (hard, variant-rich)")
+
     def test_model_play_command_preserves_tuning_args(self):
-        args = parse_args(["--difficulty", "hard", "--player-speed", "8", "--lives", "3", "--mute"])
+        args = parse_args(
+            [
+                "--difficulty",
+                "hard",
+                "--player-speed",
+                "8",
+                "--lives",
+                "3",
+                "--variant-profile",
+                "variant-rich",
+                "--mute",
+            ]
+        )
 
         command = model_play_command(args)
 
@@ -41,6 +61,7 @@ class GameEntrypointTest(unittest.TestCase):
         self.assertIn("hard", command)
         self.assertIn("8", command)
         self.assertIn("3", command)
+        self.assertIn("variant-rich", command)
         self.assertIn("--mute", command)
 
 

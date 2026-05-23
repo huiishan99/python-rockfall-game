@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add variant-rich spawn profile
+
+- Changed: added `standard` and `variant-rich` rock spawn profiles, threaded `--variant-profile` through manual play, model play, evaluation, comparison, experiments, and release checks, expanded entrypoint/core tests, and updated `README.md`.
+- Why: training data needs enough heavy, swift, and ore examples for the model to learn variant-specific decisions without requiring very long manual collection sessions.
+- Behavior: default runs keep the existing `standard` distribution; `--variant-profile variant-rich` increases non-normal rocks and records the profile in text/JSON evaluation and comparison outputs.
+- Verification: ran `python3 -m unittest test_game.py test_play_with_model.py test_game_core.py test_evaluate_model.py test_compare_models.py test_run_model_experiment.py test_release_check.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py game.py play_with_model.py evaluate_model.py compare_models.py run_model_experiment.py release_check.py test_game.py test_play_with_model.py test_game_core.py test_evaluate_model.py test_compare_models.py test_run_model_experiment.py test_release_check.py`; ran `python3 evaluate_model.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-variant-rich-eval.json`; ran `python3 -m unittest`; ran `python3 -m json.tool /private/tmp/rockfall-variant-rich-eval.json`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-variant-rich-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-variant-rich-release-check.json`; ran `git diff --check`.
+- Risks/Notes: variant-rich runs are intentionally not directly comparable to standard-profile score baselines unless the report's `variant_profile` matches.
+
 ## 2026-05-24 - Add evaluation score-source breakdowns
 
 - Changed: added score-source tracking to `RockfallGame`, included score breakdown payloads in headless evaluation summaries, expanded evaluation and gameplay tests, and updated `README.md`.

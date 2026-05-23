@@ -14,7 +14,7 @@ from evaluate_model import (
     write_summary_report,
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-from settings import INITIAL_LIVES, PLAYER_SPEED, VERSION
+from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, VERSION, variant_profile_names
 
 DEFAULT_GAMES = 3
 DEFAULT_MAX_FRAMES = 1800
@@ -34,6 +34,12 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--variant-profile",
+        choices=variant_profile_names(),
+        default=DEFAULT_VARIANT_PROFILE,
+        help="Rock variant spawn profile.",
+    )
     parser.add_argument("--report", help="Optional JSON release-check report file to write.")
     return parser.parse_args(argv)
 
@@ -52,6 +58,7 @@ def run_evaluation(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
+    variant_profile=DEFAULT_VARIANT_PROFILE,
 ):
     import joblib
 
@@ -75,6 +82,7 @@ def run_evaluation(
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
                 initial_lives=initial_lives,
+                variant_profile=variant_profile,
             )
         )
 
@@ -95,6 +103,7 @@ def build_release_payload(
     difficulty_preset=None,
     player_speed=None,
     initial_lives=None,
+    variant_profile=None,
     tests_passed=True,
 ):
     payload = {
@@ -110,6 +119,7 @@ def build_release_payload(
             difficulty_preset=difficulty_preset,
             player_speed=player_speed,
             initial_lives=initial_lives,
+            variant_profile=variant_profile,
         )
     return payload
 
@@ -147,10 +157,12 @@ def main(argv=None):
         args.difficulty,
         args.player_speed,
         args.lives,
+        args.variant_profile,
     )
     print(f"Difficulty: {args.difficulty}")
     print(f"Player speed: {args.player_speed}")
     print(f"Initial lives: {args.lives}")
+    print(f"Variant profile: {args.variant_profile}")
     print_evaluation_summary(summary)
     if args.report:
         payload = build_release_payload(
@@ -161,6 +173,7 @@ def main(argv=None):
             difficulty_preset=args.difficulty,
             player_speed=args.player_speed,
             initial_lives=args.lives,
+            variant_profile=args.variant_profile,
             tests_passed=True,
         )
         write_summary_report(payload, args.report)

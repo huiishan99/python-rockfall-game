@@ -23,7 +23,7 @@ from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
 from play_with_model import MODEL_FILE
-from settings import INITIAL_LIVES, PLAYER_SPEED
+from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
 from train_model import (
     N_ESTIMATORS,
     RANDOM_STATE,
@@ -69,6 +69,12 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--variant-profile",
+        choices=variant_profile_names(),
+        default=DEFAULT_VARIANT_PROFILE,
+        help="Rock variant spawn profile for model comparison.",
+    )
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
@@ -134,6 +140,7 @@ def evaluate_models(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
+    variant_profile=DEFAULT_VARIANT_PROFILE,
 ):
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     import pygame
@@ -153,6 +160,7 @@ def evaluate_models(
                 difficulty_preset=difficulty_preset,
                 player_speed=player_speed,
                 initial_lives=initial_lives,
+                variant_profile=variant_profile,
             )
             for model_path in model_paths
         ]
@@ -169,6 +177,7 @@ def build_experiment_payload(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
+    variant_profile=DEFAULT_VARIANT_PROFILE,
 ):
     return {
         "training": training_summary,
@@ -180,6 +189,7 @@ def build_experiment_payload(
             difficulty_preset=difficulty_preset,
             player_speed=player_speed,
             initial_lives=initial_lives,
+            variant_profile=variant_profile,
         ),
         "candidate_result": candidate_result(comparison_summaries[0], comparison_summaries[1]),
     }
@@ -271,6 +281,7 @@ def main(argv=None):
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
         initial_lives=args.lives,
+        variant_profile=args.variant_profile,
     )
     payload = build_experiment_payload(
         training_summary,
@@ -281,6 +292,7 @@ def main(argv=None):
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
         initial_lives=args.lives,
+        variant_profile=args.variant_profile,
     )
 
     if args.report:
@@ -292,6 +304,7 @@ def main(argv=None):
         print(f"Difficulty: {args.difficulty}")
         print(f"Player speed: {args.player_speed}")
         print(f"Initial lives: {args.lives}")
+        print(f"Variant profile: {args.variant_profile}")
         for line in format_experiment_lines(training_summary, model_paths, comparison_summaries):
             print(line)
         if args.report:

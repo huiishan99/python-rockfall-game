@@ -11,6 +11,7 @@ from settings import (
     COMBO_BONUS_INTERVAL,
     COMBO_MESSAGE_COLOR,
     DEFAULT_OBSTACLE_VARIANT,
+    DEFAULT_VARIANT_PROFILE,
     HUD_COLOR,
     HUD_COMBO_COLOR,
     HUD_PANEL_BORDER_COLOR,
@@ -40,7 +41,7 @@ from settings import (
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
-    OBSTACLE_VARIANT_WEIGHTS,
+    OBSTACLE_VARIANT_PROFILES,
     OBSTACLE_VARIANTS,
     OBSTACLE_WIDTH,
     LANE_COLOR,
@@ -90,12 +91,14 @@ class RockfallGame:
         difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
         player_speed=PLAYER_SPEED,
         initial_lives=INITIAL_LIVES,
+        variant_profile=DEFAULT_VARIANT_PROFILE,
     ):
         self.screen = screen
         self.high_score = high_score
         self.difficulty_preset = difficulty_preset
         self.player_speed = max(1, int(player_speed))
         self.initial_lives = max(1, int(initial_lives))
+        self.variant_profile = self.tracked_variant_profile(variant_profile)
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
         self.tiny_font = pygame.font.Font(None, 22)
@@ -205,6 +208,11 @@ class RockfallGame:
         if variant_key in self.variant_stats:
             return variant_key
         return DEFAULT_OBSTACLE_VARIANT
+
+    def tracked_variant_profile(self, variant_profile):
+        if variant_profile in OBSTACLE_VARIANT_PROFILES:
+            return variant_profile
+        return DEFAULT_VARIANT_PROFILE
 
     def draw_start_screen(self, mode_name, show_model_button=True, show_training_button=False):
         self._draw_message_screen("ROCKFALL", self.start_lines(mode_name))
@@ -400,10 +408,11 @@ class RockfallGame:
             self.last_spawn_x = obstacle_x
 
     def choose_obstacle_variant(self):
-        total_weight = sum(weight for _, weight in OBSTACLE_VARIANT_WEIGHTS)
+        variant_weights = OBSTACLE_VARIANT_PROFILES[self.variant_profile]
+        total_weight = sum(weight for _, weight in variant_weights)
         roll = random.randint(1, total_weight)
         running_weight = 0
-        for variant_key, weight in OBSTACLE_VARIANT_WEIGHTS:
+        for variant_key, weight in variant_weights:
             running_weight += weight
             if roll <= running_weight:
                 return variant_key

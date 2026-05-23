@@ -104,6 +104,8 @@ class RunModelExperimentTest(unittest.TestCase):
                 "8",
                 "--lives",
                 "3",
+                "--variant-profile",
+                "variant-rich",
                 "--json",
             ]
         )
@@ -114,6 +116,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.difficulty, "hard")
         self.assertEqual(args.player_speed, 8)
         self.assertEqual(args.lives, 3)
+        self.assertEqual(args.variant_profile, "variant-rich")
         self.assertTrue(args.json)
 
     def test_validate_experiment_paths_rejects_baseline_overwrite(self):
@@ -180,6 +183,7 @@ class RunModelExperimentTest(unittest.TestCase):
             difficulty_preset="hard",
             player_speed=8,
             initial_lives=3,
+            variant_profile="variant-rich",
         )
 
         self.assertEqual(payload["training"]["validation_accuracy"], 0.875)
@@ -187,6 +191,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(payload["comparison"]["difficulty"], "hard")
         self.assertEqual(payload["comparison"]["player_speed"], 8)
         self.assertEqual(payload["comparison"]["initial_lives"], 3)
+        self.assertEqual(payload["comparison"]["variant_profile"], "variant-rich")
         self.assertEqual(payload["comparison"]["max_frames"], 300)
         self.assertEqual(payload["comparison"]["best_model"], "runs/candidate_model.pkl")
         self.assertEqual(payload["comparison"]["models"][1]["survival_rate"], 1.0)

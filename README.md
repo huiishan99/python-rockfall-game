@@ -14,7 +14,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
 - Headless evaluation reports score baselines, score-source breakdowns, and rock-variant outcomes.
-- Runtime hand-feel tuning for difficulty, player speed, and initial lives is implemented across play, evaluation, comparison, experiments, and release checks.
+- Runtime hand-feel tuning for difficulty, player speed, initial lives, and rock variant profile is implemented across play, evaluation, comparison, experiments, and release checks.
 - Evaluation and comparison reports include survival metrics, score-source breakdowns, variant outcomes, and can be saved as JSON artifacts.
 - Data inspection can check collected samples, action balance, and rock-variant coverage before training.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
@@ -30,12 +30,12 @@ This is now in v0.8 development after the playable v0.1 release:
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
-- Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
+- Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
 - Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
-- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, score-source breakdowns, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, score-source breakdowns, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -76,6 +76,7 @@ Controls:
 - Add `--difficulty easy`, `--difficulty normal`, or `--difficulty hard` to manual play, model play, evaluation, comparison, and experiment commands.
 - Add `--player-speed 8` to tune movement speed during manual play, model play, evaluation, comparison, and experiment commands.
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
+- Add `--variant-profile variant-rich` to manual play, model play, evaluation, comparison, experiment, and release-check commands when you want more heavy, swift, and ore rocks than the default `standard` profile.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
 The help screen shows the rock variant legend, including ore's +2 reward and close-dodge +1 risk bonus, and explains that manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
@@ -110,6 +111,11 @@ python3 game.py --data runs/experiment.json
 ```
 
 Missing parent directories for the selected data file are created automatically.
+To collect more rock-variant examples for retraining, use the variant-rich profile:
+
+```bash
+python3 game.py --data runs/variant_rich.json --variant-profile variant-rich
+```
 
 Inspect collected data before training:
 
@@ -176,7 +182,7 @@ Run headless simulations to compare model performance without opening a game win
 python3 evaluate_model.py --games 10 --max-frames 3600
 ```
 
-The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, timeout counts, per-variant spawned/avoided/hit counts with avoid rates, and a score breakdown for base dodge points, combo bonuses, variant bonuses, and risk bonuses.
+The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, timeout counts, per-variant spawned/avoided/hit counts with avoid rates, and a score breakdown for base dodge points, combo bonuses, variant bonuses, and risk bonuses. Use `--variant-profile variant-rich` to stress-test models against more reward-bearing and faster rocks.
 
 For scripts or future charts, emit machine-readable JSON with the evaluation settings and summary metrics:
 
@@ -209,7 +215,7 @@ Local experiment outputs under `runs/` are also ignored by git.
 ## Next Steps
 
 - Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
-- Collect fresh lane-based gameplay data.
+- Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
 - Retrain and compare the model with `evaluate_model.py`, checking ore/heavy/swift avoid rates.
 - Tune rock variant spawn rates and rewards after more real-window playtesting.
 - Continue collecting fresh play data and compare future models with `evaluate_model.py`.

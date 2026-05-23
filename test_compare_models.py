@@ -74,6 +74,11 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_variant_profile(self):
+        args = parse_args(["base.pkl", "--variant-profile", "variant-rich"])
+
+        self.assertEqual(args.variant_profile, "variant-rich")
+
     def test_parse_args_accepts_report_path(self):
         args = parse_args(["base.pkl", "--report", "runs/comparison.json"])
 
@@ -146,6 +151,7 @@ class CompareModelsTest(unittest.TestCase):
             difficulty_preset="hard",
             player_speed=8,
             initial_lives=3,
+            variant_profile="variant-rich",
         )
 
         self.assertEqual(payload["max_frames"], 300)
@@ -153,8 +159,10 @@ class CompareModelsTest(unittest.TestCase):
         self.assertEqual(payload["difficulty"], "hard")
         self.assertEqual(payload["player_speed"], 8)
         self.assertEqual(payload["initial_lives"], 3)
+        self.assertEqual(payload["variant_profile"], "variant-rich")
         self.assertEqual(payload["best_model"], "candidate.pkl")
         self.assertEqual(payload["models"][0]["model"], "base.pkl")
+        self.assertEqual(payload["models"][0]["variant_profile"], "variant-rich")
         self.assertEqual(payload["models"][0]["score_delta"], 0)
         self.assertEqual(payload["models"][1]["average_score"], 8)
         self.assertEqual(payload["models"][1]["survival_rate"], 1.0)

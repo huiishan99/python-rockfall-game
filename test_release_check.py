@@ -36,6 +36,11 @@ class ReleaseCheckTest(unittest.TestCase):
 
         self.assertEqual(args.lives, 3)
 
+    def test_parse_args_accepts_variant_profile(self):
+        args = parse_args(["--variant-profile", "variant-rich"])
+
+        self.assertEqual(args.variant_profile, "variant-rich")
+
     def test_parse_args_accepts_report_path(self):
         args = parse_args(["--report", "runs/release_check.json"])
 
@@ -64,6 +69,7 @@ class ReleaseCheckTest(unittest.TestCase):
             difficulty_preset="normal",
             player_speed=8,
             initial_lives=3,
+            variant_profile="variant-rich",
             tests_passed=True,
         )
 
@@ -71,6 +77,7 @@ class ReleaseCheckTest(unittest.TestCase):
         self.assertTrue(payload["unit_tests"]["passed"])
         self.assertEqual(payload["evaluation"]["model"], "game_model.pkl")
         self.assertEqual(payload["evaluation"]["initial_lives"], 3)
+        self.assertEqual(payload["evaluation"]["variant_profile"], "variant-rich")
         self.assertEqual(payload["evaluation"]["survival_rate"], 1.0)
 
 

@@ -112,6 +112,22 @@ OBSTACLE_VARIANT_WEIGHTS = (
     ("swift", 13),
     ("ore", 8),
 )
+DEFAULT_VARIANT_PROFILE = "standard"
+OBSTACLE_VARIANT_PROFILES = {
+    DEFAULT_VARIANT_PROFILE: OBSTACLE_VARIANT_WEIGHTS,
+    "variant-rich": (
+        ("normal", 40),
+        ("heavy", 24),
+        ("swift", 20),
+        ("ore", 16),
+    ),
+}
+
+
+def variant_profile_names():
+    return tuple(OBSTACLE_VARIANT_PROFILES.keys())
+
+
 INITIAL_OBSTACLE_SPEED = 5
 OBSTACLE_FREQUENCY = 25
 MIN_OBSTACLE_FREQUENCY = 12

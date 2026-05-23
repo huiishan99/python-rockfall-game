@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 
+from settings import DEFAULT_VARIANT_PROFILE
+
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 MODEL_FILE = "game_model.pkl"
@@ -12,7 +14,7 @@ MODE_NAME = "Model Play"
 
 def parse_args(argv=None):
     from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-    from settings import INITIAL_LIVES, PLAYER_SPEED
+    from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
 
     parser = argparse.ArgumentParser(description="Run Rockfall with a trained model.")
     parser.add_argument("--model", default=MODEL_FILE, help="Model file to load.")
@@ -24,6 +26,12 @@ def parse_args(argv=None):
     )
     parser.add_argument("--player-speed", type=int, default=PLAYER_SPEED, help="Player movement speed in pixels.")
     parser.add_argument("--lives", type=int, default=INITIAL_LIVES, help="Initial player lives.")
+    parser.add_argument(
+        "--variant-profile",
+        choices=variant_profile_names(),
+        default=DEFAULT_VARIANT_PROFILE,
+        help="Rock variant spawn profile.",
+    )
     parser.add_argument("--mute", action="store_true", help="Disable generated sound effects.")
     parser.add_argument("--debug-ai", action="store_true", help="Show model action and feature debug overlay.")
     return parser.parse_args(argv)
@@ -63,9 +71,14 @@ def model_debug_lines(action, raw_features, model_features):
     return lines
 
 
-def model_mode_name(model_path, difficulty_preset=None):
+def model_mode_name(model_path, difficulty_preset=None, variant_profile=None):
+    details = [os.path.basename(model_path)]
     if difficulty_preset:
-        return f"{MODE_NAME} ({os.path.basename(model_path)}, {difficulty_preset})"
+        details.append(difficulty_preset)
+    if variant_profile and variant_profile != DEFAULT_VARIANT_PROFILE:
+        details.append(variant_profile)
+    if details:
+        return f"{MODE_NAME} ({', '.join(details)})"
     return f"{MODE_NAME} ({os.path.basename(model_path)})"
 
 
@@ -83,6 +96,8 @@ def manual_play_command(args):
         str(args.player_speed),
         "--lives",
         str(args.lives),
+        "--variant-profile",
+        args.variant_profile,
     ]
     if args.mute:
         command.append("--mute")
@@ -117,7 +132,7 @@ def main(argv=None):
 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    mode_name = model_mode_name(args.model, args.difficulty)
+    mode_name = model_mode_name(args.model, args.difficulty, args.variant_profile)
     pygame.display.set_caption(f"Rockfall {VERSION} - {mode_name}")
 
     try:
@@ -133,6 +148,7 @@ def main(argv=None):
         difficulty_preset=args.difficulty,
         player_speed=args.player_speed,
         initial_lives=args.lives,
+        variant_profile=args.variant_profile,
     )
     sound_player = GameSoundPlayer(enabled=SOUND_ENABLED and not args.mute)
     clock = pygame.time.Clock()

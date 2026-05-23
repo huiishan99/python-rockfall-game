@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
@@ -335,6 +336,19 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertLess(heavy_speed, normal_speed)
         self.assertGreater(swift_speed, normal_speed)
+
+    def test_variant_rich_profile_changes_spawn_weights(self):
+        standard_game = RockfallGame(self.screen)
+        rich_game = RockfallGame(self.screen, variant_profile="variant-rich")
+
+        with patch("game_core.random.randint", return_value=65):
+            self.assertEqual(standard_game.choose_obstacle_variant(), "heavy")
+            self.assertEqual(rich_game.choose_obstacle_variant(), "swift")
+
+    def test_unknown_variant_profile_defaults_to_standard(self):
+        game = RockfallGame(self.screen, variant_profile="mystery")
+
+        self.assertEqual(game.variant_profile, "standard")
 
     def test_ore_avoid_adds_score_bonus_message(self):
         game = RockfallGame(self.screen)
