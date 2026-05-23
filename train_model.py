@@ -2,6 +2,7 @@
 import argparse
 from collections import Counter
 
+from data_quality import inspect_variant_coverage_file
 from data_store import GAME_DATA_FILE, ensure_parent_dir, load_game_data
 from features import FEATURE_NAMES, build_model_features
 
@@ -79,10 +80,24 @@ def save_model(model, path):
     joblib.dump(model, path)
 
 
+def format_variant_coverage_line(variant_coverage):
+    variant_counts = variant_coverage["variant_counts"]
+    return (
+        "Variant coverage: "
+        f"recorded={variant_coverage['recorded_variant_samples']}, "
+        f"legacy={variant_coverage['legacy_obstacle_samples']}, "
+        f"normal={variant_counts['normal']}, "
+        f"heavy={variant_counts['heavy']}, "
+        f"swift={variant_counts['swift']}, "
+        f"ore={variant_counts['ore']}."
+    )
+
+
 def main(argv=None):
     args = parse_args(argv)
 
     X, y, skipped_entries = load_data(args.data)
+    variant_coverage = inspect_variant_coverage_file(args.data)
     if len(X) < 2:
         raise ValueError("Need at least 2 valid training samples.")
 
@@ -98,6 +113,9 @@ def main(argv=None):
     print(f"Loaded {len(X)} valid samples from {args.data} ({skipped_entries} skipped).")
     print(f"Features: {', '.join(FEATURE_NAMES)}.")
     print(f"Action balance: left={action_counts[0]}, right={action_counts[1]}.")
+    print(format_variant_coverage_line(variant_coverage))
+    if variant_coverage["warnings"]:
+        print("Variant warnings: " + ", ".join(variant_coverage["warnings"]) + ".")
     print(f"Validation accuracy: {accuracy:.3f}.")
     print(f"Model saved to {args.model}.")
 

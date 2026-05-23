@@ -16,7 +16,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Headless evaluation reports model score baselines.
 - Runtime hand-feel tuning for difficulty, player speed, and initial lives is implemented across play, evaluation, comparison, experiments, and release checks.
 - Evaluation and comparison reports include survival metrics and can be saved as JSON artifacts.
-- Data inspection can check collected samples before training and save quality reports.
+- Data inspection can check collected samples, action balance, and rock-variant coverage before training.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
 - Variant rocks add different fall speeds and score rewards; new training features expose those effects while old four-feature models still run.
 - Release checks can save versioned JSON artifacts for candidate builds.
@@ -33,7 +33,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
 - Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through speed and reward features.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
-- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -115,7 +115,7 @@ Inspect collected data before training:
 python3 inspect_data.py --data game_data.json
 ```
 
-The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, and data-quality warnings. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
+The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, rock-variant coverage, and data-quality warnings. If the report says `no_recorded_variant_samples`, the dataset predates rock variants and can still train a position-aware model, but it cannot teach the model that ore is worth `+2`. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
 
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
@@ -124,7 +124,7 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
-Newly trained models use these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, horizontal distance to that obstacle, nearest obstacle fall-speed modifier, and nearest obstacle score bonus. Existing model files trained on the original four position features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+2`, swift rocks fall faster, and heavy rocks fall slower.
+Newly trained models use these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, horizontal distance to that obstacle, nearest obstacle fall-speed modifier, and nearest obstacle score bonus. The training command prints variant coverage so stale datasets are obvious. Existing model files trained on the original four position features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+2`, swift rocks fall faster, and heavy rocks fall slower.
 
 You can also experiment with alternate data or model files:
 

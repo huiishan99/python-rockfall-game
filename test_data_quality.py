@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from data_quality import action_balance_payload, inspect_data_file
+from data_quality import action_balance_payload, inspect_data_file, variant_coverage_summary
 
 
 class DataQualityTest(unittest.TestCase):
@@ -33,7 +33,26 @@ class DataQualityTest(unittest.TestCase):
         self.assertEqual(summary["valid_samples"], 2)
         self.assertEqual(summary["skipped_entries"], 1)
         self.assertEqual(summary["action_balance"], {"left": 1, "right": 1})
+        self.assertEqual(summary["variant_coverage"]["legacy_obstacle_samples"], 2)
+        self.assertEqual(summary["variant_coverage"]["warnings"], ["no_recorded_variant_samples"])
         self.assertEqual(summary["data_quality"]["status"], "ready")
+
+    def test_variant_coverage_summarizes_recorded_nearest_variants(self):
+        entries = [
+            {"state": {"player_x": 100, "obstacles": [[120, 40, "ore"]]}, "action": "left"},
+            {"state": {"player_x": 200, "obstacles": [[180, 50, "heavy"]]}, "action": "right"},
+            {"state": {"player_x": 300, "obstacles": [[220, 20, "ore"], [260, 70, "swift"]]}, "action": "left"},
+            {"state": {"player_x": 100, "obstacles": [[120, 40]]}, "action": "right"},
+        ]
+
+        coverage = variant_coverage_summary(entries)
+
+        self.assertEqual(coverage["recorded_variant_samples"], 3)
+        self.assertEqual(coverage["legacy_obstacle_samples"], 1)
+        self.assertEqual(coverage["variant_counts"]["ore"], 1)
+        self.assertEqual(coverage["variant_counts"]["heavy"], 1)
+        self.assertEqual(coverage["variant_counts"]["swift"], 1)
+        self.assertEqual(coverage["status"], "variant_ready")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import unittest
 
 import joblib
 
-from train_model import MODEL_FILE, load_data, parse_args, save_model
+from train_model import MODEL_FILE, format_variant_coverage_line, load_data, parse_args, save_model
 
 
 class TrainModelTest(unittest.TestCase):
@@ -36,6 +36,19 @@ class TrainModelTest(unittest.TestCase):
         self.assertEqual(X.tolist(), [[100, 120, 40, 20, 0, 2]])
         self.assertEqual(y.tolist(), [1])
         self.assertEqual(skipped_entries, 0)
+
+    def test_format_variant_coverage_line_lists_variant_counts(self):
+        line = format_variant_coverage_line(
+            {
+                "recorded_variant_samples": 3,
+                "legacy_obstacle_samples": 1,
+                "variant_counts": {"normal": 0, "heavy": 1, "swift": 1, "ore": 1},
+            }
+        )
+
+        self.assertIn("recorded=3", line)
+        self.assertIn("legacy=1", line)
+        self.assertIn("ore=1", line)
 
 
 if __name__ == "__main__":

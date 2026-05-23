@@ -61,6 +61,29 @@ def format_inspection_lines(payload):
         f"Balance ratio: {quality['balance_ratio']:.3f}",
         f"Data quality: {quality['status']}",
     ]
+    variant_coverage = payload.get("variant_coverage")
+    if variant_coverage:
+        variant_counts = variant_coverage["variant_counts"]
+        lines.extend(
+            [
+                (
+                    "Variant coverage: "
+                    f"recorded={variant_coverage['recorded_variant_samples']}, "
+                    f"legacy={variant_coverage['legacy_obstacle_samples']}, "
+                    f"ratio={variant_coverage['variant_sample_ratio']:.3f}"
+                ),
+                (
+                    "Variant counts: "
+                    f"normal={variant_counts['normal']}, "
+                    f"heavy={variant_counts['heavy']}, "
+                    f"swift={variant_counts['swift']}, "
+                    f"ore={variant_counts['ore']}"
+                ),
+                f"Variant quality: {variant_coverage['status']}",
+            ]
+        )
+        if variant_coverage["warnings"]:
+            lines.append("Variant warnings: " + ", ".join(variant_coverage["warnings"]))
     if quality["warnings"]:
         lines.append("Data quality warnings: " + ", ".join(quality["warnings"]))
     return lines

@@ -16,6 +16,7 @@ from data_quality import (
     DEFAULT_MIN_SAMPLES,
     action_balance_payload,
     data_quality_summary,
+    inspect_variant_coverage_file,
 )
 from data_store import GAME_DATA_FILE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
@@ -116,6 +117,7 @@ def train_candidate_model(
         "skipped_entries": skipped_entries,
         "features": list(FEATURE_NAMES),
         "action_balance": action_balance_payload(action_counts),
+        "variant_coverage": inspect_variant_coverage_file(data_path),
         "validation_accuracy": validation_accuracy,
         "estimators": estimators,
         "test_size": test_size,
@@ -209,9 +211,17 @@ def format_training_lines(training_summary):
             f"left={training_summary['action_balance']['left']}, "
             f"right={training_summary['action_balance']['right']}"
         ),
+        (
+            "Variant coverage: "
+            f"recorded={training_summary['variant_coverage']['recorded_variant_samples']}, "
+            f"legacy={training_summary['variant_coverage']['legacy_obstacle_samples']}"
+        ),
         f"Validation accuracy: {training_summary['validation_accuracy']:.3f}",
         f"Data quality: {training_summary['data_quality']['status']}",
     ]
+    variant_warnings = training_summary["variant_coverage"]["warnings"]
+    if variant_warnings:
+        lines.append("Variant warnings: " + ", ".join(variant_warnings))
     warnings = training_summary["data_quality"]["warnings"]
     if warnings:
         lines.append("Data quality warnings: " + ", ".join(warnings))

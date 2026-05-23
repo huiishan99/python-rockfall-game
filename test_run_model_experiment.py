@@ -25,6 +25,16 @@ TRAINING_SUMMARY = {
     "skipped_entries": 3,
     "features": ["player_x", "nearest_obstacle_x"],
     "action_balance": {"left": 45, "right": 55},
+    "variant_coverage": {
+        "status": "needs_variant_data",
+        "warnings": ["no_recorded_variant_samples"],
+        "variant_counts": {"normal": 0, "heavy": 0, "swift": 0, "ore": 0},
+        "total_obstacle_samples": 100,
+        "recorded_variant_samples": 0,
+        "legacy_obstacle_samples": 100,
+        "invalid_obstacle_samples": 0,
+        "variant_sample_ratio": 0,
+    },
     "validation_accuracy": 0.875,
     "estimators": 100,
     "test_size": 0.2,
@@ -196,6 +206,8 @@ class RunModelExperimentTest(unittest.TestCase):
 
         self.assertIn("Training candidate model:", lines)
         self.assertIn("Validation accuracy: 0.875", lines)
+        self.assertIn("Variant coverage: recorded=0, legacy=100", lines)
+        self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
         self.assertIn("Data quality: ready", lines)
         self.assertIn("Model comparison:", lines)
         self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Report rock variant coverage in data tools
+
+- Changed: added rock-variant coverage summaries to `data_quality.py`, `inspect_data.py`, `train_model.py`, and `run_model_experiment.py`; expanded data inspection, training, and experiment tests; updated `README.md`.
+- Why: after adding variant-aware features, old datasets can still train successfully while containing no recorded ore, heavy, or swift rocks, so the tools need to make that gap visible before model iteration.
+- Behavior: inspection, training, and experiment output now reports recorded variant samples, legacy samples, per-variant counts, and warnings such as `no_recorded_variant_samples`.
+- Verification: ran `python3 -m unittest test_data_quality.py test_inspect_data.py test_train_model.py test_run_model_experiment.py`; ran `python3 inspect_data.py --data game_data.json`; ran `python3 train_model.py --data game_data.json --model /private/tmp/rockfall-coverage-model.pkl --estimators 20`; ran `python3 run_model_experiment.py --data game_data.json --candidate /private/tmp/rockfall-coverage-candidate.pkl --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-coverage-experiment.json`; ran `python3 -m json.tool /private/tmp/rockfall-coverage-experiment.json`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile data_quality.py inspect_data.py train_model.py run_model_experiment.py test_data_quality.py test_inspect_data.py test_train_model.py test_run_model_experiment.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-variant-coverage-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-variant-coverage-release-check.json`.
+- Risks/Notes: this does not change gameplay, model predictions, or existing data; it only makes dataset coverage visible.
+
 ## 2026-05-23 - Add rock variant features for model training
 
 - Changed: updated `features.py` so model inputs include the nearest rock's fall-speed modifier and score bonus; updated `game_core.py` snapshots to record rock type; added old-model feature adaptation in `play_with_model.py`; expanded feature, gameplay, prediction, and training tests; updated `README.md`.

@@ -35,12 +35,22 @@ class InspectDataTest(unittest.TestCase):
                 "skipped_ratio": 0.03773584905660377,
                 "balance_ratio": 0.09803921568627451,
             },
+            "variant_coverage": {
+                "status": "needs_variant_data",
+                "warnings": ["no_recorded_variant_samples"],
+                "variant_counts": {"normal": 0, "heavy": 0, "swift": 0, "ore": 0},
+                "recorded_variant_samples": 0,
+                "legacy_obstacle_samples": 51,
+                "variant_sample_ratio": 0,
+            },
         }
 
         lines = format_inspection_lines(payload)
 
         self.assertIn("Data quality: needs_more_data", lines)
         self.assertIn("Data quality warnings: valid_samples_below_500", lines)
+        self.assertIn("Variant quality: needs_variant_data", lines)
+        self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
         self.assertIn("Balance ratio: 0.098", lines)
 
     def test_write_inspection_report_creates_parent_directory(self):
