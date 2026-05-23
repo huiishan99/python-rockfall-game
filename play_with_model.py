@@ -30,8 +30,10 @@ def parse_args(argv=None):
 
 def predict_action(model, game):
     from game_core import ACTION_LEFT, ACTION_RIGHT
+    from features import adapt_features_for_model
 
-    predicted_action = model.predict([game.model_features()])[0]
+    model_features = adapt_features_for_model(game.model_features(), model)
+    predicted_action = model.predict([model_features])[0]
     if predicted_action == 1:
         return ACTION_RIGHT
     return ACTION_LEFT

@@ -18,7 +18,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Evaluation and comparison reports include survival metrics and can be saved as JSON artifacts.
 - Data inspection can check collected samples before training and save quality reports.
 - Score milestone life recovery gives damaged runs a comeback path without changing controls.
-- Variant rocks add different fall speeds and score rewards while keeping the model feature format compatible.
+- Variant rocks add different fall speeds and score rewards; new training features expose those effects while old four-feature models still run.
 - Release checks can save versioned JSON artifacts for candidate builds.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
@@ -31,6 +31,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
+- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through speed and reward features.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
@@ -75,7 +76,7 @@ Controls:
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
-The help screen shows the rock variant legend and explains that manual play records state/action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
+The help screen shows the rock variant legend and explains that manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
 
 ### Run Tests
 
@@ -123,7 +124,7 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
-The current model uses these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, and horizontal distance to that obstacle. Rock variants are kept inside the live game state and are not written into the training feature vector, so existing datasets and models remain structurally compatible.
+Newly trained models use these features: player x-position, nearest obstacle x-position, nearest obstacle y-position, horizontal distance to that obstacle, nearest obstacle fall-speed modifier, and nearest obstacle score bonus. Existing model files trained on the original four position features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+2`, swift rocks fall faster, and heavy rocks fall slower.
 
 You can also experiment with alternate data or model files:
 

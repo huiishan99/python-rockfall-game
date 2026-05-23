@@ -257,11 +257,24 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.obstacle_variant([100, 200]), DEFAULT_OBSTACLE_VARIANT)
 
-    def test_snapshot_keeps_variant_out_of_training_state(self):
+    def test_snapshot_records_variant_for_training_state(self):
         game = RockfallGame(self.screen)
         game.obstacles = [[100, 200, "ore"]]
 
-        self.assertEqual(game.snapshot()["obstacles"], [(100, 200)])
+        self.assertEqual(game.snapshot()["obstacles"], [(100, 200, "ore")])
+
+    def test_snapshot_defaults_old_obstacles_to_normal_variant(self):
+        game = RockfallGame(self.screen)
+        game.obstacles = [[100, 200]]
+
+        self.assertEqual(game.snapshot()["obstacles"], [(100, 200, DEFAULT_OBSTACLE_VARIANT)])
+
+    def test_model_features_include_variant_reward(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+        game.obstacles = [[120, 200, "ore"]]
+
+        self.assertEqual(game.model_features(), [100, 120, 200, 20, 0, 2])
 
     def test_spawned_obstacles_include_variant_key(self):
         game = RockfallGame(self.screen)

@@ -135,7 +135,10 @@ class RockfallGame:
     def snapshot(self):
         return {
             "player_x": self.player_x,
-            "obstacles": [(obstacle[0], obstacle[1]) for obstacle in self.obstacles],
+            "obstacles": [
+                (obstacle[0], obstacle[1], self.obstacle_variant(obstacle))
+                for obstacle in self.obstacles
+            ],
         }
 
     def model_features(self):
@@ -234,7 +237,7 @@ class RockfallGame:
         return [
             "Dodge falling rocks and survive as long as you can.",
             "Move with Left/Right or A/D. Combos reward clean dodges.",
-            "Manual play records state + action examples.",
+            "Manual play records state, rock type, and action.",
             "train_model.py learns left/right choices from samples.",
             "play_with_model.py predicts movement each frame.",
             "inspect/evaluate/compare check data and model quality.",

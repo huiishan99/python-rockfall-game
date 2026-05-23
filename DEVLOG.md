@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Add rock variant features for model training
+
+- Changed: updated `features.py` so model inputs include the nearest rock's fall-speed modifier and score bonus; updated `game_core.py` snapshots to record rock type; added old-model feature adaptation in `play_with_model.py`; expanded feature, gameplay, prediction, and training tests; updated `README.md`.
+- Why: ore already awards +2 score in gameplay, but the machine-learning model could only see obstacle positions, so it could not distinguish ore, heavy, swift, or normal rocks in newly collected samples.
+- Behavior: new training data includes obstacle variants, newly trained models use six features, and old four-feature models still run by receiving the legacy position-only feature subset.
+- Verification: ran `python3 -m unittest test_features.py test_game_core.py test_play_with_model.py test_train_model.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile features.py game_core.py play_with_model.py train_model.py test_features.py test_game_core.py test_play_with_model.py test_train_model.py`; ran `python3 inspect_data.py --data game_data.json`; ran `python3 train_model.py --data game_data.json --model /private/tmp/rockfall-variant-features-model.pkl --estimators 20`; ran `python3 evaluate_model.py --model /private/tmp/rockfall-variant-features-model.pkl --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --json`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-variant-features-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-variant-features-release-check.json`.
+- Risks/Notes: existing `game_data.json` entries do not contain variants, so they default to normal for feature extraction; collect fresh data before expecting a retrained model to learn variant-specific behavior.
+
 ## 2026-05-23 - Add rock variant legend to help screen
 
 - Changed: added a four-card rock variant legend to the `HOW IT WORKS` screen in `game_core.py`; added a small font for compact card labels; expanded rendering tests; updated `README.md`.

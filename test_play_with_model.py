@@ -1,7 +1,14 @@
 import sys
 import unittest
 
-from play_with_model import MODEL_FILE, manual_play_command, model_load_error_message, model_mode_name, parse_args
+from play_with_model import (
+    MODEL_FILE,
+    manual_play_command,
+    model_load_error_message,
+    model_mode_name,
+    parse_args,
+    predict_action,
+)
 
 
 class PlayWithModelTest(unittest.TestCase):
@@ -53,6 +60,44 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertIn("8", command)
         self.assertIn("3", command)
         self.assertIn("--mute", command)
+
+    def test_predict_action_adapts_features_for_legacy_model(self):
+        model = RecordingModel(n_features_in=4, prediction=1)
+        game = StubGame([200, 260, 300, 60, 0, 2])
+
+        action = predict_action(model, game)
+
+        self.assertEqual(action, "right")
+        self.assertEqual(model.seen_features, [200, 260, 300, 60])
+
+    def test_predict_action_uses_variant_features_for_current_model(self):
+        features = [200, 260, 300, 60, 0, 2]
+        model = RecordingModel(n_features_in=6, prediction=0)
+        game = StubGame(features)
+
+        action = predict_action(model, game)
+
+        self.assertEqual(action, "left")
+        self.assertEqual(model.seen_features, features)
+
+
+class StubGame:
+    def __init__(self, features):
+        self.features = features
+
+    def model_features(self):
+        return self.features
+
+
+class RecordingModel:
+    def __init__(self, n_features_in, prediction):
+        self.n_features_in_ = n_features_in
+        self.prediction = prediction
+        self.seen_features = None
+
+    def predict(self, rows):
+        self.seen_features = rows[0]
+        return [self.prediction]
 
 
 if __name__ == "__main__":
