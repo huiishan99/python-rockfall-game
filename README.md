@@ -30,7 +30,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, and lane-based rock spawning.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
-- Start-screen `HOW IT WORKS` help that explains the game rules and the machine-learning loop from manual data collection to model play.
+- Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, and initial lives.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
@@ -65,7 +65,7 @@ Controls:
 - Move left/right with arrow keys or A/D.
 - Press P to pause or resume.
 - Press R to restart from pause or game over.
-- Click `HOW IT WORKS` on the start screen, or press H, to see how gameplay data becomes a trained model.
+- Click `HOW IT WORKS` on the start screen, or press H, to see rock variant effects and how gameplay data becomes a trained model.
 - Click `PLAY WITH MODEL` on the start screen, or press M, to switch into model-controlled play after training.
 - In model play, click `TRAIN MANUALLY` on the start screen, or press T, to return to data collection with the same tuning settings.
 - Press Esc to quit.
@@ -75,7 +75,7 @@ Controls:
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 
 The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
-The help screen explains that manual play records state/action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
+The help screen shows the rock variant legend and explains that manual play records state/action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
 
 ### Run Tests
 

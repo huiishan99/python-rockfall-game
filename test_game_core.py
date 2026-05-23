@@ -508,6 +508,19 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at(back_rect.topleft)[:3], PROMPT_BORDER_COLOR)
         self.assertEqual(self.screen.get_at(start_rect.topleft)[:3], PROMPT_BORDER_COLOR)
 
+    def test_help_screen_draws_rock_variant_legend(self):
+        game = RockfallGame(self.screen)
+
+        game.draw_help_screen()
+
+        card_rects = game.rock_legend_card_rects()
+        ore_card_rect = card_rects[3]
+        self.assertEqual(self.screen.get_at(card_rects[0].topleft)[:3], PROMPT_BORDER_COLOR)
+        self.assertEqual(
+            self.screen.get_at((ore_card_rect.x + 27, ore_card_rect.y + 34))[:3],
+            OBSTACLE_VARIANTS["ore"]["mark"],
+        )
+
     def test_model_missing_screen_draws_back_button(self):
         game = RockfallGame(self.screen)
 

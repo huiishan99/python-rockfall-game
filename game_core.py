@@ -98,6 +98,7 @@ class RockfallGame:
         self.initial_lives = max(1, int(initial_lives))
         self.font = pygame.font.Font(None, 36)
         self.small_font = pygame.font.Font(None, 28)
+        self.tiny_font = pygame.font.Font(None, 22)
         self.title_font = pygame.font.Font(None, 72)
         self.level_text = self.font.render("Level:", True, HUD_COLOR)
         self.progress_bar_x = SCREEN_WIDTH - PROGRESS_BAR_LENGTH - 10
@@ -209,7 +210,9 @@ class RockfallGame:
         self._draw_panel(panel_rect, MENU_PANEL_COLOR, MENU_PANEL_BORDER_COLOR)
         for index, line in enumerate(self.help_lines()):
             text_surface = self.small_font.render(line, True, self._help_line_color(index))
-            self._blit_centered(text_surface, panel_rect.y + 24 + index * 30)
+            self._blit_centered(text_surface, panel_rect.y + 22 + index * 27)
+
+        self._draw_rock_legend(panel_rect)
 
         self._draw_button(self.help_back_button_rect(), "BACK")
         self._draw_button(self.help_start_button_rect(), "START")
@@ -230,14 +233,20 @@ class RockfallGame:
     def help_lines(self):
         return [
             "Dodge falling rocks and survive as long as you can.",
-            "Move with Left/Right or A/D. Avoid rocks to score.",
-            "Heavy and ore rocks give bonus score; swift rocks fall fast.",
-            "Combos add bonus points; score milestones restore lost lives.",
+            "Move with Left/Right or A/D. Combos reward clean dodges.",
             "Manual play records state + action examples.",
-            "train_model.py learns left/right choices.",
+            "train_model.py learns left/right choices from samples.",
             "play_with_model.py predicts movement each frame.",
             "inspect/evaluate/compare check data and model quality.",
             "That loop is the machine-learning part of Rockfall.",
+        ]
+
+    def rock_legend_items(self):
+        return [
+            ("normal", "Baseline"),
+            ("heavy", "Slower +1"),
+            ("swift", "Fast fall"),
+            ("ore", "Bonus +2"),
         ]
 
     def help_button_rect(self):
@@ -257,6 +266,21 @@ class RockfallGame:
 
     def help_panel_rect(self):
         return pygame.Rect(85, 190, SCREEN_WIDTH - 170, 310)
+
+    def rock_legend_card_rects(self, panel_rect=None):
+        if panel_rect is None:
+            panel_rect = self.help_panel_rect()
+
+        card_width = 145
+        card_height = 68
+        gap = 12
+        total_width = card_width * 4 + gap * 3
+        start_x = panel_rect.x + (panel_rect.width - total_width) // 2
+        card_y = panel_rect.y + 228
+        return [
+            pygame.Rect(start_x + index * (card_width + gap), card_y, card_width, card_height)
+            for index in range(4)
+        ]
 
     def draw_game_over_screen(self, mode_name):
         self._draw_message_screen("GAME OVER", self.game_over_lines(mode_name))
@@ -642,6 +666,21 @@ class RockfallGame:
             ),
         )
 
+    def _draw_rock_legend(self, panel_rect):
+        title_surface = self.small_font.render("Rock types", True, MENU_ACCENT_COLOR)
+        self._blit_centered(title_surface, panel_rect.y + 202)
+
+        for card_rect, (variant_key, effect_text) in zip(self.rock_legend_card_rects(panel_rect), self.rock_legend_items()):
+            pygame.draw.rect(self.screen, PROMPT_BACK_COLOR, card_rect)
+            pygame.draw.rect(self.screen, PROMPT_BORDER_COLOR, card_rect, 1)
+            self._draw_obstacle([card_rect.x + 7, card_rect.y + 8, variant_key])
+
+            variant = OBSTACLE_VARIANTS[variant_key]
+            label_surface = self.tiny_font.render(variant["label"], True, HUD_COLOR)
+            effect_surface = self.tiny_font.render(effect_text, True, MENU_SECONDARY_COLOR)
+            self.screen.blit(label_surface, (card_rect.x + 65, card_rect.y + 17))
+            self.screen.blit(effect_surface, (card_rect.x + 65, card_rect.y + 39))
+
     def _message_line_color(self, index, line):
         if index == 0:
             return MENU_ACCENT_COLOR
@@ -650,7 +689,7 @@ class RockfallGame:
         return HUD_COLOR
 
     def _help_line_color(self, index):
-        if index in (4, 5, 6, 7):
+        if index in (2, 3, 4, 5):
             return MENU_ACCENT_COLOR
         return HUD_COLOR
 

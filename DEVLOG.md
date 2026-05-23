@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Add rock variant legend to help screen
+
+- Changed: added a four-card rock variant legend to the `HOW IT WORKS` screen in `game_core.py`; added a small font for compact card labels; expanded rendering tests; updated `README.md`.
+- Why: variant rocks are easier to understand when players can see each shape and effect in-game instead of relying on external documentation.
+- Behavior: the help screen now shows Stone, Heavy, Swift, and Ore cards with their visuals and effects while preserving the machine-learning explanation.
+- Verification: ran `python3 -m unittest test_game_core.py`; rendered pygame preview image to `/private/tmp/rockfall-help-rock-legend.png`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game_core.py test_game_core.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-help-legend-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-help-legend-release-check.json`.
+- Risks/Notes: this is a tutorial/UI change only; gameplay rules, data format, and model behavior are unchanged.
+
 ## 2026-05-23 - Add latest GUI smoke-test gameplay samples
 
 - Changed: updated `game_data.json` with 412 new manual-play samples collected while opening the current GUI build for smoke testing.
