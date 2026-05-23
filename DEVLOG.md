@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-23 - Replace warning strip and square player art
+
+- Changed: removed the yellow top-edge incoming-rock warning strip; redrew the player as a small mine cart with a rim, angled body, shaded side, and wheels; expanded rendering tests; updated `README.md`.
+- Why: the warning strip read like a confusing yellow line, and the square player shape did not fit the Rockfall theme.
+- Behavior: rocks now simply enter from above as partially clipped stones, and the player is visually a cart while collision bounds and controls stay unchanged.
+- Verification: ran `python3 -m unittest test_game_core.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py game_core.py test_game_core.py`; rendered pygame preview image to `/private/tmp/rockfall-cart-no-warning.png`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-cart-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-cart-release-check.json`.
+- Risks/Notes: this is visual-only, but the removed warning strip reduces early lane telegraphing slightly; playtesting should confirm the rock entry timing still feels readable.
+
 ## 2026-05-23 - Draw falling rocks as irregular stones
 
 - Changed: replaced rectangular obstacle rendering with irregular rock polygons, offset shadows, warm stone colors, highlight facets, dark facets, and crack lines; expanded rendering tests; updated `README.md`.

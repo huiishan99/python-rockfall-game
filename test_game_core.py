@@ -34,10 +34,12 @@ from settings import (
     OBSTACLE_CRACK_COLOR,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
-    OBSTACLE_WARNING_COLOR,
     PLAYER_COLOR,
     PLAYER_HIT_COLOR,
     PLAYER_OUTLINE_COLOR,
+    PLAYER_RIM_COLOR,
+    PLAYER_SHADOW_COLOR,
+    PLAYER_WHEEL_COLOR,
     PLAYER_WIDTH,
     PROMPT_BACK_COLOR,
     PROMPT_BORDER_COLOR,
@@ -353,12 +355,15 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(self.screen.get_at((3, 3))[:3], BACKGROUND_COLOR)
 
-    def test_draw_adds_player_outline(self):
+    def test_draw_adds_mine_cart_player_shape(self):
         game = RockfallGame(self.screen)
 
         game.draw()
 
-        self.assertEqual(self.screen.get_at(game.player_rect.topleft)[:3], PLAYER_OUTLINE_COLOR)
+        self.assertEqual(self.screen.get_at((game.player_x + 25, game.player_y + 15))[:3], PLAYER_RIM_COLOR)
+        self.assertEqual(self.screen.get_at((game.player_x + 20, game.player_y + 28))[:3], PLAYER_COLOR)
+        self.assertEqual(self.screen.get_at((game.player_x + 38, game.player_y + 28))[:3], PLAYER_SHADOW_COLOR)
+        self.assertEqual(self.screen.get_at((game.player_x + 15, game.player_y + 42))[:3], PLAYER_WHEEL_COLOR)
 
     def test_draw_hit_overlay_tints_background_after_hit(self):
         game = RockfallGame(self.screen)
@@ -379,13 +384,13 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(self.screen.get_at((310, 205))[:3], OBSTACLE_SHADOW_COLOR)
         self.assertEqual(self.screen.get_at((290, 207))[:3], OBSTACLE_CRACK_COLOR)
 
-    def test_draw_adds_top_warning_for_incoming_obstacle(self):
+    def test_incoming_obstacle_draws_clipped_rock_without_warning_strip(self):
         game = RockfallGame(self.screen)
         game.obstacles = [[100, -30]]
 
         game.draw()
 
-        self.assertEqual(self.screen.get_at((101, 1))[:3], OBSTACLE_WARNING_COLOR)
+        self.assertNotEqual(self.screen.get_at((101, 1))[:3], MENU_ACCENT_COLOR)
 
     def test_message_line_colors_highlight_mode_and_controls(self):
         game = RockfallGame(self.screen)

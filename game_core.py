@@ -39,8 +39,6 @@ from settings import (
     OBSTACLE_HEIGHT,
     OBSTACLE_HIGHLIGHT_COLOR,
     OBSTACLE_SHADOW_COLOR,
-    OBSTACLE_WARNING_COLOR,
-    OBSTACLE_WARNING_HEIGHT,
     OBSTACLE_WIDTH,
     LANE_COLOR,
     LANE_HIGHLIGHT_COLOR,
@@ -54,8 +52,10 @@ from settings import (
     PLAYER_HIT_COLOR,
     PLAYER_HEIGHT,
     PLAYER_OUTLINE_COLOR,
+    PLAYER_RIM_COLOR,
     PLAYER_SHADOW_COLOR,
     PLAYER_SPEED,
+    PLAYER_WHEEL_COLOR,
     PLAYER_WIDTH,
     PROMPT_BACK_COLOR,
     PROMPT_BORDER_COLOR,
@@ -430,10 +430,35 @@ class RockfallGame:
             pygame.draw.line(self.screen, lane_color, (center_x, 0), (center_x, SCREEN_HEIGHT), 1)
 
     def _draw_player(self):
-        shadow_rect = self.player_rect.move(4, 5)
-        pygame.draw.rect(self.screen, PLAYER_SHADOW_COLOR, shadow_rect)
-        pygame.draw.rect(self.screen, self.player_color(), self.player_rect)
-        pygame.draw.rect(self.screen, PLAYER_OUTLINE_COLOR, self.player_rect, 2)
+        player_rect = self.player_rect
+        body_points = [
+            (player_rect.x + 5, player_rect.y + 18),
+            (player_rect.x + 45, player_rect.y + 18),
+            (player_rect.x + 39, player_rect.y + 38),
+            (player_rect.x + 11, player_rect.y + 38),
+        ]
+        shadow_points = [(x + 4, y + 5) for x, y in body_points]
+        side_points = [
+            (player_rect.x + 35, player_rect.y + 19),
+            (player_rect.x + 45, player_rect.y + 19),
+            (player_rect.x + 39, player_rect.y + 38),
+            (player_rect.x + 30, player_rect.y + 38),
+        ]
+        rim_rect = pygame.Rect(player_rect.x + 8, player_rect.y + 12, 34, 8)
+
+        pygame.draw.polygon(self.screen, PLAYER_SHADOW_COLOR, shadow_points)
+        pygame.draw.polygon(self.screen, self.player_color(), body_points)
+        pygame.draw.polygon(self.screen, PLAYER_SHADOW_COLOR, side_points)
+        pygame.draw.rect(self.screen, PLAYER_RIM_COLOR, rim_rect)
+        pygame.draw.rect(self.screen, PLAYER_OUTLINE_COLOR, rim_rect, 2)
+        pygame.draw.polygon(self.screen, PLAYER_OUTLINE_COLOR, body_points, 2)
+        self._draw_player_wheel(player_rect.x + 15, player_rect.y + 42)
+        self._draw_player_wheel(player_rect.x + 35, player_rect.y + 42)
+
+    def _draw_player_wheel(self, x, y):
+        pygame.draw.circle(self.screen, PLAYER_SHADOW_COLOR, (x + 2, y + 2), 7)
+        pygame.draw.circle(self.screen, PLAYER_WHEEL_COLOR, (x, y), 6)
+        pygame.draw.circle(self.screen, PLAYER_OUTLINE_COLOR, (x, y), 6, 2)
 
     def _draw_obstacle(self, obstacle):
         obstacle_rect = self.obstacle_rect(obstacle)
@@ -458,8 +483,6 @@ class RockfallGame:
         pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, dark_facet_points)
         pygame.draw.polygon(self.screen, OBSTACLE_SHADOW_COLOR, rock_points, 2)
         self._draw_rock_cracks(obstacle_rect)
-        if obstacle_rect.y < 0:
-            self._draw_obstacle_warning(obstacle_rect)
 
     def _rock_points(self, obstacle_rect):
         return [
@@ -484,10 +507,6 @@ class RockfallGame:
         ]
         pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_a, 2)
         pygame.draw.lines(self.screen, OBSTACLE_CRACK_COLOR, False, crack_b, 2)
-
-    def _draw_obstacle_warning(self, obstacle_rect):
-        warning_rect = pygame.Rect(obstacle_rect.x, 0, obstacle_rect.width, OBSTACLE_WARNING_HEIGHT)
-        pygame.draw.rect(self.screen, OBSTACLE_WARNING_COLOR, warning_rect)
 
     def _draw_hit_overlay(self):
         alpha = self.hit_overlay_alpha()
