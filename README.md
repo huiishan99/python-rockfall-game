@@ -31,6 +31,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
 - Model learning reports combine data quality, standard evaluation, variant-rich stress testing, score-source breakdowns, and safe-rule baseline comparison.
+- Policy data collection can record safe-rule demonstration samples into `runs/` for quick variant-rich training experiments.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
@@ -117,6 +118,14 @@ To collect more rock-variant examples for retraining, use the variant-rich profi
 ```bash
 python3 game.py --data runs/variant_rich.json --variant-profile variant-rich
 ```
+
+To bootstrap a variant-rich imitation dataset from the built-in safe-rule policy:
+
+```bash
+python3 collect_policy_data.py --data runs/policy_variant_rich.json --games 3 --max-frames 900
+```
+
+This creates synthetic policy demonstrations for experiments; keep them separate from human play data when comparing model behavior.
 
 Inspect collected data before training:
 
@@ -234,6 +243,7 @@ Local experiment outputs under `runs/` are also ignored by git.
 
 - Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
 - Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
+- Optionally bootstrap safe-rule demonstration data with `collect_policy_data.py` and compare it against human-play models.
 - Retrain and compare the model with `evaluate_model.py`, checking ore/heavy/swift avoid rates.
 - Generate `model_report.py` reports after each candidate retrain to track whether new data actually improves model behavior.
 - Tune rock variant spawn rates and rewards after more real-window playtesting.

@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add safe-rule policy data collection
+
+- Changed: added `collect_policy_data.py`, policy sample collection/report helpers, tests, and README usage.
+- Why: the project needs a quick way to generate variant-rich supervised examples without waiting for a long manual play session, while keeping synthetic policy data separate from human play data.
+- Behavior: `python3 collect_policy_data.py` records built-in safe-rule actions to `runs/policy_variant_rich.json` by default, summarizes the collected run, inspects variant coverage, and can save a JSON report.
+- Verification: ran `python3 -m unittest test_collect_policy_data.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile collect_policy_data.py test_collect_policy_data.py`; ran `python3 collect_policy_data.py --data /private/tmp/rockfall-policy-samples.json --games 1 --max-frames 120 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-policy-collection-report.json`; ran `python3 collect_policy_data.py --data /private/tmp/rockfall-policy-samples-300.json --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-policy-collection-report-300.json`; ran `python3 -m json.tool /private/tmp/rockfall-policy-collection-report-300.json`; ran `python3 -m unittest test_collect_policy_data.py test_model_report.py test_run_model_experiment.py test_train_model.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile collect_policy_data.py test_collect_policy_data.py`; ran `python3 -m unittest`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-policy-data-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-policy-data-release-check.json`; ran `git diff --check`.
+- Risks/Notes: policy-generated samples are demonstrations from a deterministic baseline, not human skill; use them as an experiment source and compare against human-play models rather than mixing them blindly.
+
 ## 2026-05-24 - Add model learning report command
 
 - Changed: added `model_report.py`, report formatting/writing helpers, recommendation rules, tests, and README usage.
