@@ -156,6 +156,10 @@ def score_delta(summary, baseline_summary):
     return summary["average_score"] - baseline_summary["average_score"]
 
 
+def score_breakdown_average(summary, key):
+    return summary.get("score_breakdown", {}).get(key, {}).get("average", 0)
+
+
 def comparison_winner(model_paths, summaries):
     best_index = max(
         range(len(summaries)),
@@ -184,6 +188,8 @@ def format_comparison_table(model_paths, summaries):
             "Avg Frames",
             "Avg Lives",
             "Survival",
+            "Var Bonus",
+            "Risk Bonus",
             "Timeouts",
         )
     ]
@@ -200,6 +206,8 @@ def format_comparison_table(model_paths, summaries):
                 f"{summary['average_frames']:.1f}",
                 f"{summary['average_lives_left']:.2f}",
                 f"{summary['survival_rate']:.1%}",
+                f"{score_breakdown_average(summary, 'variant_bonus'):.2f}",
+                f"{score_breakdown_average(summary, 'risk_bonus'):.2f}",
                 str(summary["timeouts"]),
             )
         )

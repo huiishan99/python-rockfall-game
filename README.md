@@ -221,7 +221,7 @@ Add `--include-rule-baseline` to compare against the built-in `policy:safe-rule`
 python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --max-frames 3600
 ```
 
-Comparison output includes score deltas, average remaining lives, survival rate, score-source breakdowns and per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
+Comparison output includes score deltas, average remaining lives, survival rate, average variant/risk bonus columns, score-source breakdowns and per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
 ### Build a Model Learning Report
 

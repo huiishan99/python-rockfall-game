@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Show reward columns in model comparison
+
+- Changed: added average variant-bonus and risk-bonus columns to `compare_models.py` text tables; expanded comparison tests and README notes.
+- Why: reward-aware behavior should be visible in normal terminal comparison output, not only in JSON reports or model-learning reports.
+- Behavior: comparison tables now include `Var Bonus` and `Risk Bonus` averages for each model or policy.
+- Verification: ran `python3 -m unittest test_compare_models.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile compare_models.py test_compare_models.py`; ran `python3 compare_models.py game_model.pkl --include-rule-baseline --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-reward-columns-comparison.json`; ran `python3 -m json.tool /private/tmp/rockfall-reward-columns-comparison.json`; ran `python3 -m unittest`; ran `git diff --check`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-reward-columns-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-reward-columns-release-check.json`.
+- Risks/Notes: old summaries without score breakdowns display `0.00`, preserving compatibility with pure summary fixtures.
+
 ## 2026-05-24 - Add safe-rule policy data collection
 
 - Changed: added `collect_policy_data.py`, policy sample collection/report helpers, tests, and README usage.
