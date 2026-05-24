@@ -188,8 +188,7 @@ def model_report_recommendations(payload):
             recommendations.append(f"beat_baseline_on_{profile_name}")
         score_breakdown = model_result.get("score_breakdown", {})
         ore_bonus = score_breakdown.get("ore_bonus", {}).get("average", 0)
-        risk_bonus = score_breakdown.get("risk_bonus", {}).get("average", 0)
-        if profile_name != DEFAULT_VARIANT_PROFILE and ore_bonus + risk_bonus == 0:
+        if profile_name != DEFAULT_VARIANT_PROFILE and ore_bonus == 0:
             recommendations.append(f"improve_reward_capture_on_{profile_name}")
 
     return sorted(set(recommendations))
@@ -199,7 +198,7 @@ def format_model_row(model_result):
     score_breakdown = model_result.get("score_breakdown", {})
     dodges = score_breakdown.get("survival", {}).get("average", 0)
     ore_bonus = score_breakdown.get("ore_bonus", {}).get("average", 0)
-    risk_bonus = score_breakdown.get("risk_bonus", {}).get("average", 0)
+    ore_penalty = score_breakdown.get("ore_penalty", {}).get("average", 0)
     return (
         f"  {model_result['model']}: "
         f"avg_score={model_result['average_score']:.2f}, "
@@ -207,7 +206,7 @@ def format_model_row(model_result):
         f"survival={model_result['survival_rate']:.1%}, "
         f"dodges={dodges:.2f}, "
         f"ore_bonus={ore_bonus:.2f}, "
-        f"risk_bonus={risk_bonus:.2f}"
+        f"ore_penalty={ore_penalty:.2f}"
     )
 
 

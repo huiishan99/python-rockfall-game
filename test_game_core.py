@@ -354,33 +354,72 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.variant_profile, "standard")
 
-    def test_ore_avoid_adds_score_bonus_message(self):
+    def test_ore_collect_adds_score_and_costs_life(self):
         game = RockfallGame(self.screen)
 
-        game._handle_avoid(20, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
+        game._handle_ore_collect(20, variant_key="ore")
 
         messages = [message["text"] for message in game.messages]
         self.assertEqual(game.score, 5)
-        self.assertEqual(game.variant_stats["ore"]["avoided"], 1)
-        self.assertIn("+5", messages)
-        self.assertIn("ORE +5", messages)
-
-    def test_close_ore_avoid_adds_risk_bonus(self):
-        game = RockfallGame(self.screen)
-        game.player_x = 100
-
-        game._handle_avoid(160, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
-
-        messages = [message["text"] for message in game.messages]
-        self.assertEqual(game.score, 7)
+        self.assertEqual(game.lives, INITIAL_LIVES - 1)
+        self.assertEqual(game.variant_stats["ore"]["hits"], 1)
         self.assertEqual(
             game.score_breakdown,
-            {"survival": 1, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 2},
+            {"survival": 0, "ore_bonus": 5, "combo_bonus": 0, "ore_penalty": 0},
         )
-        self.assertIn("+7", messages)
+        self.assertIn("+5", messages)
         self.assertIn("ORE +5", messages)
-        self.assertIn("RISK +2", messages)
-        self.assertIn("CLOSE!", messages)
+        self.assertIn("HIT!", messages)
+
+    def test_ore_collision_in_movement_collects_ore(self):
+        game = RockfallGame(self.screen)
+        game.player_x = 100
+        game.obstacles = [[100, game.player_y, "ore"]]
+
+        game._move_obstacles_and_check_collisions()
+
+        self.assertEqual(game.obstacles, [])
+        self.assertEqual(game.score, 5)
+        self.assertEqual(game.lives, INITIAL_LIVES - 1)
+        self.assertEqual(game.variant_stats["ore"]["hits"], 1)
+
+    def test_ore_miss_subtracts_ore_score(self):
+        game = RockfallGame(self.screen)
+        game.score = 7
+
+        game._handle_ore_miss(20, variant_key="ore")
+
+        messages = [message["text"] for message in game.messages]
+        self.assertEqual(game.score, 5)
+        self.assertEqual(
+            game.score_breakdown,
+            {"survival": 0, "ore_bonus": 0, "combo_bonus": 0, "ore_penalty": 2},
+        )
+        self.assertEqual(game.variant_stats["ore"]["avoided"], 1)
+        self.assertIn("ORE -2", messages)
+
+    def test_ore_miss_does_not_make_score_negative(self):
+        game = RockfallGame(self.screen)
+
+        game._handle_ore_miss(20, variant_key="ore")
+
+        messages = [message["text"] for message in game.messages]
+        self.assertEqual(game.score, 0)
+        self.assertEqual(game.score_breakdown["ore_penalty"], 0)
+        self.assertIn("ORE MISSED", messages)
+
+    def test_ore_leaving_screen_in_movement_penalizes_missed_ore(self):
+        game = RockfallGame(self.screen)
+        game.score = 7
+        game.obstacles = [[100, SCREEN_HEIGHT, "ore"]]
+
+        game._move_obstacles_and_check_collisions()
+
+        self.assertEqual(game.obstacles, [])
+        self.assertEqual(game.score, 5)
+        self.assertEqual(game.lives, INITIAL_LIVES)
+        self.assertEqual(game.score_breakdown["ore_penalty"], 2)
+        self.assertEqual(game.variant_stats["ore"]["avoided"], 1)
 
     def test_score_breakdown_payload_is_a_copy(self):
         game = RockfallGame(self.screen)
@@ -398,7 +437,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.variant_stats["normal"]["hits"], 0)
 
-    def test_combo_bonus_increases_ore_score_after_survival_streak(self):
+    def test_combo_bonus_increases_collected_ore_score_after_survival_streak(self):
         game = RockfallGame(self.screen)
 
         for _ in range(COMBO_BONUS_INTERVAL):
@@ -410,10 +449,10 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         self.assertEqual(game.score_breakdown["survival"], COMBO_BONUS_INTERVAL)
         self.assertEqual(game.score_breakdown["combo_bonus"], 0)
 
-        game._handle_avoid(20, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
+        game._handle_ore_collect(20, variant_key="ore")
 
         self.assertEqual(game.score, 6)
-        self.assertEqual(game.score_breakdown["survival"], COMBO_BONUS_INTERVAL + 1)
+        self.assertEqual(game.score_breakdown["survival"], COMBO_BONUS_INTERVAL)
         self.assertEqual(game.score_breakdown["ore_bonus"], 5)
         self.assertEqual(game.score_breakdown["combo_bonus"], 1)
 

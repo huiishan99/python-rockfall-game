@@ -39,7 +39,7 @@ TRAINING_SUMMARY = {
     "objective_coverage": {
         "status": "needs_objective_data",
         "warnings": ["no_ore_target_samples"],
-        "target_objective": "ore_target_v1",
+        "target_objective": "ore_target_v2",
         "target_samples": 0,
         "legacy_samples": 100,
         "other_samples": 0,
@@ -121,7 +121,7 @@ class RunModelExperimentTest(unittest.TestCase):
                 "--reward-weighting",
                 "score",
                 "--require-objective",
-                "ore_target_v1",
+                "ore_target_v2",
                 "--json",
             ]
         )
@@ -134,7 +134,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.lives, 3)
         self.assertEqual(args.variant_profile, "variant-rich")
         self.assertEqual(args.reward_weighting, "score")
-        self.assertEqual(args.require_objective, "ore_target_v1")
+        self.assertEqual(args.require_objective, "ore_target_v2")
         self.assertTrue(args.json)
 
     def test_validate_experiment_paths_rejects_baseline_overwrite(self):
@@ -231,7 +231,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Validation accuracy: 0.875", lines)
         self.assertIn("Variant coverage: recorded=0, legacy=100", lines)
         self.assertIn(
-            "Objective coverage: target=ore_target_v1, target_samples=0, legacy=100, other=0, ratio=0.000.",
+            "Objective coverage: target=ore_target_v2, target_samples=0, legacy=100, other=0, ratio=0.000.",
             lines,
         )
         self.assertIn("Reward weighting: none.", lines)

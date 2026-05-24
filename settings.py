@@ -1,4 +1,4 @@
-VERSION = "0.8.2-dev"
+VERSION = "0.8.3-dev"
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -71,6 +71,7 @@ OBSTACLE_VARIANTS = {
         "speed_delta": 0,
         "score_bonus": 0,
         "near_miss_bonus": 0,
+        "miss_penalty": 0,
     },
     "heavy": {
         "label": "HEAVY",
@@ -82,6 +83,7 @@ OBSTACLE_VARIANTS = {
         "speed_delta": -1,
         "score_bonus": 0,
         "near_miss_bonus": 0,
+        "miss_penalty": 0,
     },
     "swift": {
         "label": "SWIFT",
@@ -93,6 +95,7 @@ OBSTACLE_VARIANTS = {
         "speed_delta": 2,
         "score_bonus": 0,
         "near_miss_bonus": 0,
+        "miss_penalty": 0,
     },
     "ore": {
         "label": "ORE",
@@ -103,7 +106,8 @@ OBSTACLE_VARIANTS = {
         "mark": (255, 214, 80),
         "speed_delta": 0,
         "score_bonus": 5,
-        "near_miss_bonus": 2,
+        "near_miss_bonus": 0,
+        "miss_penalty": 2,
     },
 }
 OBSTACLE_VARIANT_WEIGHTS = (

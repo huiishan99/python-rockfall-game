@@ -190,7 +190,7 @@ def format_comparison_table(model_paths, summaries):
             "Survival",
             "Avg Dodges",
             "Ore Bonus",
-            "Risk Bonus",
+            "Ore Penalty",
             "Timeouts",
         )
     ]
@@ -209,7 +209,7 @@ def format_comparison_table(model_paths, summaries):
                 f"{summary['survival_rate']:.1%}",
                 f"{score_breakdown_average(summary, 'survival'):.2f}",
                 f"{score_breakdown_average(summary, 'ore_bonus'):.2f}",
-                f"{score_breakdown_average(summary, 'risk_bonus'):.2f}",
+                f"{score_breakdown_average(summary, 'ore_penalty'):.2f}",
                 str(summary["timeouts"]),
             )
         )

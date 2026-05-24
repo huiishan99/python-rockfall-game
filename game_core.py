@@ -199,7 +199,7 @@ class RockfallGame:
             "survival": 0,
             "ore_bonus": 0,
             "combo_bonus": 0,
-            "risk_bonus": 0,
+            "ore_penalty": 0,
         }
 
     def score_breakdown_payload(self):
@@ -274,9 +274,9 @@ class RockfallGame:
 
     def help_lines(self):
         return [
-            "Ore is the score. Rocks are the road to survive.",
-            "Dodges build combo; combo makes later ore worth more.",
-            "Ore is still dangerous: hit it and lose a life.",
+            "Catch ore for score, but every catch costs a life.",
+            "Missed ore subtracts score; dodges keep you alive.",
+            "Dodge stones to build combo before taking ore.",
             "Manual play records state, rock type, and action.",
             "train_model.py learns left/right choices from samples.",
             "play_with_model.py predicts movement each frame.",
@@ -289,7 +289,7 @@ class RockfallGame:
             ("normal", "Dodge"),
             ("heavy", "Slow dodge"),
             ("swift", "Fast fall"),
-            ("ore", "Score +5"),
+            ("ore", "+5 hit, miss -2"),
         ]
 
     def help_button_rect(self):
@@ -380,6 +380,10 @@ class RockfallGame:
         variant = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])
         return variant["near_miss_bonus"]
 
+    def obstacle_miss_penalty(self, variant_key):
+        variant = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])
+        return variant.get("miss_penalty", 0)
+
     def player_color(self):
         if self.invincibility_frames <= 0:
             return PLAYER_COLOR
@@ -426,16 +430,20 @@ class RockfallGame:
 
         for obstacle in self.obstacles:
             if obstacle[1] >= SCREEN_HEIGHT:
-                self._handle_avoid(
-                    obstacle[0],
-                    self.obstacle_score_bonus(obstacle),
-                    self.obstacle_variant(obstacle),
-                )
+                variant_key = self.obstacle_variant(obstacle)
+                if self.obstacle_score_bonus(obstacle) > 0:
+                    self._handle_ore_miss(obstacle[0], variant_key)
+                else:
+                    self._handle_avoid(obstacle[0], variant_key=variant_key)
                 continue
 
             obstacle[1] += self.obstacle_fall_speed(obstacle)
             if player_rect.colliderect(self.obstacle_rect(obstacle)):
-                self._handle_hit(self.obstacle_variant(obstacle))
+                variant_key = self.obstacle_variant(obstacle)
+                if self.obstacle_score_bonus(obstacle) > 0:
+                    self._handle_ore_collect(obstacle[0], variant_key)
+                else:
+                    self._handle_hit(variant_key)
             else:
                 remaining_obstacles.append(obstacle)
 
@@ -455,6 +463,44 @@ class RockfallGame:
         if self.lives <= 0:
             self.game_over = True
 
+    def _handle_ore_collect(self, obstacle_x, variant_key="ore"):
+        if self.invincibility_frames > 0:
+            return
+
+        variant_key = self.tracked_variant_key(variant_key)
+        score_bonus = OBSTACLE_VARIANTS[variant_key]["score_bonus"]
+        combo_bonus = self.combo_bonus_points()
+        points = score_bonus + combo_bonus
+        self.score += points
+        self.score_breakdown["ore_bonus"] += score_bonus
+        self.score_breakdown["combo_bonus"] += combo_bonus
+        self.variant_stats[variant_key]["hits"] += 1
+        self._add_message(f"ORE +{score_bonus}", SCORE_MESSAGE_COLOR, obstacle_x - 15, SCREEN_HEIGHT - 115)
+        if combo_bonus > 0:
+            self._add_message(f"COMBO +{combo_bonus}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 135)
+        self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
+
+        self.lives -= 1
+        self.invincibility_frames = INVINCIBILITY_FRAMES
+        self.combo = 0
+        self._add_message("HIT!", HIT_MESSAGE_COLOR, self.player_x - 5, self.player_y - 35)
+        self._emit_event(EVENT_HIT)
+        if self.lives <= 0:
+            self.game_over = True
+
+    def _handle_ore_miss(self, obstacle_x, variant_key="ore"):
+        variant_key = self.tracked_variant_key(variant_key)
+        penalty = self.obstacle_miss_penalty(variant_key)
+        actual_penalty = min(self.score, penalty)
+        self.score -= actual_penalty
+        self.score_breakdown["ore_penalty"] += actual_penalty
+        self.combo = 0
+        self.variant_stats[variant_key]["avoided"] += 1
+        if actual_penalty > 0:
+            self._add_message(f"ORE -{actual_penalty}", HIT_MESSAGE_COLOR, obstacle_x - 18, SCREEN_HEIGHT - 95)
+        else:
+            self._add_message("ORE MISSED", HIT_MESSAGE_COLOR, obstacle_x - 32, SCREEN_HEIGHT - 95)
+
     def _handle_avoid(self, obstacle_x, score_bonus=0, variant_key=DEFAULT_OBSTACLE_VARIANT):
         variant_key = self.tracked_variant_key(variant_key)
         near_miss = self.is_near_miss(obstacle_x)
@@ -468,7 +514,6 @@ class RockfallGame:
         self.score_breakdown["survival"] += 1
         self.score_breakdown["ore_bonus"] += score_bonus
         self.score_breakdown["combo_bonus"] += combo_bonus
-        self.score_breakdown["risk_bonus"] += near_miss_bonus
         self.variant_stats[variant_key]["avoided"] += 1
         if points > 0:
             self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)

@@ -38,9 +38,9 @@ class TrainModelTest(unittest.TestCase):
         self.assertEqual(args.reward_weighting, "score")
 
     def test_parse_args_accepts_required_objective(self):
-        args = parse_args(["--require-objective", "ore_target_v1"])
+        args = parse_args(["--require-objective", "ore_target_v2"])
 
-        self.assertEqual(args.require_objective, "ore_target_v1")
+        self.assertEqual(args.require_objective, "ore_target_v2")
 
     def test_save_model_creates_parent_directory(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -81,7 +81,7 @@ class TrainModelTest(unittest.TestCase):
     def test_format_objective_coverage_line_lists_target_samples(self):
         line = format_objective_coverage_line(
             {
-                "target_objective": "ore_target_v1",
+                "target_objective": "ore_target_v2",
                 "target_samples": 3,
                 "legacy_samples": 1,
                 "other_samples": 0,
@@ -89,23 +89,23 @@ class TrainModelTest(unittest.TestCase):
             }
         )
 
-        self.assertIn("target=ore_target_v1", line)
+        self.assertIn("target=ore_target_v2", line)
         self.assertIn("target_samples=3", line)
         self.assertIn("legacy=1", line)
 
     def test_validate_required_objective_rejects_warnings(self):
         objective_coverage = {
-            "target_objective": "ore_target_v1",
+            "target_objective": "ore_target_v2",
             "warnings": ["mixed_legacy_and_ore_target_samples"],
         }
 
         with self.assertRaises(ValueError):
-            validate_required_objective(objective_coverage, "ore_target_v1")
+            validate_required_objective(objective_coverage, "ore_target_v2")
 
-    def test_reward_weight_for_features_counts_reward_and_close_ore_potential(self):
+    def test_reward_weight_for_features_counts_reward_bearing_ore(self):
         features = [100, 120, 40, 20, 0, 5] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)
 
-        self.assertEqual(reward_weight_for_features(features), 8)
+        self.assertEqual(reward_weight_for_features(features), 6)
 
     def test_build_sample_weights_can_disable_reward_weighting(self):
         self.assertIsNone(build_sample_weights([[100]], "none"))
@@ -116,16 +116,16 @@ class TrainModelTest(unittest.TestCase):
             [100, 120, 40, 200, 0, 0] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1),
         ]
 
-        self.assertEqual(build_sample_weights(features, "score"), [8, 1])
+        self.assertEqual(build_sample_weights(features, "score"), [6, 1])
 
     def test_sample_weight_summary_formats_enabled_weights(self):
-        summary = sample_weight_summary([1, 8], "score")
+        summary = sample_weight_summary([1, 6], "score")
 
         self.assertEqual(summary["mode"], "score")
         self.assertEqual(summary["min"], 1)
-        self.assertEqual(summary["max"], 8)
-        self.assertEqual(summary["average"], 4.5)
-        self.assertIn("avg=4.50", format_sample_weight_line(summary))
+        self.assertEqual(summary["max"], 6)
+        self.assertEqual(summary["average"], 3.5)
+        self.assertIn("avg=3.50", format_sample_weight_line(summary))
 
 
 if __name__ == "__main__":

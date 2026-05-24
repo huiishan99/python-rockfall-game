@@ -52,7 +52,7 @@ class InspectDataTest(unittest.TestCase):
             "objective_coverage": {
                 "status": "needs_objective_data",
                 "warnings": ["no_ore_target_samples"],
-                "target_objective": "ore_target_v1",
+                "target_objective": "ore_target_v2",
                 "target_samples": 0,
                 "legacy_samples": 51,
                 "other_samples": 0,

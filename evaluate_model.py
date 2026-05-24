@@ -19,7 +19,7 @@ from settings import (
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
 DEFAULT_RANDOM_SEED = 42
-SCORE_BREAKDOWN_KEYS = ("survival", "ore_bonus", "combo_bonus", "risk_bonus")
+SCORE_BREAKDOWN_KEYS = ("survival", "ore_bonus", "combo_bonus", "ore_penalty")
 
 
 def parse_args(argv=None):

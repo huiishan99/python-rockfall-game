@@ -48,7 +48,7 @@ SUMMARY_B = {
     "score_breakdown": {
         "survival": {"average": 12.0},
         "ore_bonus": {"average": 5.0},
-        "risk_bonus": {"average": 2.0},
+        "ore_penalty": {"average": 2.0},
     },
 }
 
@@ -125,7 +125,7 @@ class CompareModelsTest(unittest.TestCase):
         self.assertIn("Survival", lines[0])
         self.assertIn("Avg Dodges", lines[0])
         self.assertIn("Ore Bonus", lines[0])
-        self.assertIn("Risk Bonus", lines[0])
+        self.assertIn("Ore Penalty", lines[0])
         self.assertIn("base.pkl", lines[1])
         self.assertIn("5.00", lines[1])
         self.assertIn("50.0%", lines[1])
@@ -153,7 +153,7 @@ class CompareModelsTest(unittest.TestCase):
 
     def test_score_breakdown_average_defaults_to_zero(self):
         self.assertEqual(score_breakdown_average(SUMMARY_A, "ore_bonus"), 0)
-        self.assertEqual(score_breakdown_average(SUMMARY_B, "risk_bonus"), 2.0)
+        self.assertEqual(score_breakdown_average(SUMMARY_B, "ore_penalty"), 2.0)
 
     def test_comparison_winner_uses_average_score(self):
         self.assertEqual(comparison_winner(["base.pkl", "candidate.pkl"], [SUMMARY_A, SUMMARY_B]), "candidate.pkl")

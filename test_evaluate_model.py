@@ -70,15 +70,15 @@ class EvaluateModelTest(unittest.TestCase):
     def test_summarizes_score_breakdown(self):
         score_breakdown = summarize_score_breakdown(
             [
-                {"score_breakdown": {"survival": 3, "ore_bonus": 5, "combo_bonus": 1, "risk_bonus": 2}},
-                {"score_breakdown": {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 0}},
+                {"score_breakdown": {"survival": 3, "ore_bonus": 5, "combo_bonus": 1, "ore_penalty": 2}},
+                {"score_breakdown": {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "ore_penalty": 0}},
             ]
         )
 
         self.assertEqual(score_breakdown["survival"]["total"], 5)
         self.assertEqual(score_breakdown["survival"]["average"], 2.5)
         self.assertEqual(score_breakdown["ore_bonus"]["total"], 10)
-        self.assertEqual(score_breakdown["risk_bonus"]["total"], 2)
+        self.assertEqual(score_breakdown["ore_penalty"]["total"], 2)
 
     def test_summarizes_variant_stats(self):
         variant_stats = summarize_variant_stats(
@@ -159,14 +159,14 @@ class EvaluateModelTest(unittest.TestCase):
                     "survival": {"total": 3, "average": 3},
                     "ore_bonus": {"total": 5, "average": 5},
                     "combo_bonus": {"total": 1, "average": 1},
-                    "risk_bonus": {"total": 2, "average": 2},
+                    "ore_penalty": {"total": 2, "average": 2},
                 },
             }
         )
 
         self.assertIn("Run breakdown:", lines)
         self.assertIn("  ore_bonus: total=5, avg=5.00", lines)
-        self.assertIn("  risk_bonus: total=2, avg=2.00", lines)
+        self.assertIn("  ore_penalty: total=2, avg=2.00", lines)
 
     def test_builds_summary_payload_with_model_path(self):
         payload = build_summary_payload(

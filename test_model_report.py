@@ -29,7 +29,7 @@ DATA_SUMMARY = {
     "objective_coverage": {
         "status": "needs_objective_data",
         "warnings": ["no_ore_target_samples"],
-        "target_objective": "ore_target_v1",
+        "target_objective": "ore_target_v2",
         "target_samples": 0,
     },
 }
@@ -42,7 +42,7 @@ MODEL_RESULT = {
     "score_breakdown": {
         "survival": {"average": 8},
         "ore_bonus": {"average": 0},
-        "risk_bonus": {"average": 0},
+        "ore_penalty": {"average": 0},
     },
 }
 
@@ -54,7 +54,7 @@ RULE_RESULT = {
     "score_breakdown": {
         "survival": {"average": 12},
         "ore_bonus": {"average": 5},
-        "risk_bonus": {"average": 0},
+        "ore_penalty": {"average": 0},
     },
 }
 

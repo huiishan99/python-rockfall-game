@@ -34,7 +34,7 @@ COLLECTION_SUMMARY = {
         "survival": {"total": 2, "average": 2},
         "ore_bonus": {"total": 5, "average": 5},
         "combo_bonus": {"total": 0, "average": 0},
-        "risk_bonus": {"total": 0, "average": 0},
+        "ore_penalty": {"total": 0, "average": 0},
     },
 }
 
@@ -128,7 +128,7 @@ class CollectPolicyDataTest(unittest.TestCase):
         self.assertIn("Policy data collection", lines)
         self.assertIn("Variant coverage: recorded=4, legacy=0, quality=variant_ready", lines)
         self.assertIn(
-            "Objective coverage: target=ore_target_v1, target_samples=10, legacy=0, quality=objective_ready",
+            "Objective coverage: target=ore_target_v2, target_samples=10, legacy=0, quality=objective_ready",
             lines,
         )
         self.assertIn("Collected games: 1", lines)
@@ -171,7 +171,7 @@ class StubGame:
         return {"ore": {"spawned": 1, "avoided": 1, "hits": 0}}
 
     def score_breakdown_payload(self):
-        return {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 0}
+        return {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "ore_penalty": 0}
 
 
 if __name__ == "__main__":
