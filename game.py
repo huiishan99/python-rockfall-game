@@ -34,7 +34,7 @@ from settings import (
     variant_profile_names,
 )
 
-MODE_KEY = "manual"
+MODE_KEY = "manual_ore_score"
 MODE_NAME = "Data Collection"
 
 

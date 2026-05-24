@@ -127,9 +127,10 @@ class RockfallGame:
         self.lives = self.initial_lives
         self.invincibility_frames = 0
         self.score = 0
+        self.dodges = 0
         self.combo = 0
         self.best_combo = 0
-        self.next_life_restore_score = LIFE_RESTORE_INTERVAL
+        self.next_life_restore_dodges = LIFE_RESTORE_INTERVAL
         self.difficulty_level = INITIAL_DIFFICULTY_LEVEL
         self.messages = []
         self.events = []
@@ -195,9 +196,9 @@ class RockfallGame:
 
     def empty_score_breakdown(self):
         return {
-            "base": 0,
+            "survival": 0,
+            "ore_bonus": 0,
             "combo_bonus": 0,
-            "variant_bonus": 0,
             "risk_bonus": 0,
         }
 
@@ -225,7 +226,7 @@ class RockfallGame:
     def start_lines(self, mode_name):
         return [
             mode_name,
-            f"High Score: {self.visible_high_score()}",
+            f"Best Ore Score: {self.visible_high_score()}",
             "Move: Left/Right or A/D",
             "Pause: P",
             "Press SPACE to start",
@@ -273,8 +274,9 @@ class RockfallGame:
 
     def help_lines(self):
         return [
-            "Dodge falling rocks and survive as long as you can.",
-            "Move with Left/Right or A/D. Combos reward clean dodges.",
+            "Ore is the score. Rocks are the road to survive.",
+            "Dodges build combo; combo makes later ore worth more.",
+            "Ore is still dangerous: hit it and lose a life.",
             "Manual play records state, rock type, and action.",
             "train_model.py learns left/right choices from samples.",
             "play_with_model.py predicts movement each frame.",
@@ -284,10 +286,10 @@ class RockfallGame:
 
     def rock_legend_items(self):
         return [
-            ("normal", "Baseline"),
-            ("heavy", "Slower +1"),
+            ("normal", "Dodge"),
+            ("heavy", "Slow dodge"),
             ("swift", "Fast fall"),
-            ("ore", "+2, close +1"),
+            ("ore", "Score +5"),
         ]
 
     def help_button_rect(self):
@@ -329,11 +331,10 @@ class RockfallGame:
     def game_over_lines(self, mode_name):
         return [
             mode_name,
-            f"Final Score: {self.score}",
-            f"High Score: {self.visible_high_score()}",
-            f"Level Reached: {self.difficulty_level}",
-            f"Best Combo: {self.best_combo}",
-            f"Lives Left: {self.lives}",
+            f"Final Ore Score: {self.score}",
+            f"Best Ore Score: {self.visible_high_score()}",
+            f"Level: {self.difficulty_level}  Dodges: {self.dodges}",
+            f"Best Combo: {self.best_combo}  Lives: {self.lives}",
             "Press R to restart",
             "Press ESC to quit",
         ]
@@ -344,8 +345,9 @@ class RockfallGame:
     def pause_lines(self, mode_name):
         return [
             mode_name,
-            f"Score: {self.score}  Best: {self.visible_high_score()}",
-            f"Level: {self.difficulty_level}  Lives: {self.lives}  Combo: {self.combo}",
+            f"Ore: {self.score}  Best: {self.visible_high_score()}",
+            f"Dodges: {self.dodges}  Combo: {self.combo}",
+            f"Level: {self.difficulty_level}  Lives: {self.lives}",
             "Move: Left/Right or A/D",
             "Press P to resume",
             "Press R to restart",
@@ -457,41 +459,48 @@ class RockfallGame:
         variant_key = self.tracked_variant_key(variant_key)
         near_miss = self.is_near_miss(obstacle_x)
         near_miss_bonus = self.obstacle_near_miss_bonus(variant_key) if near_miss else 0
+        self.dodges += 1
         self.combo += 1
         self.best_combo = max(self.best_combo, self.combo)
-        base_points = self.combo_points()
-        combo_bonus = base_points - 1
-        points = base_points + score_bonus + near_miss_bonus
+        combo_bonus = self.combo_bonus_points() if score_bonus > 0 else 0
+        points = score_bonus + combo_bonus + near_miss_bonus
         self.score += points
-        self.score_breakdown["base"] += 1
+        self.score_breakdown["survival"] += 1
+        self.score_breakdown["ore_bonus"] += score_bonus
         self.score_breakdown["combo_bonus"] += combo_bonus
-        self.score_breakdown["variant_bonus"] += score_bonus
         self.score_breakdown["risk_bonus"] += near_miss_bonus
         self.variant_stats[variant_key]["avoided"] += 1
-        self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
+        if points > 0:
+            self._add_message(f"+{points}", SCORE_MESSAGE_COLOR, obstacle_x, SCREEN_HEIGHT - 95)
+        else:
+            self._add_message("DODGE", MENU_SECONDARY_COLOR, obstacle_x - 10, SCREEN_HEIGHT - 95)
         self._emit_event(EVENT_AVOID)
         self._maybe_restore_life()
 
         if score_bonus > 0:
             label = OBSTACLE_VARIANTS.get(variant_key, OBSTACLE_VARIANTS[DEFAULT_OBSTACLE_VARIANT])["label"]
             self._add_message(f"{label} +{score_bonus}", COMBO_MESSAGE_COLOR, obstacle_x - 15, SCREEN_HEIGHT - 115)
+        if combo_bonus > 0 and score_bonus > 0:
+            self._add_message(f"COMBO +{combo_bonus}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
         if near_miss_bonus > 0:
             self._add_message(f"RISK +{near_miss_bonus}", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 18, SCREEN_HEIGHT - 148)
-        if base_points > 1:
+        elif self.combo_bonus_points() > 0:
             self._add_message(f"COMBO {self.combo}", COMBO_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 130)
         if near_miss:
             self._add_message("CLOSE!", NEAR_MISS_MESSAGE_COLOR, obstacle_x - 25, SCREEN_HEIGHT - 165)
 
     def _maybe_restore_life(self):
-        while self.score >= self.next_life_restore_score:
+        while self.dodges >= self.next_life_restore_dodges:
             if self.lives < self.initial_lives:
                 self.lives += 1
                 self._add_message("LIFE +1", LIFE_RESTORE_MESSAGE_COLOR, self.player_x - 20, self.player_y - 65)
-            self.next_life_restore_score += LIFE_RESTORE_INTERVAL
+            self.next_life_restore_dodges += LIFE_RESTORE_INTERVAL
+
+    def combo_bonus_points(self):
+        return min(MAX_COMBO_BONUS, self.combo // COMBO_BONUS_INTERVAL)
 
     def combo_points(self):
-        bonus = min(MAX_COMBO_BONUS, self.combo // COMBO_BONUS_INTERVAL)
-        return 1 + bonus
+        return 1 + self.combo_bonus_points()
 
     def is_near_miss(self, obstacle_x):
         player_center = self.player_x + PLAYER_WIDTH // 2
@@ -769,20 +778,23 @@ class RockfallGame:
         return HUD_COLOR
 
     def _draw_hud(self):
-        stats_panel = pygame.Rect(8, 8, 190, 142)
+        stats_panel = pygame.Rect(8, 8, 210, 172)
         self._draw_panel(stats_panel, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)
 
         lives_text = self.font.render(f"Lives: {self.lives}", True, self.lives_color())
-        self.screen.blit(lives_text, (22, 20))
+        self.screen.blit(lives_text, (22, 18))
 
-        score_text = self.font.render(f"Score: {self.score}", True, HUD_COLOR)
-        self.screen.blit(score_text, (22, 54))
+        score_text = self.font.render(f"Ore: {self.score}", True, HUD_COLOR)
+        self.screen.blit(score_text, (22, 50))
 
-        high_score_text = self.font.render(f"Best: {self.visible_high_score()}", True, HUD_COLOR)
-        self.screen.blit(high_score_text, (22, 88))
+        dodge_text = self.font.render(f"Dodges: {self.dodges}", True, HUD_COLOR)
+        self.screen.blit(dodge_text, (22, 82))
 
         combo_text = self.font.render(f"Combo: {self.combo}", True, self.combo_color())
-        self.screen.blit(combo_text, (22, 122))
+        self.screen.blit(combo_text, (22, 114))
+
+        high_score_text = self.font.render(f"Best Ore: {self.visible_high_score()}", True, HUD_COLOR)
+        self.screen.blit(high_score_text, (22, 146))
 
         progress_panel = pygame.Rect(self.progress_bar_x - 92, 8, PROGRESS_BAR_LENGTH + 102, 44)
         self._draw_panel(progress_panel, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)

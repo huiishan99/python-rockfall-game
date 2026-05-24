@@ -5,7 +5,7 @@ from collections import Counter
 from data_quality import inspect_variant_coverage_file
 from data_store import GAME_DATA_FILE, ensure_parent_dir, load_game_data
 from features import FEATURE_NAMES, MAX_MODEL_OBSTACLES, build_model_features
-from settings import NEAR_MISS_DISTANCE
+from settings import NEAR_MISS_DISTANCE, OBSTACLE_VARIANTS
 
 MODEL_FILE = "game_model.pkl"
 RANDOM_STATE = 42
@@ -75,8 +75,9 @@ def reward_weight_for_features(features):
         if obstacle_y == 0:
             continue
         weight += max(0, score_bonus)
-        if score_bonus >= 2 and abs(obstacle_dx) <= NEAR_MISS_DISTANCE:
-            weight += 1
+        ore_reward = OBSTACLE_VARIANTS["ore"]
+        if score_bonus >= ore_reward["score_bonus"] and abs(obstacle_dx) <= NEAR_MISS_DISTANCE:
+            weight += ore_reward["near_miss_bonus"]
     return weight
 
 

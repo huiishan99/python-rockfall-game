@@ -34,7 +34,8 @@ MODEL_RESULT = {
     "score_delta": 0,
     "survival_rate": 0.5,
     "score_breakdown": {
-        "variant_bonus": {"average": 0},
+        "survival": {"average": 8},
+        "ore_bonus": {"average": 0},
         "risk_bonus": {"average": 0},
     },
 }
@@ -45,7 +46,8 @@ RULE_RESULT = {
     "score_delta": 3,
     "survival_rate": 1.0,
     "score_breakdown": {
-        "variant_bonus": {"average": 1},
+        "survival": {"average": 12},
+        "ore_bonus": {"average": 5},
         "risk_bonus": {"average": 0},
     },
 }

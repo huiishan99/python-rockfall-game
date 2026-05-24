@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Make ore the main reward target
+
+- Changed: updated scoring rules in `settings.py` and `game_core.py`; split HUD/game-over/help copy into ore score and dodge count; changed evaluation/comparison/model-report score breakdown keys to `survival`, `ore_bonus`, `combo_bonus`, and `risk_bonus`; adjusted reward weighting in `train_model.py`; separated local high score keys in `game.py` and `play_with_model.py`; refreshed README and tests.
+- Why: dodging ordinary rocks should feel like surviving long enough to collect better ore opportunities, not like the main scoring objective itself.
+- Behavior: normal/heavy/swift dodges now build `Dodges` and combo without directly increasing ore score; avoiding ore gives +5 ore score; close-dodging ore adds `RISK +2`; combo bonuses apply when an ore is successfully avoided; life recovery milestones now use dodge count; comparison tables show average dodges, ore bonus, and risk bonus.
+- Verification: ran `python3 -m unittest test_game.py test_play_with_model.py test_game_core.py`; ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile game.py play_with_model.py game_core.py settings.py compare_models.py evaluate_model.py model_report.py train_model.py test_game.py test_play_with_model.py test_game_core.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-ore-score-release-check.json`; ran `python3 model_report.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-ore-score-model-report.json`; ran `python3 compare_models.py game_model.pkl --include-rule-baseline --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-ore-score-comparison.json`; ran `python3 -m json.tool /private/tmp/rockfall-ore-score-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-ore-score-model-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-ore-score-comparison.json`; ran `git diff --check`.
+- Risks/Notes: the tracked `game_model.pkl` still runs through compatibility adapters, but it was trained before ore became the explicit main reward; collect fresh variant-rich data and retrain before judging model quality under the new objective. The local `game_data.json` has user play samples from the latest manual test and is intentionally not part of this code commit.
+
 ## 2026-05-24 - Release v0.8.0
 
 - Changed: updated `settings.py` and `README.md` from `0.8.0-candidate` to `0.8.0`; added `RELEASE_NOTES.md`.

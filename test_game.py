@@ -1,7 +1,7 @@
 import unittest
 
 from data_store import GAME_DATA_FILE
-from game import manual_mode_name, model_play_command, parse_args
+from game import MODE_KEY, manual_mode_name, model_play_command, parse_args
 from play_with_model import MODEL_FILE
 
 
@@ -10,6 +10,9 @@ class GameEntrypointTest(unittest.TestCase):
         args = parse_args([])
 
         self.assertEqual(args.data, GAME_DATA_FILE)
+
+    def test_manual_high_score_key_tracks_ore_score_rules(self):
+        self.assertEqual(MODE_KEY, "manual_ore_score")
 
     def test_parse_args_accepts_data_file_override(self):
         args = parse_args(["--data", "runs/experiment.json"])

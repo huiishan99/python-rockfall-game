@@ -30,9 +30,9 @@ COLLECTION_SUMMARY = {
         "ore": {"spawned": 1, "avoided": 1, "hits": 0, "avoid_rate": 1.0},
     },
     "score_breakdown": {
-        "base": {"total": 2, "average": 2},
+        "survival": {"total": 2, "average": 2},
+        "ore_bonus": {"total": 5, "average": 5},
         "combo_bonus": {"total": 0, "average": 0},
-        "variant_bonus": {"total": 2, "average": 2},
         "risk_bonus": {"total": 0, "average": 0},
     },
 }
@@ -155,7 +155,7 @@ class StubGame:
         return {"ore": {"spawned": 1, "avoided": 1, "hits": 0}}
 
     def score_breakdown_payload(self):
-        return {"base": 2, "combo_bonus": 0, "variant_bonus": 2, "risk_bonus": 0}
+        return {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 0}
 
 
 if __name__ == "__main__":

@@ -188,7 +188,8 @@ def format_comparison_table(model_paths, summaries):
             "Avg Frames",
             "Avg Lives",
             "Survival",
-            "Var Bonus",
+            "Avg Dodges",
+            "Ore Bonus",
             "Risk Bonus",
             "Timeouts",
         )
@@ -206,7 +207,8 @@ def format_comparison_table(model_paths, summaries):
                 f"{summary['average_frames']:.1f}",
                 f"{summary['average_lives_left']:.2f}",
                 f"{summary['survival_rate']:.1%}",
-                f"{score_breakdown_average(summary, 'variant_bonus'):.2f}",
+                f"{score_breakdown_average(summary, 'survival'):.2f}",
+                f"{score_breakdown_average(summary, 'ore_bonus'):.2f}",
                 f"{score_breakdown_average(summary, 'risk_bonus'):.2f}",
                 str(summary["timeouts"]),
             )

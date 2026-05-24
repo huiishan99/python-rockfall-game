@@ -1,4 +1,4 @@
-VERSION = "0.8.0"
+VERSION = "0.8.1-dev"
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -80,7 +80,7 @@ OBSTACLE_VARIANTS = {
         "crack": (18, 20, 22),
         "mark": (60, 58, 58),
         "speed_delta": -1,
-        "score_bonus": 1,
+        "score_bonus": 0,
         "near_miss_bonus": 0,
     },
     "swift": {
@@ -102,8 +102,8 @@ OBSTACLE_VARIANTS = {
         "crack": (74, 44, 30),
         "mark": (255, 214, 80),
         "speed_delta": 0,
-        "score_bonus": 2,
-        "near_miss_bonus": 1,
+        "score_bonus": 5,
+        "near_miss_bonus": 2,
     },
 }
 OBSTACLE_VARIANT_WEIGHTS = (

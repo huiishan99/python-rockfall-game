@@ -7,18 +7,18 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.0`.
+Current version: `0.8.1-dev`.
 
-This is now the v0.8 release after the playable v0.1 release:
+This is post-v0.8 development after the playable v0.8 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
-- Headless evaluation reports score baselines, score-source breakdowns, and rock-variant outcomes.
+- Headless evaluation reports ore-score baselines, run breakdowns, and rock-variant outcomes.
 - Runtime hand-feel tuning for difficulty, player speed, initial lives, and rock variant profile is implemented across play, evaluation, comparison, experiments, and release checks.
-- Evaluation and comparison reports include survival metrics, score-source breakdowns, variant outcomes, and can be saved as JSON artifacts.
+- Evaluation and comparison reports include survival metrics, ore/reward breakdowns, variant outcomes, and can be saved as JSON artifacts.
 - Data inspection can check collected samples, action balance, and rock-variant coverage before training.
-- Score milestone life recovery gives damaged runs a comeback path without changing controls.
-- Variant rocks add different fall speeds and score rewards; ore now adds an extra close-dodge risk bonus, and new training features expose the nearest three rocks while old four- and six-feature models still run.
+- Dodge milestone life recovery gives damaged runs a comeback path without changing controls.
+- Variant rocks add different fall speeds; ore is now the main score source, and new training features expose the nearest three rocks while old four- and six-feature models still run.
 - Release checks can save versioned JSON artifacts for candidate builds.
 - Difficulty, lane-based spawning, high scores, hit feedback, visual polish, styled menu screens, pause, restart, game-over summary, and release checks are implemented.
 - Unit tests cover storage, feature extraction, difficulty, spawning, evaluation summaries, and core behavior/rendering.
@@ -30,14 +30,14 @@ This is now the v0.8 release after the playable v0.1 release:
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
-- Model learning reports combine data quality, standard evaluation, variant-rich stress testing, score-source breakdowns, and safe-rule baseline comparison.
+- Model learning reports combine data quality, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and safe-rule baseline comparison.
 - Policy data collection can record safe-rule demonstration samples into `runs/` for quick variant-rich training experiments.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
-- Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
+- Gameplay feedback for ore score gains, dodges, combos, dodge-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
 - Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features; optional reward weighting can give reward-bearing samples more influence during training.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
-- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, score-source breakdowns, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, ore/reward breakdowns, and text or JSON output, including ore score, dodges, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -65,7 +65,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly and award +1 score when avoided, swift stones fall faster, and ore stones award +2 score when avoided. Ore also gives an extra +1 risk bonus when avoided as a close dodge, so chasing ore can become a real risk/reward decision. Consecutive avoided rocks build combo, which adds score bonuses until the next hit, and score milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message, and ore close dodges also show `RISK +1`. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly, swift stones fall faster, and ore stones award +5 ore score when avoided. Ore is still dangerous on contact, but close-dodging ore adds a +2 risk bonus, so chasing ore becomes the main risk/reward decision. Ordinary dodges do not directly increase ore score; they build `Dodges`, preserve lives, and grow combo so later ore is worth more. Dodge milestones can restore a lost life up to the run's starting lives. Close dodges show a `CLOSE!` feedback message, and ore close dodges also show `RISK +2`. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with ore score, dodge count, and a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
 
 Controls:
 
@@ -82,8 +82,8 @@ Controls:
 - Add `--lives 3` to tune initial lives during manual play, model play, evaluation, comparison, and experiment commands.
 - Add `--variant-profile variant-rich` to manual play, model play, evaluation, comparison, experiment, and release-check commands when you want more heavy, swift, and ore rocks than the default `standard` profile.
 
-The pause screen shows the current score, best score, level, lives, and combo so a run can be reviewed mid-game.
-The help screen shows the rock variant legend, including ore's +2 reward and close-dodge +1 risk bonus, and explains that manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
+The pause screen shows the current ore score, best ore score, dodge count, level, lives, and combo so a run can be reviewed mid-game.
+The help screen shows the rock variant legend, including ore's +5 reward, and explains that ore is still dangerous, manual play records state, rock type, and action samples, `train_model.py` learns left/right decisions from that data, and `play_with_model.py` uses `game_model.pkl` to predict movement every frame.
 
 ### Run Tests
 
@@ -135,7 +135,7 @@ Inspect collected data before training:
 python3 inspect_data.py --data game_data.json
 ```
 
-The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, nearest-three rock-variant coverage, and data-quality warnings. If the report says `no_recorded_variant_samples`, the dataset predates rock variants and can still train a position-aware model, but it cannot teach the model that ore is worth `+2`. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
+The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, nearest-three rock-variant coverage, and data-quality warnings. If the report says `no_recorded_variant_samples`, the dataset predates rock variants and can still train a position-aware model, but it cannot teach the model that ore is worth `+5`. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
 
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
@@ -144,7 +144,7 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
-Newly trained models use player x-position plus the nearest three rocks, with each rock represented by x-position, y-position, horizontal distance, fall-speed modifier, and score bonus. The training command prints variant coverage so stale datasets are obvious. Existing model files trained on the original four position features or the first six single-rock variant features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+2`, swift rocks fall faster, heavy rocks fall slower, and multiple rocks can compete for attention.
+Newly trained models use player x-position plus the nearest three rocks, with each rock represented by x-position, y-position, horizontal distance, fall-speed modifier, and score bonus. The training command prints variant coverage so stale datasets are obvious. Existing model files trained on the original four position features or the first six single-rock variant features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+5`, ordinary stones are survival pressure rather than direct score, swift rocks fall faster, heavy rocks fall slower, and multiple rocks can compete for attention.
 
 You can also experiment with alternate data or model files:
 
@@ -201,7 +201,7 @@ Run headless simulations to compare model performance without opening a game win
 python3 evaluate_model.py --games 10 --max-frames 3600
 ```
 
-The evaluation summary reports score, best combo, frame survival, remaining lives, survival rate, timeout counts, per-variant spawned/avoided/hit counts with avoid rates, and a score breakdown for base dodge points, combo bonuses, variant bonuses, and risk bonuses. Use `--variant-profile variant-rich` to stress-test models against more reward-bearing and faster rocks.
+The evaluation summary reports ore score, best combo, frame survival, remaining lives, survival rate, timeout counts, per-variant spawned/avoided/hit counts with avoid rates, and a run breakdown for survival dodges, ore bonuses, combo bonuses, and risk bonuses. Use `--variant-profile variant-rich` to stress-test models against more reward-bearing and faster rocks.
 
 For scripts or future charts, emit machine-readable JSON with the evaluation settings and summary metrics:
 
@@ -223,7 +223,7 @@ Add `--include-rule-baseline` to compare against the built-in `policy:safe-rule`
 python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --max-frames 3600
 ```
 
-Comparison output includes score deltas, average remaining lives, survival rate, average variant/risk bonus columns, score-source breakdowns and per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
+Comparison output includes score deltas, average remaining lives, survival rate, average dodge/ore/risk bonus columns, run breakdowns and per-variant outcomes in JSON reports, and the best model by average ore score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
 ### Build a Model Learning Report
 

@@ -19,7 +19,7 @@ from settings import (
 DEFAULT_GAMES = 10
 DEFAULT_MAX_FRAMES = 3600
 DEFAULT_RANDOM_SEED = 42
-SCORE_BREAKDOWN_KEYS = ("base", "combo_bonus", "variant_bonus", "risk_bonus")
+SCORE_BREAKDOWN_KEYS = ("survival", "ore_bonus", "combo_bonus", "risk_bonus")
 
 
 def parse_args(argv=None):
@@ -217,7 +217,7 @@ def format_summary_lines(summary, games_label="Games"):
             )
     score_breakdown = summary.get("score_breakdown")
     if score_breakdown:
-        lines.append("Score breakdown:")
+        lines.append("Run breakdown:")
         for key in SCORE_BREAKDOWN_KEYS:
             stats = score_breakdown.get(key, {"total": 0, "average": 0})
             lines.append(f"  {key}: total={stats['total']}, avg={stats['average']:.2f}")

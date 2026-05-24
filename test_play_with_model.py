@@ -4,6 +4,7 @@ import unittest
 from features import FEATURE_NAMES, SINGLE_OBSTACLE_FEATURE_NAMES
 from play_with_model import (
     MODEL_FILE,
+    MODE_KEY,
     manual_play_command,
     model_load_error_message,
     model_debug_lines,
@@ -20,6 +21,9 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(args.model, MODEL_FILE)
         self.assertEqual(args.difficulty, "normal")
+
+    def test_model_high_score_key_tracks_ore_score_rules(self):
+        self.assertEqual(MODE_KEY, "model_ore_score")
 
     def test_parse_args_accepts_difficulty_preset(self):
         args = parse_args(["--difficulty", "easy"])
@@ -94,7 +98,7 @@ class PlayWithModelTest(unittest.TestCase):
 
     def test_predict_action_adapts_features_for_legacy_model(self):
         model = RecordingModel(n_features_in=4, prediction=1)
-        game = StubGame([200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0])
+        game = StubGame([200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0])
 
         action = predict_action(model, game)
 
@@ -102,7 +106,7 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertEqual(model.seen_features, [200, 260, 300, 60])
 
     def test_predict_action_with_debug_returns_raw_and_model_features(self):
-        features = [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
+        features = [200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
         model = RecordingModel(n_features_in=6, prediction=1)
         game = StubGame(features)
 
@@ -113,7 +117,7 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertEqual(model_features, features[:6])
 
     def test_predict_action_adapts_features_for_single_obstacle_model(self):
-        features = [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
+        features = [200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
         model = RecordingModel(n_features_in=len(SINGLE_OBSTACLE_FEATURE_NAMES), prediction=0)
         game = StubGame(features)
 
@@ -123,7 +127,7 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertEqual(model.seen_features, features[: len(SINGLE_OBSTACLE_FEATURE_NAMES)])
 
     def test_predict_action_uses_multi_obstacle_features_for_current_model(self):
-        features = [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
+        features = [200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0, 200, 0, 0, 0, 0]
         model = RecordingModel(n_features_in=len(FEATURE_NAMES), prediction=0)
         game = StubGame(features)
 
@@ -133,11 +137,11 @@ class PlayWithModelTest(unittest.TestCase):
         self.assertEqual(model.seen_features, features)
 
     def test_model_debug_lines_show_action_feature_counts_and_rocks(self):
-        lines = model_debug_lines("left", [200, 260, 300, 60, 0, 2, 150, 100, -50, 0, 0], [200, 260, 300, 60])
+        lines = model_debug_lines("left", [200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0], [200, 260, 300, 60])
 
         self.assertEqual(lines[0], "AI: LEFT")
         self.assertEqual(lines[1], "Features: 4/11")
-        self.assertIn("near: dx=60 y=300 sp=0 +2", lines)
+        self.assertIn("near: dx=60 y=300 sp=0 +5", lines)
         self.assertIn("second: dx=-50 y=100 sp=0 +0", lines)
 
 

@@ -65,20 +65,20 @@ class EvaluateModelTest(unittest.TestCase):
         self.assertEqual(summary["survival_rate"], 0.5)
         self.assertEqual(summary["timeouts"], 1)
         self.assertIn("ore", summary["variant_stats"])
-        self.assertIn("risk_bonus", summary["score_breakdown"])
+        self.assertIn("ore_bonus", summary["score_breakdown"])
 
     def test_summarizes_score_breakdown(self):
         score_breakdown = summarize_score_breakdown(
             [
-                {"score_breakdown": {"base": 3, "combo_bonus": 1, "variant_bonus": 2, "risk_bonus": 1}},
-                {"score_breakdown": {"base": 2, "combo_bonus": 0, "variant_bonus": 1, "risk_bonus": 0}},
+                {"score_breakdown": {"survival": 3, "ore_bonus": 5, "combo_bonus": 1, "risk_bonus": 2}},
+                {"score_breakdown": {"survival": 2, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 0}},
             ]
         )
 
-        self.assertEqual(score_breakdown["base"]["total"], 5)
-        self.assertEqual(score_breakdown["base"]["average"], 2.5)
-        self.assertEqual(score_breakdown["variant_bonus"]["total"], 3)
-        self.assertEqual(score_breakdown["risk_bonus"]["total"], 1)
+        self.assertEqual(score_breakdown["survival"]["total"], 5)
+        self.assertEqual(score_breakdown["survival"]["average"], 2.5)
+        self.assertEqual(score_breakdown["ore_bonus"]["total"], 10)
+        self.assertEqual(score_breakdown["risk_bonus"]["total"], 2)
 
     def test_summarizes_variant_stats(self):
         variant_stats = summarize_variant_stats(
@@ -156,16 +156,17 @@ class EvaluateModelTest(unittest.TestCase):
                 "survival_rate": 1,
                 "timeouts": 1,
                 "score_breakdown": {
-                    "base": {"total": 3, "average": 3},
+                    "survival": {"total": 3, "average": 3},
+                    "ore_bonus": {"total": 5, "average": 5},
                     "combo_bonus": {"total": 1, "average": 1},
-                    "variant_bonus": {"total": 2, "average": 2},
-                    "risk_bonus": {"total": 1, "average": 1},
+                    "risk_bonus": {"total": 2, "average": 2},
                 },
             }
         )
 
-        self.assertIn("Score breakdown:", lines)
-        self.assertIn("  risk_bonus: total=1, avg=1.00", lines)
+        self.assertIn("Run breakdown:", lines)
+        self.assertIn("  ore_bonus: total=5, avg=5.00", lines)
+        self.assertIn("  risk_bonus: total=2, avg=2.00", lines)
 
     def test_builds_summary_payload_with_model_path(self):
         payload = build_summary_payload(

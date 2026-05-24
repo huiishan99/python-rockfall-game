@@ -109,11 +109,11 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
     def test_reset_resets_life_restore_threshold(self):
         game = RockfallGame(self.screen)
-        game.next_life_restore_score = LIFE_RESTORE_INTERVAL * 2
+        game.next_life_restore_dodges = LIFE_RESTORE_INTERVAL * 2
 
         game.reset()
 
-        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL)
+        self.assertEqual(game.next_life_restore_dodges, LIFE_RESTORE_INTERVAL)
 
     def test_difficulty_preset_changes_initial_pressure(self):
         normal_game = RockfallGame(self.screen, difficulty_preset="normal")
@@ -194,13 +194,14 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.score = 12
         game.difficulty_level = 3
         game.lives = 2
+        game.dodges = 9
 
         lines = game.game_over_lines("Model Play")
 
         self.assertIn("Model Play", lines)
-        self.assertIn("Final Score: 12", lines)
-        self.assertIn("Level Reached: 3", lines)
-        self.assertIn("Lives Left: 2", lines)
+        self.assertIn("Final Ore Score: 12", lines)
+        self.assertIn("Level: 3  Dodges: 9", lines)
+        self.assertIn("Best Combo: 0  Lives: 2", lines)
 
     def test_start_lines_include_controls(self):
         game = RockfallGame(self.screen)
@@ -244,20 +245,23 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.difficulty_level = 3
         game.lives = 4
         game.combo = 5
+        game.dodges = 7
 
         lines = game.pause_lines("Data Collection")
 
-        self.assertIn("Score: 12  Best: 20", lines)
-        self.assertIn("Level: 3  Lives: 4  Combo: 5", lines)
+        self.assertIn("Ore: 12  Best: 20", lines)
+        self.assertIn("Dodges: 7  Combo: 5", lines)
+        self.assertIn("Level: 3  Lives: 4", lines)
 
-    def test_avoiding_obstacles_builds_combo_and_score(self):
+    def test_avoiding_obstacles_builds_combo_and_dodge_count(self):
         game = RockfallGame(self.screen)
 
         game._handle_avoid(100)
 
         self.assertEqual(game.combo, 1)
         self.assertEqual(game.best_combo, 1)
-        self.assertEqual(game.score, 1)
+        self.assertEqual(game.dodges, 1)
+        self.assertEqual(game.score, 0)
         self.assertEqual(game.pop_events(), [EVENT_AVOID])
 
     def test_old_obstacles_default_to_normal_variant(self):
@@ -282,7 +286,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.player_x = 100
         game.obstacles = [[120, 200, "ore"]]
 
-        self.assertEqual(game.model_features(), [100, 120, 200, 20, 0, 2, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0])
+        self.assertEqual(game.model_features(), [100, 120, 200, 20, 0, 5, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0])
 
     def test_model_features_include_three_nearest_obstacles(self):
         game = RockfallGame(self.screen)
@@ -302,12 +306,12 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
                 200,
                 20,
                 0,
-                2,
+                5,
                 80,
                 160,
                 -20,
                 -1,
-                1,
+                0,
                 200,
                 120,
                 100,
@@ -356,10 +360,10 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._handle_avoid(20, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
 
         messages = [message["text"] for message in game.messages]
-        self.assertEqual(game.score, 3)
+        self.assertEqual(game.score, 5)
         self.assertEqual(game.variant_stats["ore"]["avoided"], 1)
-        self.assertIn("+3", messages)
-        self.assertIn("ORE +2", messages)
+        self.assertIn("+5", messages)
+        self.assertIn("ORE +5", messages)
 
     def test_close_ore_avoid_adds_risk_bonus(self):
         game = RockfallGame(self.screen)
@@ -368,23 +372,23 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game._handle_avoid(160, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
 
         messages = [message["text"] for message in game.messages]
-        self.assertEqual(game.score, 4)
+        self.assertEqual(game.score, 7)
         self.assertEqual(
             game.score_breakdown,
-            {"base": 1, "combo_bonus": 0, "variant_bonus": 2, "risk_bonus": 1},
+            {"survival": 1, "ore_bonus": 5, "combo_bonus": 0, "risk_bonus": 2},
         )
-        self.assertIn("+4", messages)
-        self.assertIn("ORE +2", messages)
-        self.assertIn("RISK +1", messages)
+        self.assertIn("+7", messages)
+        self.assertIn("ORE +5", messages)
+        self.assertIn("RISK +2", messages)
         self.assertIn("CLOSE!", messages)
 
     def test_score_breakdown_payload_is_a_copy(self):
         game = RockfallGame(self.screen)
 
         payload = game.score_breakdown_payload()
-        payload["base"] = 99
+        payload["survival"] = 99
 
-        self.assertEqual(game.score_breakdown["base"], 0)
+        self.assertEqual(game.score_breakdown["survival"], 0)
 
     def test_variant_stats_payload_is_a_copy(self):
         game = RockfallGame(self.screen)
@@ -394,7 +398,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.variant_stats["normal"]["hits"], 0)
 
-    def test_combo_bonus_increases_score_after_interval(self):
+    def test_combo_bonus_increases_ore_score_after_survival_streak(self):
         game = RockfallGame(self.screen)
 
         for _ in range(COMBO_BONUS_INTERVAL):
@@ -402,8 +406,15 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         self.assertEqual(game.combo, COMBO_BONUS_INTERVAL)
         self.assertEqual(game.combo_points(), 2)
-        self.assertEqual(game.score, COMBO_BONUS_INTERVAL + 1)
-        self.assertEqual(game.score_breakdown["base"], COMBO_BONUS_INTERVAL)
+        self.assertEqual(game.score, 0)
+        self.assertEqual(game.score_breakdown["survival"], COMBO_BONUS_INTERVAL)
+        self.assertEqual(game.score_breakdown["combo_bonus"], 0)
+
+        game._handle_avoid(20, score_bonus=OBSTACLE_VARIANTS["ore"]["score_bonus"], variant_key="ore")
+
+        self.assertEqual(game.score, 6)
+        self.assertEqual(game.score_breakdown["survival"], COMBO_BONUS_INTERVAL + 1)
+        self.assertEqual(game.score_breakdown["ore_bonus"], 5)
         self.assertEqual(game.score_breakdown["combo_bonus"], 1)
 
     def test_hit_resets_combo(self):
@@ -432,28 +443,28 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         messages = [message["text"] for message in game.messages]
         self.assertIn("CLOSE!", messages)
         self.assertEqual(game.messages[-1]["color"], NEAR_MISS_MESSAGE_COLOR)
-        self.assertEqual(game.score, 1)
+        self.assertEqual(game.score, 0)
 
-    def test_score_milestone_restores_life_when_damaged(self):
+    def test_dodge_milestone_restores_life_when_damaged(self):
         game = RockfallGame(self.screen, initial_lives=3)
         game.lives = 2
-        game.score = LIFE_RESTORE_INTERVAL - 1
+        game.dodges = LIFE_RESTORE_INTERVAL - 1
 
         game._handle_avoid(100)
 
         self.assertEqual(game.lives, 3)
-        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL * 2)
+        self.assertEqual(game.next_life_restore_dodges, LIFE_RESTORE_INTERVAL * 2)
         self.assertEqual(game.messages[-1]["text"], "LIFE +1")
         self.assertEqual(game.messages[-1]["color"], LIFE_RESTORE_MESSAGE_COLOR)
 
-    def test_score_milestone_does_not_exceed_initial_lives(self):
+    def test_dodge_milestone_does_not_exceed_initial_lives(self):
         game = RockfallGame(self.screen, initial_lives=3)
-        game.score = LIFE_RESTORE_INTERVAL - 1
+        game.dodges = LIFE_RESTORE_INTERVAL - 1
 
         game._handle_avoid(100)
 
         self.assertEqual(game.lives, 3)
-        self.assertEqual(game.next_life_restore_score, LIFE_RESTORE_INTERVAL * 2)
+        self.assertEqual(game.next_life_restore_dodges, LIFE_RESTORE_INTERVAL * 2)
 
     def test_lives_color_warns_when_low(self):
         game = RockfallGame(self.screen)
@@ -477,7 +488,7 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
 
         lines = game.game_over_lines("Model Play")
 
-        self.assertIn("Best Combo: 7", lines)
+        self.assertTrue(any("Best Combo: 7" in line for line in lines))
 
     def test_pop_events_clears_event_queue(self):
         game = RockfallGame(self.screen)

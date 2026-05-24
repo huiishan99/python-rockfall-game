@@ -55,7 +55,7 @@ class ModelFeatureTest(unittest.TestCase):
     def test_builds_variant_effect_features(self):
         features = build_model_features(200, [(260, 300, "ore")])
 
-        self.assertEqual(features[: len(SINGLE_OBSTACLE_FEATURE_NAMES)], [200, 260, 300, 60, 0, 2])
+        self.assertEqual(features[: len(SINGLE_OBSTACLE_FEATURE_NAMES)], [200, 260, 300, 60, 0, 5])
 
     def test_builds_swift_speed_feature(self):
         features = build_model_features(200, [(260, 300, "swift")])
@@ -82,7 +82,7 @@ class ModelFeatureTest(unittest.TestCase):
         class LegacyModel:
             n_features_in_ = len(LEGACY_FEATURE_NAMES)
 
-        features = [200] + [260, 300, 60, 0, 2] * MAX_MODEL_OBSTACLES
+        features = [200] + [260, 300, 60, 0, 5] * MAX_MODEL_OBSTACLES
 
         self.assertEqual(adapt_features_for_model(features, LegacyModel()), [200, 260, 300, 60])
 
@@ -90,15 +90,15 @@ class ModelFeatureTest(unittest.TestCase):
         class SingleObstacleModel:
             n_features_in_ = len(SINGLE_OBSTACLE_FEATURE_NAMES)
 
-        features = [200] + [260, 300, 60, 0, 2] * MAX_MODEL_OBSTACLES
+        features = [200] + [260, 300, 60, 0, 5] * MAX_MODEL_OBSTACLES
 
-        self.assertEqual(adapt_features_for_model(features, SingleObstacleModel()), [200, 260, 300, 60, 0, 2])
+        self.assertEqual(adapt_features_for_model(features, SingleObstacleModel()), [200, 260, 300, 60, 0, 5])
 
     def test_adapts_features_for_current_model(self):
         class CurrentModel:
             n_features_in_ = len(FEATURE_NAMES)
 
-        features = [200] + [260, 300, 60, 0, 2] * MAX_MODEL_OBSTACLES
+        features = [200] + [260, 300, 60, 0, 5] * MAX_MODEL_OBSTACLES
 
         self.assertEqual(adapt_features_for_model(features, CurrentModel()), features)
 
@@ -107,7 +107,7 @@ class ModelFeatureTest(unittest.TestCase):
             n_features_in_ = 5
 
         with self.assertRaises(ValueError):
-            adapt_features_for_model([200, 260, 300, 60, 0, 2], UnsupportedModel())
+            adapt_features_for_model([200, 260, 300, 60, 0, 5], UnsupportedModel())
 
 
 if __name__ == "__main__":

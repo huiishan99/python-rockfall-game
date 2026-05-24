@@ -50,7 +50,7 @@ class TrainModelTest(unittest.TestCase):
 
             X, y, skipped_entries = load_data(data_path)
 
-        self.assertEqual(X.tolist(), [[100, 120, 40, 20, 0, 2] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)])
+        self.assertEqual(X.tolist(), [[100, 120, 40, 20, 0, 5] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)])
         self.assertEqual(y.tolist(), [1])
         self.assertEqual(skipped_entries, 0)
 
@@ -68,29 +68,29 @@ class TrainModelTest(unittest.TestCase):
         self.assertIn("ore=1", line)
 
     def test_reward_weight_for_features_counts_reward_and_close_ore_potential(self):
-        features = [100, 120, 40, 20, 0, 2] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)
+        features = [100, 120, 40, 20, 0, 5] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1)
 
-        self.assertEqual(reward_weight_for_features(features), 4)
+        self.assertEqual(reward_weight_for_features(features), 8)
 
     def test_build_sample_weights_can_disable_reward_weighting(self):
         self.assertIsNone(build_sample_weights([[100]], "none"))
 
     def test_build_sample_weights_scores_reward_bearing_rows(self):
         features = [
-            [100, 120, 40, 20, 0, 2] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1),
+            [100, 120, 40, 20, 0, 5] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1),
             [100, 120, 40, 200, 0, 0] + [100, 0, 0, 0, 0] * (MAX_MODEL_OBSTACLES - 1),
         ]
 
-        self.assertEqual(build_sample_weights(features, "score"), [4, 1])
+        self.assertEqual(build_sample_weights(features, "score"), [8, 1])
 
     def test_sample_weight_summary_formats_enabled_weights(self):
-        summary = sample_weight_summary([1, 4], "score")
+        summary = sample_weight_summary([1, 8], "score")
 
         self.assertEqual(summary["mode"], "score")
         self.assertEqual(summary["min"], 1)
-        self.assertEqual(summary["max"], 4)
-        self.assertEqual(summary["average"], 2.5)
-        self.assertIn("avg=2.50", format_sample_weight_line(summary))
+        self.assertEqual(summary["max"], 8)
+        self.assertEqual(summary["average"], 4.5)
+        self.assertIn("avg=4.50", format_sample_weight_line(summary))
 
 
 if __name__ == "__main__":
