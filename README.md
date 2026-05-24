@@ -7,9 +7,9 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.0-candidate`.
+Current version: `0.8.0`.
 
-This is now a v0.8 candidate after the playable v0.1 release:
+This is now the v0.8 release after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
@@ -43,6 +43,8 @@ This is now a v0.8 candidate after the playable v0.1 release:
 ## Development Log
 
 Every meaningful change should be recorded in [DEVLOG.md](DEVLOG.md). Add entries newest first and include what changed, why it changed, how it was verified, and any risks or follow-up notes. This is especially important when changing gameplay rules, collected data, or the trained model.
+
+Release summaries are recorded in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## Installation
 
@@ -239,9 +241,8 @@ High scores are saved locally in `high_scores.json`. This file is ignored by git
 
 Local experiment outputs under `runs/` are also ignored by git.
 
-## Next Steps
+## Post-v0.8 Ideas
 
-- Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
 - Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
 - Optionally bootstrap safe-rule demonstration data with `collect_policy_data.py` and compare it against human-play models.
 - Retrain and compare the model with `evaluate_model.py`, checking ore/heavy/swift avoid rates.

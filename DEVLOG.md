@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Release v0.8.0
+
+- Changed: updated `settings.py` and `README.md` from `0.8.0-candidate` to `0.8.0`; added `RELEASE_NOTES.md`.
+- Why: the requested v0.8 line now has the gameplay, UI, model visibility, training, evaluation, reporting, and release-check pieces needed for a complete local release.
+- Behavior: window captions and release-check output identify the project as `0.8.0`, and README links to the v0.8 release summary.
+- Verification: ran `python3 -m unittest`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile collect_policy_data.py compare_models.py data_quality.py data_store.py difficulty.py evaluate_model.py features.py game.py game_audio.py game_core.py game_events.py inspect_data.py model_report.py play_with_model.py policies.py release_check.py run_model_experiment.py scores.py settings.py spawning.py train_model.py test_collect_policy_data.py test_compare_models.py test_data_quality.py test_data_store.py test_difficulty.py test_evaluate_model.py test_features.py test_game.py test_game_audio.py test_game_core.py test_inspect_data.py test_model_report.py test_play_with_model.py test_policies.py test_release_check.py test_run_model_experiment.py test_scores.py test_spawning.py test_train_model.py`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-v080-release-check.json`; ran `python3 model_report.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-v080-model-report.json`; ran `python3 compare_models.py game_model.pkl --include-rule-baseline --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-v080-comparison.json`; ran `python3 -m json.tool /private/tmp/rockfall-v080-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-v080-model-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-v080-comparison.json`; opened a short pygame window smoke and saved `/private/tmp/rockfall-v080-window-smoke.png`; opened a variant render smoke and saved `/private/tmp/rockfall-v080-variant-window-smoke.png`; ran `git diff --check`.
+- Risks/Notes: the tracked legacy model still works, but fresh variant-rich data should be collected before training a model expected to exploit ore/heavy/swift behavior.
+
 ## 2026-05-24 - Mark v0.8 release candidate
 
 - Changed: updated `settings.py` and `README.md` from `0.8.0-dev` to `0.8.0-candidate`.
