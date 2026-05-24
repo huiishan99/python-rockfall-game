@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add model learning report command
+
+- Changed: added `model_report.py`, report formatting/writing helpers, recommendation rules, tests, and README usage.
+- Why: the machine-learning loop needs one command that explains data quality, model-vs-baseline behavior, variant-rich stress performance, and reward capture without manually stitching together several tools.
+- Behavior: `python3 model_report.py` evaluates the model on selected variant profiles, compares against `policy:safe-rule` by default, includes data-quality and variant-coverage context, and can save JSON reports.
+- Verification: ran `python3 -m unittest test_model_report.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile model_report.py test_model_report.py`; ran `python3 model_report.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-model-learning-report.json`; ran `python3 -m unittest test_model_report.py test_compare_models.py test_evaluate_model.py test_data_quality.py`; ran `python3 -m json.tool /private/tmp/rockfall-model-learning-report.json`; ran `python3 -m unittest`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-model-report-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-model-report-release-check.json`; ran `git diff --check`.
+- Risks/Notes: the default report runs multiple headless evaluations, so larger `--games` and `--max-frames` values take longer than a single `evaluate_model.py` run.
+
 ## 2026-05-24 - Add reward-aware training weights
 
 - Changed: added `train_model.py --reward-weighting score`, reward sample-weight helpers, candidate-experiment support, tests, and README guidance.

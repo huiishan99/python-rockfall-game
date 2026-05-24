@@ -30,6 +30,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
+- Model learning reports combine data quality, standard evaluation, variant-rich stress testing, score-source breakdowns, and safe-rule baseline comparison.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
@@ -213,6 +214,16 @@ python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --ma
 
 Comparison output includes score deltas, average remaining lives, survival rate, score-source breakdowns and per-variant outcomes in JSON reports, and the best model by average score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
+### Build a Model Learning Report
+
+Generate one report that inspects the training data, evaluates the model on both `standard` and `variant-rich` profiles, compares against the built-in `safe-rule` baseline, and emits recommendations:
+
+```bash
+python3 model_report.py --games 3 --max-frames 1200 --report runs/model_report.json
+```
+
+Use `--json` for machine-readable output, `--profiles standard` for a smaller report, or `--skip-rule-baseline` when you only want model-only evaluation.
+
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
@@ -224,6 +235,7 @@ Local experiment outputs under `runs/` are also ignored by git.
 - Do a real-window playtest and tune player speed, initial lives, and difficulty presets together.
 - Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
 - Retrain and compare the model with `evaluate_model.py`, checking ore/heavy/swift avoid rates.
+- Generate `model_report.py` reports after each candidate retrain to track whether new data actually improves model behavior.
 - Tune rock variant spawn rates and rewards after more real-window playtesting.
 - Continue collecting fresh play data and compare future models with `evaluate_model.py`.
 
