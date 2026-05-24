@@ -7,9 +7,9 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.0-dev`.
+Current version: `0.8.0-candidate`.
 
-This is now in v0.8 development after the playable v0.1 release:
+This is now a v0.8 candidate after the playable v0.1 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.

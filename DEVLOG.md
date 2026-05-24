@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Mark v0.8 release candidate
+
+- Changed: updated `settings.py` and `README.md` from `0.8.0-dev` to `0.8.0-candidate`.
+- Why: the v0.8 development line now has gameplay variants, model visibility, reward-aware evaluation/training tools, policy data collection, and release-report coverage.
+- Behavior: window captions and release-check output now identify the build as `0.8.0-candidate`.
+- Verification: ran `python3 -m unittest`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-v08-candidate-release-check.json`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile settings.py release_check.py`; ran `python3 model_report.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-v08-candidate-model-report.json`; ran `python3 -m json.tool /private/tmp/rockfall-v08-candidate-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-v08-candidate-model-report.json`; ran `git diff --check`.
+- Risks/Notes: this is still a candidate marker; final `0.8.0` should wait for a real-window playtest and any hand-feel tweaks from that session.
+
 ## 2026-05-24 - Show reward columns in model comparison
 
 - Changed: added average variant-bonus and risk-bonus columns to `compare_models.py` text tables; expanded comparison tests and README notes.
