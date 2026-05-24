@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-from settings import DEFAULT_VARIANT_PROFILE
+from settings import DEFAULT_VARIANT_PROFILE, NEAR_MISS_DISTANCE, SCREEN_HEIGHT
 
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
@@ -54,11 +54,24 @@ def predict_action_with_debug(model, game):
     return (ACTION_LEFT, raw_features, model_features)
 
 
-def model_debug_lines(action, raw_features, model_features):
-    lines = [
-        f"AI: {action.upper()}",
-        f"Features: {len(model_features)}/{len(raw_features)}",
-    ]
+def prediction_confidence(model, model_features, action):
+    if model is None or not hasattr(model, "predict_proba"):
+        return None
+
+    try:
+        probabilities = model.predict_proba([model_features])[0]
+    except Exception:
+        return None
+
+    target_label = 1 if action == "right" else 0
+    classes = list(getattr(model, "classes_", [0, 1]))
+    if target_label not in classes:
+        return None
+    return float(probabilities[classes.index(target_label)])
+
+
+def obstacle_debug_metrics(raw_features):
+    metrics = []
     rock_labels = ("near", "second", "third")
     offset = 1
     for label in rock_labels:
@@ -66,8 +79,59 @@ def model_debug_lines(action, raw_features, model_features):
             break
         _, y, dx, speed_delta, score_bonus = raw_features[offset : offset + 5]
         if y != 0:
-            lines.append(f"{label}: dx={dx} y={y} sp={speed_delta} +{score_bonus}")
+            metrics.append(
+                {
+                    "label": label,
+                    "kind": "ORE" if score_bonus > 0 else "STONE",
+                    "dx": dx,
+                    "y": y,
+                    "speed_delta": speed_delta,
+                    "score_bonus": score_bonus,
+                    "danger": obstacle_danger_pressure(dx, y, score_bonus),
+                    "ore_pull": obstacle_ore_pull(dx, y, score_bonus),
+                }
+            )
         offset += 5
+    return metrics
+
+
+def obstacle_danger_pressure(dx, y, score_bonus):
+    if score_bonus > 0:
+        return 0
+    horizontal_pressure = max(0, NEAR_MISS_DISTANCE - abs(dx)) / NEAR_MISS_DISTANCE
+    vertical_pressure = max(0, min(SCREEN_HEIGHT, y)) / SCREEN_HEIGHT
+    return horizontal_pressure * (0.35 + vertical_pressure)
+
+
+def obstacle_ore_pull(dx, y, score_bonus):
+    if score_bonus <= 0:
+        return 0
+    horizontal_pressure = max(0, NEAR_MISS_DISTANCE - abs(dx)) / NEAR_MISS_DISTANCE
+    vertical_pressure = max(0, min(SCREEN_HEIGHT, y)) / SCREEN_HEIGHT
+    return score_bonus * horizontal_pressure * (0.25 + vertical_pressure)
+
+
+def model_debug_lines(action, raw_features, model_features, model=None):
+    confidence = prediction_confidence(model, model_features, action)
+    action_text = f"AI: {action.upper()}"
+    if confidence is not None:
+        action_text += f" {confidence:.0%}"
+
+    obstacle_metrics = obstacle_debug_metrics(raw_features)
+    total_danger = sum(metric["danger"] for metric in obstacle_metrics)
+    total_ore_pull = sum(metric["ore_pull"] for metric in obstacle_metrics)
+    lines = [
+        action_text,
+        f"Features: {len(model_features)}/{len(raw_features)}",
+        f"Pressure: danger={total_danger:.2f} ore={total_ore_pull:.2f}",
+    ]
+    for metric in obstacle_metrics:
+        focus = metric["ore_pull"] if metric["kind"] == "ORE" else metric["danger"]
+        lines.append(
+            f"{metric['label']} {metric['kind']}: "
+            f"dx={metric['dx']} y={metric['y']} sp={metric['speed_delta']} "
+            f"+{metric['score_bonus']} focus={focus:.2f}"
+        )
     return lines
 
 
@@ -206,7 +270,7 @@ def main(argv=None):
         if screen_state == SCREEN_PLAYING:
             if args.debug_ai:
                 action, raw_features, model_features = predict_action_with_debug(model, game)
-                debug_lines = model_debug_lines(action, raw_features, model_features)
+                debug_lines = model_debug_lines(action, raw_features, model_features, model=model)
             else:
                 action = predict_action(model, game)
             game.apply_action(action)

@@ -7,7 +7,7 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.3-dev`.
+Current version: `0.8.4-dev`.
 
 This is post-v0.8 development after the playable v0.8 release:
 
@@ -29,9 +29,11 @@ This is post-v0.8 development after the playable v0.8 release:
 - AI play with a trained Random Forest model, selectable model path, visible active model filename, optional mute, and clear model-load failures.
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
-- Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
-- Model learning reports combine data quality, objective coverage, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and safe-rule baseline comparison.
-- Policy data collection can record `ore_target_v2` safe-rule demonstration samples into `runs/` for quick variant-rich training experiments.
+- Model comparison can also include an `ore-hunter` baseline that spends lives for collectable ore when it looks worthwhile.
+- Model play can show a debug overlay with predicted action, confidence, feature compatibility count, danger pressure, ore pull, and nearest rock feature values.
+- Model learning reports combine data quality, objective coverage, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and built-in policy baseline comparison.
+- `train_pipeline.py` runs the ore-target data check, candidate training, model/policy comparison, promotion recommendation, and JSON report in one command.
+- Policy data collection can record `ore_target_v2` built-in policy demonstration samples into `runs/` for quick variant-rich training experiments.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for ore score gains, dodges, combos, dodge-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
@@ -65,7 +67,7 @@ To get started with this project, clone this repository to your local machine:
 
 ### Gameplay
 
-Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly, swift stones fall faster, and ore stones award +5 ore score when caught. Ore is still dangerous: catching it costs 1 life, while missing it subtracts up to 2 ore score. Ordinary dodges do not directly increase ore score; they build `Dodges`, preserve lives, and grow combo so later caught ore is worth more. Dodge milestones can restore a lost life up to the run's starting lives. Close dodges still show a `CLOSE!` feedback message for normal danger. Hits now add a short red screen tint while invincibility fades. The HUD now sits in framed panels with ore score, dodge count, and a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
+Difficulty rises over time: obstacle speed increases and rocks spawn more frequently as the level bar fills. Rocks spawn from readable lanes, with early levels avoiding repeated nearby lanes and later levels allowing tighter pressure. Rocks now enter as clipped falling stones instead of showing a separate warning strip. Falling rocks have variants: normal stones behave as the baseline, heavy stones fall more slowly, swift stones fall faster, and ore stones award +5 ore score when caught. Ore is still dangerous: catching it costs 1 life, while missing it subtracts up to 2 ore score. Ordinary dodges do not directly increase ore score; they build `Dodges`, preserve lives, and grow combo so later caught ore is worth more. Dodge milestones can restore a lost life up to the run's starting lives. Close dodges still show a `CLOSE!` feedback message for normal danger. Hits now add a short red screen tint while invincibility fades. The game-over screen summarizes ore caught, ore missed, and missed-ore penalty so a run can be reviewed quickly. The HUD now sits in framed panels with ore score, dodge count, and a cleaner progress display, while the playfield and menu screens draw lane guides, panel-backed prompts, a mine-cart player, and irregular rock obstacles with facets, shadows, cracks, and variant markings.
 
 Controls:
 
@@ -127,7 +129,7 @@ To bootstrap an ore-target imitation dataset from the built-in safe-rule policy:
 python3 collect_policy_data.py --games 3 --max-frames 900
 ```
 
-This writes `runs/policy_ore_target_v2.json` by default. It creates synthetic policy demonstrations for experiments; keep them separate from human play data when comparing model behavior.
+This writes `runs/policy_ore_target_v2.json` by default. It creates synthetic policy demonstrations for experiments; keep them separate from human play data when comparing model behavior. Use `--policy ore-hunter` to collect from the more reward-seeking baseline that will spend lives on collectable ore when it has enough health.
 
 Inspect collected data before training:
 
@@ -161,6 +163,16 @@ python3 train_model.py --data runs/ore_target_v2_variant_rich.json --model runs/
 
 If the data predates rock variants, reward weighting safely reports min/max/average weight as `1.00`, meaning it had no reward-bearing samples to emphasize.
 
+### Run the Training Pipeline
+
+For a full data-to-model loop, run:
+
+```bash
+python3 train_pipeline.py --data runs/ore_target_v2_manual.json --games 10 --max-frames 3600 --variant-profile variant-rich
+```
+
+The pipeline checks that data matches `ore_target_v2`, trains `runs/pipeline_candidate.pkl`, compares the tracked baseline, candidate model, `policy:safe-rule`, and `policy:ore-hunter`, writes `runs/training_pipeline.json`, and prints a promotion recommendation. It does not replace `game_model.pkl` unless you add `--promote`, and promotion only happens when the candidate is the best model and clears `--min-score-delta`.
+
 ### Run a Model Experiment
 
 Train a candidate model and compare it against the current baseline with the same evaluation seeds:
@@ -187,7 +199,7 @@ python3 play_with_model.py --model game_model.pkl
 
 Model play screens and the window title show the active model filename.
 If the model file cannot be loaded, the command prints a concise error and exits nonzero.
-Use `--debug-ai` to show the model's current action, feature count, and nearest rock feature groups during play:
+Use `--debug-ai` to show the model's current action, prediction confidence when available, feature count, danger pressure, ore pull, and nearest rock feature groups during play:
 
 ```bash
 python3 play_with_model.py --debug-ai
@@ -223,17 +235,23 @@ Add `--include-rule-baseline` to compare against the built-in `policy:safe-rule`
 python3 compare_models.py game_model.pkl --include-rule-baseline --games 10 --max-frames 3600
 ```
 
+Add `--include-ore-hunter-baseline` to compare against the more reward-seeking `policy:ore-hunter` baseline:
+
+```bash
+python3 compare_models.py game_model.pkl --include-rule-baseline --include-ore-hunter-baseline --games 10 --max-frames 3600 --variant-profile variant-rich
+```
+
 Comparison output includes score deltas, average remaining lives, survival rate, average dodge count, ore bonus, missed-ore penalty columns, run breakdowns and per-variant outcomes in JSON reports, and the best model by average ore score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
 
 ### Build a Model Learning Report
 
-Generate one report that inspects the training data, evaluates the model on both `standard` and `variant-rich` profiles, compares against the built-in `safe-rule` baseline, and emits recommendations:
+Generate one report that inspects the training data, evaluates the model on both `standard` and `variant-rich` profiles, compares against built-in policy baselines, and emits recommendations:
 
 ```bash
 python3 model_report.py --games 3 --max-frames 1200 --report runs/model_report.json
 ```
 
-Use `--json` for machine-readable output, `--profiles standard` for a smaller report, or `--skip-rule-baseline` when you only want model-only evaluation.
+Use `--json` for machine-readable output, `--profiles standard` for a smaller report, `--policy-baselines safe-rule` to narrow the comparison, or `--skip-rule-baseline` when you only want model-only evaluation.
 
 ### Runtime Files
 
@@ -244,8 +262,8 @@ Local experiment outputs under `runs/` are also ignored by git.
 ## Post-v0.8 Ideas
 
 - Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
-- Optionally bootstrap safe-rule demonstration data with `collect_policy_data.py` and compare it against human-play models.
-- Retrain and compare the model with `evaluate_model.py`, checking ore/heavy/swift avoid rates.
+- Bootstrap safe-rule or ore-hunter demonstration data with `collect_policy_data.py` and compare it against human-play models.
+- Use `train_pipeline.py` after each fresh dataset to decide whether a candidate model is worth promoting.
 - Generate `model_report.py` reports after each candidate retrain to track whether new data actually improves model behavior.
 - Tune rock variant spawn rates and rewards after more real-window playtesting.
 - Continue collecting fresh play data and compare future models with `evaluate_model.py`.

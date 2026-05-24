@@ -75,9 +75,21 @@ class ModelReportTest(unittest.TestCase):
         args = parse_args([])
 
         self.assertEqual(args.profiles, ["standard", "variant-rich"])
+        self.assertEqual(args.policy_baselines, ["safe-rule", "ore-hunter"])
+
+    def test_parse_args_accepts_policy_baselines(self):
+        args = parse_args(["--policy-baselines", "ore-hunter"])
+
+        self.assertEqual(args.policy_baselines, ["ore-hunter"])
 
     def test_validate_args_rejects_duplicate_profiles(self):
         args = parse_args(["--profiles", "standard", "standard"])
+
+        with self.assertRaises(ValueError):
+            validate_args(args)
+
+    def test_validate_args_rejects_duplicate_policy_baselines(self):
+        args = parse_args(["--policy-baselines", "safe-rule", "safe-rule"])
 
         with self.assertRaises(ValueError):
             validate_args(args)

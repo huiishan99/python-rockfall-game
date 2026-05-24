@@ -195,12 +195,16 @@ class GameCoreHitFeedbackTest(unittest.TestCase):
         game.difficulty_level = 3
         game.lives = 2
         game.dodges = 9
+        game.variant_stats["ore"]["hits"] = 2
+        game.variant_stats["ore"]["avoided"] = 1
+        game.score_breakdown["ore_penalty"] = 2
 
         lines = game.game_over_lines("Model Play")
 
         self.assertIn("Model Play", lines)
         self.assertIn("Final Ore Score: 12", lines)
         self.assertIn("Level: 3  Dodges: 9", lines)
+        self.assertIn("Ore Caught: 2  Missed: 1  Penalty: -2", lines)
         self.assertIn("Best Combo: 0  Lives: 2", lines)
 
     def test_start_lines_include_controls(self):

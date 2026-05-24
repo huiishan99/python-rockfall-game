@@ -71,6 +71,11 @@ class CollectPolicyDataTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_args(args)
 
+    def test_parse_args_accepts_ore_hunter_policy(self):
+        args = parse_args(["--policy", "ore-hunter"])
+
+        self.assertEqual(args.policy, "ore-hunter")
+
     def test_collect_game_samples_records_policy_actions(self):
         game = StubGame()
 

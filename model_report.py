@@ -18,7 +18,7 @@ from data_store import GAME_DATA_FILE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from play_with_model import MODEL_FILE
-from policies import POLICY_SAFE_RULE, policy_label
+from policies import built_in_policy_names, policy_label
 from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
 
 
@@ -47,7 +47,14 @@ def parse_args(argv=None):
     parser.add_argument(
         "--skip-rule-baseline",
         action="store_true",
-        help="Only evaluate the model, without the built-in safe-rule baseline.",
+        help="Only evaluate the model, without built-in policy baselines.",
+    )
+    parser.add_argument(
+        "--policy-baselines",
+        nargs="+",
+        choices=built_in_policy_names(),
+        default=list(built_in_policy_names()),
+        help="Built-in policy baselines to compare against.",
     )
     parser.add_argument("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES, help="Recommended minimum valid samples.")
     parser.add_argument(
@@ -84,6 +91,8 @@ def validate_args(args):
         raise ValueError("--max-skipped-ratio must be between 0 and 1.")
     if len(set(args.profiles)) != len(args.profiles):
         raise ValueError("--profiles must not contain duplicates.")
+    if len(set(args.policy_baselines)) != len(args.policy_baselines):
+        raise ValueError("--policy-baselines must not contain duplicates.")
 
 
 def evaluate_profile(
@@ -96,8 +105,11 @@ def evaluate_profile(
     difficulty_preset=DEFAULT_DIFFICULTY_PRESET,
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
-    include_rule_baseline=True,
+    policy_baselines=None,
 ):
+    if policy_baselines is None:
+        policy_baselines = built_in_policy_names()
+
     labels = [model_path]
     summaries = [
         evaluate_model_path(
@@ -112,11 +124,11 @@ def evaluate_profile(
             variant_profile=profile,
         )
     ]
-    if include_rule_baseline:
-        labels.append(policy_label(POLICY_SAFE_RULE))
+    for policy_name in policy_baselines:
+        labels.append(policy_label(policy_name))
         summaries.append(
             evaluate_policy(
-                POLICY_SAFE_RULE,
+                policy_name,
                 games,
                 max_frames,
                 random_seed,
@@ -291,7 +303,7 @@ def build_model_report(args):
                 difficulty_preset=args.difficulty,
                 player_speed=args.player_speed,
                 initial_lives=args.lives,
-                include_rule_baseline=not args.skip_rule_baseline,
+                policy_baselines=[] if args.skip_rule_baseline else args.policy_baselines,
             )
             for profile in args.profiles
         }

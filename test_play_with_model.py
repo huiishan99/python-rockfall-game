@@ -8,8 +8,10 @@ from play_with_model import (
     manual_play_command,
     model_load_error_message,
     model_debug_lines,
+    obstacle_debug_metrics,
     model_mode_name,
     parse_args,
+    prediction_confidence,
     predict_action,
     predict_action_with_debug,
 )
@@ -141,8 +143,29 @@ class PlayWithModelTest(unittest.TestCase):
 
         self.assertEqual(lines[0], "AI: LEFT")
         self.assertEqual(lines[1], "Features: 4/11")
-        self.assertIn("near: dx=60 y=300 sp=0 +5", lines)
-        self.assertIn("second: dx=-50 y=100 sp=0 +0", lines)
+        self.assertTrue(any(line.startswith("Pressure: danger=") for line in lines))
+        self.assertTrue(any("near ORE: dx=60 y=300 sp=0 +5" in line for line in lines))
+        self.assertTrue(any("second STONE: dx=-50 y=100 sp=0 +0" in line for line in lines))
+
+    def test_model_debug_lines_show_prediction_confidence_when_available(self):
+        model = ProbaModel()
+
+        lines = model_debug_lines("right", [200, 260, 300, 60, 0, 5], [200, 260, 300, 60], model=model)
+
+        self.assertEqual(lines[0], "AI: RIGHT 80%")
+
+    def test_prediction_confidence_returns_none_without_probability_support(self):
+        model = RecordingModel(n_features_in=4, prediction=1)
+
+        self.assertIsNone(prediction_confidence(model, [1, 2, 3, 4], "right"))
+
+    def test_obstacle_debug_metrics_labels_ore_and_stone(self):
+        metrics = obstacle_debug_metrics([200, 260, 300, 60, 0, 5, 150, 100, -50, 0, 0])
+
+        self.assertEqual(metrics[0]["kind"], "ORE")
+        self.assertGreater(metrics[0]["ore_pull"], 0)
+        self.assertEqual(metrics[1]["kind"], "STONE")
+        self.assertGreater(metrics[1]["danger"], 0)
 
 
 class StubGame:
@@ -162,6 +185,13 @@ class RecordingModel:
     def predict(self, rows):
         self.seen_features = rows[0]
         return [self.prediction]
+
+
+class ProbaModel:
+    classes_ = [0, 1]
+
+    def predict_proba(self, rows):
+        return [[0.2, 0.8]]
 
 
 if __name__ == "__main__":

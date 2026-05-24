@@ -334,10 +334,18 @@ class RockfallGame:
             f"Final Ore Score: {self.score}",
             f"Best Ore Score: {self.visible_high_score()}",
             f"Level: {self.difficulty_level}  Dodges: {self.dodges}",
+            self.ore_summary_line(),
             f"Best Combo: {self.best_combo}  Lives: {self.lives}",
             "Press R to restart",
             "Press ESC to quit",
         ]
+
+    def ore_summary_line(self):
+        ore_stats = self.variant_stats.get("ore", {})
+        ore_caught = ore_stats.get("hits", 0)
+        ore_missed = ore_stats.get("avoided", 0)
+        ore_penalty = self.score_breakdown.get("ore_penalty", 0)
+        return f"Ore Caught: {ore_caught}  Missed: {ore_missed}  Penalty: -{ore_penalty}"
 
     def draw_pause_screen(self, mode_name):
         self._draw_message_screen("PAUSED", self.pause_lines(mode_name))
@@ -786,7 +794,7 @@ class RockfallGame:
             return
 
         line_height = 20
-        overlay_width = 280
+        overlay_width = 360
         overlay_height = 18 + line_height * len(lines)
         overlay_rect = pygame.Rect(SCREEN_WIDTH - overlay_width - 10, 58, overlay_width, overlay_height)
         self._draw_panel(overlay_rect, HUD_PANEL_COLOR, HUD_PANEL_BORDER_COLOR)

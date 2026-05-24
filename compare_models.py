@@ -14,7 +14,7 @@ from evaluate_model import (
     write_summary_report,
 )
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
-from policies import POLICY_SAFE_RULE, policy_label
+from policies import POLICY_ORE_HUNTER, POLICY_SAFE_RULE, policy_label
 from play_with_model import MODEL_FILE
 from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
 
@@ -43,6 +43,11 @@ def parse_args(argv=None):
         "--include-rule-baseline",
         action="store_true",
         help="Compare models against the built-in safe-rule baseline policy.",
+    )
+    parser.add_argument(
+        "--include-ore-hunter-baseline",
+        action="store_true",
+        help="Compare models against a built-in ore-hunter policy that spends lives for ore.",
     )
     parser.add_argument("--report", help="Optional JSON report file to write.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
@@ -267,6 +272,21 @@ def main(argv=None):
         summaries.append(
             evaluate_policy(
                 POLICY_SAFE_RULE,
+                args.games,
+                args.max_frames,
+                args.random_seed,
+                screen,
+                difficulty_preset=args.difficulty,
+                player_speed=args.player_speed,
+                initial_lives=args.lives,
+                variant_profile=args.variant_profile,
+            )
+        )
+    if args.include_ore_hunter_baseline:
+        labels.append(policy_label(POLICY_ORE_HUNTER))
+        summaries.append(
+            evaluate_policy(
+                POLICY_ORE_HUNTER,
                 args.games,
                 args.max_frames,
                 args.random_seed,
