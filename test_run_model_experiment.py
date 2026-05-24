@@ -39,6 +39,7 @@ TRAINING_SUMMARY = {
     "estimators": 100,
     "test_size": 0.2,
     "random_state": 42,
+    "sample_weights": {"mode": "none"},
     "data_quality": {
         "status": "ready",
         "warnings": [],
@@ -106,6 +107,8 @@ class RunModelExperimentTest(unittest.TestCase):
                 "3",
                 "--variant-profile",
                 "variant-rich",
+                "--reward-weighting",
+                "score",
                 "--json",
             ]
         )
@@ -117,6 +120,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.player_speed, 8)
         self.assertEqual(args.lives, 3)
         self.assertEqual(args.variant_profile, "variant-rich")
+        self.assertEqual(args.reward_weighting, "score")
         self.assertTrue(args.json)
 
     def test_validate_experiment_paths_rejects_baseline_overwrite(self):
@@ -212,6 +216,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Training candidate model:", lines)
         self.assertIn("Validation accuracy: 0.875", lines)
         self.assertIn("Variant coverage: recorded=0, legacy=100", lines)
+        self.assertIn("Reward weighting: none.", lines)
         self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
         self.assertIn("Data quality: ready", lines)
         self.assertIn("Model comparison:", lines)

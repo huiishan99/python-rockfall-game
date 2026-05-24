@@ -27,10 +27,15 @@ from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, varia
 from train_model import (
     N_ESTIMATORS,
     RANDOM_STATE,
+    REWARD_WEIGHTING_CHOICES,
+    REWARD_WEIGHTING_NONE,
     TEST_SIZE,
+    build_sample_weights,
+    format_sample_weight_line,
+    sample_weight_summary,
     load_data,
     save_model,
-    split_data,
+    split_training_data,
     train_model,
 )
 
@@ -45,6 +50,12 @@ def parse_args(argv=None):
     parser.add_argument("--test-size", type=float, default=TEST_SIZE, help="Validation split size.")
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE, help="Training random seed.")
     parser.add_argument("--estimators", type=int, default=N_ESTIMATORS, help="Random forest tree count.")
+    parser.add_argument(
+        "--reward-weighting",
+        choices=REWARD_WEIGHTING_CHOICES,
+        default=REWARD_WEIGHTING_NONE,
+        help="Give reward-bearing samples more weight during candidate training.",
+    )
     parser.add_argument("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES, help="Recommended minimum valid samples.")
     parser.add_argument(
         "--min-balance-ratio",
@@ -94,6 +105,7 @@ def train_candidate_model(
     min_samples=DEFAULT_MIN_SAMPLES,
     min_balance_ratio=DEFAULT_MIN_BALANCE_RATIO,
     max_skipped_ratio=DEFAULT_MAX_SKIPPED_RATIO,
+    reward_weighting=REWARD_WEIGHTING_NONE,
 ):
     X, y, skipped_entries = load_data(data_path)
     if len(X) < 2:
@@ -111,8 +123,16 @@ def train_candidate_model(
         max_skipped_ratio,
     )
 
-    X_train, X_test, y_train, y_test = split_data(X, y, test_size, random_state)
-    model = train_model(X_train, y_train, estimators, random_state)
+    sample_weights = build_sample_weights(X, reward_weighting)
+    weights = sample_weight_summary(sample_weights, reward_weighting)
+    X_train, X_test, y_train, y_test, train_weights = split_training_data(
+        X,
+        y,
+        sample_weights,
+        test_size,
+        random_state,
+    )
+    model = train_model(X_train, y_train, estimators, random_state, sample_weights=train_weights)
     validation_accuracy = model.score(X_test, y_test)
     save_model(model, model_path)
 
@@ -128,6 +148,7 @@ def train_candidate_model(
         "estimators": estimators,
         "test_size": test_size,
         "random_state": random_state,
+        "sample_weights": weights,
         "data_quality": quality,
     }
 
@@ -227,6 +248,7 @@ def format_training_lines(training_summary):
             f"legacy={training_summary['variant_coverage']['legacy_obstacle_samples']}"
         ),
         f"Validation accuracy: {training_summary['validation_accuracy']:.3f}",
+        format_sample_weight_line(training_summary["sample_weights"]),
         f"Data quality: {training_summary['data_quality']['status']}",
     ]
     variant_warnings = training_summary["variant_coverage"]["warnings"]
@@ -271,6 +293,7 @@ def main(argv=None):
         min_samples=args.min_samples,
         min_balance_ratio=args.min_balance_ratio,
         max_skipped_ratio=args.max_skipped_ratio,
+        reward_weighting=args.reward_weighting,
     )
     model_paths = [args.baseline, args.candidate]
     comparison_summaries = evaluate_models(

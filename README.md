@@ -33,7 +33,7 @@ This is now in v0.8 development after the playable v0.1 release:
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for score gains, combos, score-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
-- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features.
+- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features; optional reward weighting can give reward-bearing samples more influence during training.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
 - Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, score-source breakdowns, and text or JSON output, including score, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
@@ -141,6 +141,13 @@ python3 train_model.py --data game_data.json --model game_model.pkl --estimators
 ```
 
 Missing parent directories for the selected model output are created automatically.
+After collecting variant-rich data, add reward-aware sample weighting to emphasize reward-bearing states during training:
+
+```bash
+python3 train_model.py --data runs/variant_rich.json --model runs/reward_model.pkl --reward-weighting score
+```
+
+If the data predates rock variants, reward weighting safely reports min/max/average weight as `1.00`, meaning it had no reward-bearing samples to emphasize.
 
 ### Run a Model Experiment
 
@@ -150,7 +157,7 @@ Train a candidate model and compare it against the current baseline with the sam
 python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02_model.pkl --games 10 --max-frames 3600
 ```
 
-Use `--report runs/v02_report.json` to save the training summary, data-quality status, candidate result, and comparison metrics, or `--json` to print the same structured payload.
+Use `--reward-weighting score` after collecting variant-rich data if you want the candidate training step to emphasize reward-bearing samples. Use `--report runs/v02_report.json` to save the training summary, sample-weight summary, data-quality status, candidate result, and comparison metrics, or `--json` to print the same structured payload.
 The experiment command refuses to use the same path for `--baseline` and `--candidate`, so the baseline model is not overwritten accidentally.
 
 ### Play the Game with the Model

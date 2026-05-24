@@ -22,6 +22,14 @@ This file records meaningful project changes so bugs, design decisions, and mode
 - Risks/Notes: known limitations, follow-ups, or rollback clues.
 ```
 
+## 2026-05-24 - Add reward-aware training weights
+
+- Changed: added `train_model.py --reward-weighting score`, reward sample-weight helpers, candidate-experiment support, tests, and README guidance.
+- Why: rare ore/heavy reward states should be able to influence retraining more strongly once fresh variant-rich data exists.
+- Behavior: default training remains unweighted; `--reward-weighting score` increases sample weights for reward-bearing rocks and close ore opportunities, and reports min/max/average weights in training and experiment output.
+- Verification: ran `python3 -m unittest test_train_model.py test_run_model_experiment.py`; ran `python3 -X pycache_prefix=/private/tmp/rockfall-pycache -m py_compile train_model.py run_model_experiment.py test_train_model.py test_run_model_experiment.py`; ran `python3 train_model.py --data game_data.json --model /private/tmp/rockfall-reward-weighted-model.pkl --estimators 20 --reward-weighting score`; ran `python3 run_model_experiment.py --help`; ran `python3 -m unittest`; ran `python3 train_model.py --help`; ran `python3 release_check.py --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --report /private/tmp/rockfall-reward-weighting-release-check.json`; ran `python3 run_model_experiment.py --data game_data.json --candidate /private/tmp/rockfall-reward-weighted-candidate.pkl --estimators 20 --reward-weighting score --games 1 --max-frames 300 --difficulty normal --player-speed 8 --lives 3 --variant-profile variant-rich --report /private/tmp/rockfall-reward-weighting-experiment.json`; ran `python3 -m json.tool /private/tmp/rockfall-reward-weighting-release-check.json`; ran `python3 -m json.tool /private/tmp/rockfall-reward-weighting-experiment.json`; ran `git diff --check`.
+- Risks/Notes: existing tracked data predates rock variants, so reward weighting currently reports all weights as `1.00`; collect variant-rich data before expecting this to change model behavior.
+
 ## 2026-05-24 - Add variant-rich spawn profile
 
 - Changed: added `standard` and `variant-rich` rock spawn profiles, threaded `--variant-profile` through manual play, model play, evaluation, comparison, experiments, and release checks, expanded entrypoint/core tests, and updated `README.md`.
