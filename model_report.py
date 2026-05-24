@@ -171,6 +171,12 @@ def build_report_payload(
 def model_report_recommendations(payload):
     recommendations = []
     variant_warnings = payload["data"].get("variant_coverage", {}).get("warnings", [])
+    objective_warnings = payload["data"].get("objective_coverage", {}).get("warnings", [])
+    if "no_ore_target_samples" in objective_warnings:
+        recommendations.append("collect_ore_target_data")
+    elif objective_warnings:
+        recommendations.append("separate_ore_target_data")
+
     if "no_recorded_variant_samples" in variant_warnings:
         recommendations.append("collect_variant_rich_data")
     elif variant_warnings:
@@ -209,6 +215,7 @@ def format_report_lines(payload):
     data = payload["data"]
     data_quality = data["data_quality"]
     variant_coverage = data["variant_coverage"]
+    objective_coverage = data.get("objective_coverage")
     settings = payload["settings"]
     lines = [
         "Model learning report",
@@ -227,6 +234,14 @@ def format_report_lines(payload):
     ]
     if variant_coverage["warnings"]:
         lines.append("Variant warnings: " + ", ".join(variant_coverage["warnings"]))
+    if objective_coverage:
+        lines.append(
+            "Objective quality: "
+            f"{objective_coverage['status']} "
+            f"({objective_coverage['target_samples']} {objective_coverage['target_objective']} samples)"
+        )
+        if objective_coverage["warnings"]:
+            lines.append("Objective warnings: " + ", ".join(objective_coverage["warnings"]))
     if data_quality["warnings"]:
         lines.append("Data warnings: " + ", ".join(data_quality["warnings"]))
 

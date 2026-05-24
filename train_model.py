@@ -2,8 +2,8 @@
 import argparse
 from collections import Counter
 
-from data_quality import inspect_variant_coverage_file
-from data_store import GAME_DATA_FILE, ensure_parent_dir, load_game_data
+from data_quality import inspect_objective_coverage_file, inspect_variant_coverage_file
+from data_store import ORE_TARGET_DATA_FILE, ORE_TARGET_OBJECTIVE, ensure_parent_dir, load_game_data
 from features import FEATURE_NAMES, MAX_MODEL_OBSTACLES, build_model_features
 from settings import NEAR_MISS_DISTANCE, OBSTACLE_VARIANTS
 
@@ -15,11 +15,13 @@ REWARD_WEIGHTING_NONE = "none"
 REWARD_WEIGHTING_SCORE = "score"
 REWARD_WEIGHTING_CHOICES = (REWARD_WEIGHTING_NONE, REWARD_WEIGHTING_SCORE)
 OBSTACLE_FEATURE_WIDTH = 5
+REQUIRE_OBJECTIVE_NONE = "none"
+REQUIRE_OBJECTIVE_CHOICES = (REQUIRE_OBJECTIVE_NONE, ORE_TARGET_OBJECTIVE)
 
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Train a Rockfall movement model.")
-    parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data JSON file.")
+    parser.add_argument("--data", default=ORE_TARGET_DATA_FILE, help="Gameplay data JSON file.")
     parser.add_argument("--model", default=MODEL_FILE, help="Output model file.")
     parser.add_argument("--test-size", type=float, default=TEST_SIZE, help="Validation split size.")
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE, help="Random seed.")
@@ -29,6 +31,12 @@ def parse_args(argv=None):
         choices=REWARD_WEIGHTING_CHOICES,
         default=REWARD_WEIGHTING_NONE,
         help="Give reward-bearing samples more weight during training.",
+    )
+    parser.add_argument(
+        "--require-objective",
+        choices=REQUIRE_OBJECTIVE_CHOICES,
+        default=REQUIRE_OBJECTIVE_NONE,
+        help="Fail if the training data does not cleanly match the requested objective.",
     )
     return parser.parse_args(argv)
 
@@ -161,6 +169,17 @@ def format_variant_coverage_line(variant_coverage):
     )
 
 
+def format_objective_coverage_line(objective_coverage):
+    return (
+        "Objective coverage: "
+        f"target={objective_coverage['target_objective']}, "
+        f"target_samples={objective_coverage['target_samples']}, "
+        f"legacy={objective_coverage['legacy_samples']}, "
+        f"other={objective_coverage['other_samples']}, "
+        f"ratio={objective_coverage['target_ratio']:.3f}."
+    )
+
+
 def format_sample_weight_line(sample_weights):
     if "average" not in sample_weights:
         return f"Reward weighting: {sample_weights['mode']}."
@@ -172,11 +191,25 @@ def format_sample_weight_line(sample_weights):
     )
 
 
+def validate_required_objective(objective_coverage, required_objective):
+    if required_objective == REQUIRE_OBJECTIVE_NONE:
+        return
+    if objective_coverage["target_objective"] != required_objective:
+        raise ValueError(f"Unsupported required objective: {required_objective}.")
+    if objective_coverage["warnings"]:
+        raise ValueError(
+            "Training data does not cleanly match "
+            f"{required_objective}: {', '.join(objective_coverage['warnings'])}."
+        )
+
+
 def main(argv=None):
     args = parse_args(argv)
 
     X, y, skipped_entries = load_data(args.data)
     variant_coverage = inspect_variant_coverage_file(args.data)
+    objective_coverage = inspect_objective_coverage_file(args.data)
+    validate_required_objective(objective_coverage, args.require_objective)
     if len(X) < 2:
         raise ValueError("Need at least 2 valid training samples.")
 
@@ -201,9 +234,12 @@ def main(argv=None):
     print(f"Features: {', '.join(FEATURE_NAMES)}.")
     print(f"Action balance: left={action_counts[0]}, right={action_counts[1]}.")
     print(format_variant_coverage_line(variant_coverage))
+    print(format_objective_coverage_line(objective_coverage))
     print(format_sample_weight_line(weight_summary))
     if variant_coverage["warnings"]:
         print("Variant warnings: " + ", ".join(variant_coverage["warnings"]) + ".")
+    if objective_coverage["warnings"]:
+        print("Objective warnings: " + ", ".join(objective_coverage["warnings"]) + ".")
     print(f"Validation accuracy: {accuracy:.3f}.")
     print(f"Model saved to {args.model}.")
 

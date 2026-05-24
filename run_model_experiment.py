@@ -16,9 +16,10 @@ from data_quality import (
     DEFAULT_MIN_SAMPLES,
     action_balance_payload,
     data_quality_summary,
+    inspect_objective_coverage_file,
     inspect_variant_coverage_file,
 )
-from data_store import GAME_DATA_FILE, ensure_parent_dir
+from data_store import ORE_TARGET_DATA_FILE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
 from features import FEATURE_NAMES
@@ -27,16 +28,20 @@ from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, varia
 from train_model import (
     N_ESTIMATORS,
     RANDOM_STATE,
+    REQUIRE_OBJECTIVE_CHOICES,
+    REQUIRE_OBJECTIVE_NONE,
     REWARD_WEIGHTING_CHOICES,
     REWARD_WEIGHTING_NONE,
     TEST_SIZE,
     build_sample_weights,
     format_sample_weight_line,
+    format_objective_coverage_line,
     sample_weight_summary,
     load_data,
     save_model,
     split_training_data,
     train_model,
+    validate_required_objective,
 )
 
 DEFAULT_CANDIDATE_MODEL = "runs/candidate_model.pkl"
@@ -44,7 +49,7 @@ DEFAULT_CANDIDATE_MODEL = "runs/candidate_model.pkl"
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Train a candidate model and compare it with a baseline.")
-    parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data JSON file.")
+    parser.add_argument("--data", default=ORE_TARGET_DATA_FILE, help="Gameplay data JSON file.")
     parser.add_argument("--baseline", default=MODEL_FILE, help="Baseline model file to compare against.")
     parser.add_argument("--candidate", default=DEFAULT_CANDIDATE_MODEL, help="Candidate model output file.")
     parser.add_argument("--test-size", type=float, default=TEST_SIZE, help="Validation split size.")
@@ -55,6 +60,12 @@ def parse_args(argv=None):
         choices=REWARD_WEIGHTING_CHOICES,
         default=REWARD_WEIGHTING_NONE,
         help="Give reward-bearing samples more weight during candidate training.",
+    )
+    parser.add_argument(
+        "--require-objective",
+        choices=REQUIRE_OBJECTIVE_CHOICES,
+        default=REQUIRE_OBJECTIVE_NONE,
+        help="Fail if the candidate training data does not cleanly match the requested objective.",
     )
     parser.add_argument("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES, help="Recommended minimum valid samples.")
     parser.add_argument(
@@ -106,6 +117,7 @@ def train_candidate_model(
     min_balance_ratio=DEFAULT_MIN_BALANCE_RATIO,
     max_skipped_ratio=DEFAULT_MAX_SKIPPED_RATIO,
     reward_weighting=REWARD_WEIGHTING_NONE,
+    require_objective=REQUIRE_OBJECTIVE_NONE,
 ):
     X, y, skipped_entries = load_data(data_path)
     if len(X) < 2:
@@ -122,6 +134,8 @@ def train_candidate_model(
         min_balance_ratio,
         max_skipped_ratio,
     )
+    objective_coverage = inspect_objective_coverage_file(data_path)
+    validate_required_objective(objective_coverage, require_objective)
 
     sample_weights = build_sample_weights(X, reward_weighting)
     weights = sample_weight_summary(sample_weights, reward_weighting)
@@ -144,6 +158,7 @@ def train_candidate_model(
         "features": list(FEATURE_NAMES),
         "action_balance": action_balance_payload(action_counts),
         "variant_coverage": inspect_variant_coverage_file(data_path),
+        "objective_coverage": objective_coverage,
         "validation_accuracy": validation_accuracy,
         "estimators": estimators,
         "test_size": test_size,
@@ -247,6 +262,7 @@ def format_training_lines(training_summary):
             f"recorded={training_summary['variant_coverage']['recorded_variant_samples']}, "
             f"legacy={training_summary['variant_coverage']['legacy_obstacle_samples']}"
         ),
+        format_objective_coverage_line(training_summary["objective_coverage"]),
         f"Validation accuracy: {training_summary['validation_accuracy']:.3f}",
         format_sample_weight_line(training_summary["sample_weights"]),
         f"Data quality: {training_summary['data_quality']['status']}",
@@ -254,6 +270,9 @@ def format_training_lines(training_summary):
     variant_warnings = training_summary["variant_coverage"]["warnings"]
     if variant_warnings:
         lines.append("Variant warnings: " + ", ".join(variant_warnings))
+    objective_warnings = training_summary["objective_coverage"]["warnings"]
+    if objective_warnings:
+        lines.append("Objective warnings: " + ", ".join(objective_warnings))
     warnings = training_summary["data_quality"]["warnings"]
     if warnings:
         lines.append("Data quality warnings: " + ", ".join(warnings))
@@ -294,6 +313,7 @@ def main(argv=None):
         min_balance_ratio=args.min_balance_ratio,
         max_skipped_ratio=args.max_skipped_ratio,
         reward_weighting=args.reward_weighting,
+        require_objective=args.require_objective,
     )
     model_paths = [args.baseline, args.candidate]
     comparison_summaries = evaluate_models(

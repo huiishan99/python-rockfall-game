@@ -2,6 +2,20 @@ import json
 import os
 
 GAME_DATA_FILE = "game_data.json"
+ORE_TARGET_OBJECTIVE = "ore_target_v1"
+ORE_TARGET_DATA_FILE = "runs/ore_target_manual.json"
+POLICY_ORE_TARGET_DATA_FILE = "runs/policy_ore_target.json"
+
+
+def build_game_data_entry(state, action, objective=ORE_TARGET_OBJECTIVE, source=None):
+    entry = {
+        "state": state,
+        "action": action,
+        "objective": objective,
+    }
+    if source:
+        entry["source"] = source
+    return entry
 
 
 def load_game_data(path=GAME_DATA_FILE):

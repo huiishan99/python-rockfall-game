@@ -7,12 +7,12 @@ from data_quality import (
     DEFAULT_MIN_SAMPLES,
     inspect_data_file,
 )
-from data_store import GAME_DATA_FILE, ensure_parent_dir
+from data_store import ORE_TARGET_DATA_FILE, ensure_parent_dir
 
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Inspect Rockfall training data quality.")
-    parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data JSON file.")
+    parser.add_argument("--data", default=ORE_TARGET_DATA_FILE, help="Gameplay data JSON file.")
     parser.add_argument("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES, help="Recommended minimum valid samples.")
     parser.add_argument(
         "--min-balance-ratio",
@@ -84,6 +84,23 @@ def format_inspection_lines(payload):
         )
         if variant_coverage["warnings"]:
             lines.append("Variant warnings: " + ", ".join(variant_coverage["warnings"]))
+    objective_coverage = payload.get("objective_coverage")
+    if objective_coverage:
+        lines.extend(
+            [
+                (
+                    "Objective coverage: "
+                    f"target={objective_coverage['target_objective']}, "
+                    f"target_samples={objective_coverage['target_samples']}, "
+                    f"legacy={objective_coverage['legacy_samples']}, "
+                    f"other={objective_coverage['other_samples']}, "
+                    f"ratio={objective_coverage['target_ratio']:.3f}"
+                ),
+                f"Objective quality: {objective_coverage['status']}",
+            ]
+        )
+        if objective_coverage["warnings"]:
+            lines.append("Objective warnings: " + ", ".join(objective_coverage["warnings"]))
     if quality["warnings"]:
         lines.append("Data quality warnings: " + ", ".join(quality["warnings"]))
     return lines

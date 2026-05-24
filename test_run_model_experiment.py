@@ -5,6 +5,7 @@ import unittest
 from contextlib import redirect_stdout
 from io import StringIO
 
+from data_store import ORE_TARGET_DATA_FILE
 from run_model_experiment import (
     DEFAULT_CANDIDATE_MODEL,
     build_experiment_payload,
@@ -34,6 +35,15 @@ TRAINING_SUMMARY = {
         "legacy_obstacle_samples": 100,
         "invalid_obstacle_samples": 0,
         "variant_sample_ratio": 0,
+    },
+    "objective_coverage": {
+        "status": "needs_objective_data",
+        "warnings": ["no_ore_target_samples"],
+        "target_objective": "ore_target_v1",
+        "target_samples": 0,
+        "legacy_samples": 100,
+        "other_samples": 0,
+        "target_ratio": 0,
     },
     "validation_accuracy": 0.875,
     "estimators": 100,
@@ -87,6 +97,7 @@ class RunModelExperimentTest(unittest.TestCase):
         args = parse_args([])
 
         self.assertEqual(args.candidate, DEFAULT_CANDIDATE_MODEL)
+        self.assertEqual(args.data, ORE_TARGET_DATA_FILE)
 
     def test_parse_args_accepts_experiment_overrides(self):
         args = parse_args(
@@ -109,6 +120,8 @@ class RunModelExperimentTest(unittest.TestCase):
                 "variant-rich",
                 "--reward-weighting",
                 "score",
+                "--require-objective",
+                "ore_target_v1",
                 "--json",
             ]
         )
@@ -121,6 +134,7 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertEqual(args.lives, 3)
         self.assertEqual(args.variant_profile, "variant-rich")
         self.assertEqual(args.reward_weighting, "score")
+        self.assertEqual(args.require_objective, "ore_target_v1")
         self.assertTrue(args.json)
 
     def test_validate_experiment_paths_rejects_baseline_overwrite(self):
@@ -216,8 +230,13 @@ class RunModelExperimentTest(unittest.TestCase):
         self.assertIn("Training candidate model:", lines)
         self.assertIn("Validation accuracy: 0.875", lines)
         self.assertIn("Variant coverage: recorded=0, legacy=100", lines)
+        self.assertIn(
+            "Objective coverage: target=ore_target_v1, target_samples=0, legacy=100, other=0, ratio=0.000.",
+            lines,
+        )
         self.assertIn("Reward weighting: none.", lines)
         self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
+        self.assertIn("Objective warnings: no_ore_target_samples", lines)
         self.assertIn("Data quality: ready", lines)
         self.assertIn("Model comparison:", lines)
         self.assertIn("Best model by average score: runs/candidate_model.pkl", lines)

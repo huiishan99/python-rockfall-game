@@ -6,7 +6,7 @@ import sys
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 
-from data_store import GAME_DATA_FILE, append_game_data
+from data_store import ORE_TARGET_DATA_FILE, append_game_data, build_game_data_entry
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from game_audio import GameSoundPlayer
 from game_core import (
@@ -40,7 +40,7 @@ MODE_NAME = "Data Collection"
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Play Rockfall and collect training data.")
-    parser.add_argument("--data", default=GAME_DATA_FILE, help="Gameplay data file to append.")
+    parser.add_argument("--data", default=ORE_TARGET_DATA_FILE, help="Gameplay data file to append.")
     parser.add_argument(
         "--difficulty",
         choices=difficulty_preset_names(),
@@ -185,7 +185,7 @@ def main(argv=None):
         if screen_state == SCREEN_PLAYING:
             action = read_manual_action()
             if action:
-                game_data.append({"state": game.snapshot(), "action": action})
+                game_data.append(build_game_data_entry(game.snapshot(), action, source="manual"))
 
             game.apply_action(action)
             game.update()

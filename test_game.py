@@ -1,6 +1,6 @@
 import unittest
 
-from data_store import GAME_DATA_FILE
+from data_store import ORE_TARGET_DATA_FILE
 from game import MODE_KEY, manual_mode_name, model_play_command, parse_args
 from play_with_model import MODEL_FILE
 
@@ -9,7 +9,7 @@ class GameEntrypointTest(unittest.TestCase):
     def test_parse_args_defaults_to_tracked_data_file(self):
         args = parse_args([])
 
-        self.assertEqual(args.data, GAME_DATA_FILE)
+        self.assertEqual(args.data, ORE_TARGET_DATA_FILE)
 
     def test_manual_high_score_key_tracks_ore_score_rules(self):
         self.assertEqual(MODE_KEY, "manual_ore_score")

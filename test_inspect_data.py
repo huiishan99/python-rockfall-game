@@ -3,10 +3,16 @@ import os
 import tempfile
 import unittest
 
+from data_store import ORE_TARGET_DATA_FILE
 from inspect_data import format_inspection_lines, parse_args, validate_args, write_inspection_report
 
 
 class InspectDataTest(unittest.TestCase):
+    def test_parse_args_defaults_to_ore_target_data(self):
+        args = parse_args([])
+
+        self.assertEqual(args.data, ORE_TARGET_DATA_FILE)
+
     def test_parse_args_accepts_report_and_json(self):
         args = parse_args(["--data", "runs/playtest.json", "--report", "runs/data_report.json", "--json"])
 
@@ -43,6 +49,15 @@ class InspectDataTest(unittest.TestCase):
                 "legacy_obstacle_samples": 51,
                 "variant_sample_ratio": 0,
             },
+            "objective_coverage": {
+                "status": "needs_objective_data",
+                "warnings": ["no_ore_target_samples"],
+                "target_objective": "ore_target_v1",
+                "target_samples": 0,
+                "legacy_samples": 51,
+                "other_samples": 0,
+                "target_ratio": 0,
+            },
         }
 
         lines = format_inspection_lines(payload)
@@ -51,6 +66,8 @@ class InspectDataTest(unittest.TestCase):
         self.assertIn("Data quality warnings: valid_samples_below_500", lines)
         self.assertIn("Variant quality: needs_variant_data", lines)
         self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
+        self.assertIn("Objective quality: needs_objective_data", lines)
+        self.assertIn("Objective warnings: no_ore_target_samples", lines)
         self.assertIn("Balance ratio: 0.098", lines)
 
     def test_write_inspection_report_creates_parent_directory(self):

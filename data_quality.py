@@ -1,12 +1,33 @@
 from collections import Counter
 
-from data_store import load_game_data
+from data_store import ORE_TARGET_OBJECTIVE, load_game_data
 from features import FEATURE_NAMES, MAX_MODEL_OBSTACLES
 from settings import DEFAULT_OBSTACLE_VARIANT, OBSTACLE_VARIANTS
 
 DEFAULT_MIN_SAMPLES = 500
 DEFAULT_MIN_BALANCE_RATIO = 0.35
 DEFAULT_MAX_SKIPPED_RATIO = 0.10
+LEGACY_OBJECTIVE = "legacy"
+
+
+def entry_objective(entry):
+    objective = entry.get("objective")
+    if isinstance(objective, str) and objective:
+        return objective
+    return LEGACY_OBJECTIVE
+
+
+def is_training_candidate(entry):
+    state = entry.get("state", {})
+    player_x = state.get("player_x")
+    obstacles = state.get("obstacles", [])
+    action = entry.get("action")
+
+    try:
+        int(player_x)
+    except (TypeError, ValueError):
+        return False
+    return bool(obstacles) and action in ("left", "right")
 
 
 def action_balance_payload(action_counts):
@@ -54,17 +75,11 @@ def variant_coverage_summary(entries):
     total_obstacle_samples = 0
 
     for entry in entries:
-        state = entry.get("state", {})
-        player_x = state.get("player_x")
-        obstacles = state.get("obstacles", [])
-        action = entry.get("action")
+        if not is_training_candidate(entry):
+            continue
 
-        try:
-            int(player_x)
-        except (TypeError, ValueError):
-            continue
-        if not obstacles or action not in ("left", "right"):
-            continue
+        state = entry.get("state", {})
+        obstacles = state.get("obstacles", [])
 
         variant_keys = ranked_training_obstacle_variants(obstacles)
         if not variant_keys:
@@ -102,6 +117,52 @@ def variant_coverage_summary(entries):
 
 def inspect_variant_coverage_file(data_path):
     return variant_coverage_summary(load_game_data(data_path))
+
+
+def objective_coverage_summary(entries, target_objective=ORE_TARGET_OBJECTIVE):
+    objective_counts = Counter()
+    source_counts = Counter()
+    valid_training_samples = 0
+
+    for entry in entries:
+        if not is_training_candidate(entry):
+            continue
+
+        valid_training_samples += 1
+        objective_counts[entry_objective(entry)] += 1
+        source = entry.get("source")
+        if isinstance(source, str) and source:
+            source_counts[source] += 1
+
+    target_samples = objective_counts.get(target_objective, 0)
+    legacy_samples = objective_counts.get(LEGACY_OBJECTIVE, 0)
+    other_samples = valid_training_samples - target_samples - legacy_samples
+    target_ratio = target_samples / valid_training_samples if valid_training_samples else 0
+    warnings = []
+
+    if target_samples == 0:
+        warnings.append("no_ore_target_samples")
+    if legacy_samples > 0 and target_samples > 0:
+        warnings.append("mixed_legacy_and_ore_target_samples")
+    if other_samples > 0:
+        warnings.append("unknown_objective_samples")
+
+    return {
+        "status": "objective_ready" if not warnings else "needs_objective_data",
+        "warnings": warnings,
+        "target_objective": target_objective,
+        "target_samples": target_samples,
+        "legacy_samples": legacy_samples,
+        "other_samples": other_samples,
+        "valid_training_samples": valid_training_samples,
+        "target_ratio": target_ratio,
+        "objective_counts": dict(objective_counts),
+        "source_counts": dict(source_counts),
+    }
+
+
+def inspect_objective_coverage_file(data_path):
+    return objective_coverage_summary(load_game_data(data_path))
 
 
 def data_quality_summary(
@@ -165,5 +226,6 @@ def inspect_data_file(
         "features": list(FEATURE_NAMES),
         "action_balance": action_balance_payload(action_counts),
         "variant_coverage": variant_coverage_summary(data),
+        "objective_coverage": objective_coverage_summary(data),
         "data_quality": quality,
     }

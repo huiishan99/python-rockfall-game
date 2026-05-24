@@ -4,7 +4,7 @@ import os
 import random
 
 from data_quality import inspect_data_file
-from data_store import append_game_data, ensure_parent_dir
+from data_store import POLICY_ORE_TARGET_DATA_FILE, append_game_data, build_game_data_entry, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_RANDOM_SEED, format_summary_lines, summarize_results
 from policies import POLICY_SAFE_RULE, built_in_policy_names, choose_policy_action
@@ -16,7 +16,7 @@ from settings import (
     variant_profile_names,
 )
 
-DEFAULT_POLICY_DATA_FILE = "runs/policy_variant_rich.json"
+DEFAULT_POLICY_DATA_FILE = POLICY_ORE_TARGET_DATA_FILE
 DEFAULT_POLICY_GAMES = 3
 DEFAULT_POLICY_MAX_FRAMES = 900
 DEFAULT_POLICY_VARIANT_PROFILE = "variant-rich"
@@ -69,7 +69,7 @@ def collect_game_samples(game, policy_name, max_frames):
     frames = 0
     while not game.game_over and frames < max_frames:
         action = choose_policy_action(policy_name, game)
-        samples.append({"state": game.snapshot(), "action": action})
+        samples.append(build_game_data_entry(game.snapshot(), action, source=f"policy:{policy_name}"))
         game.apply_action(action)
         game.update()
         frames += 1
@@ -161,6 +161,7 @@ def build_collection_payload(
 
 def format_collection_lines(payload):
     variant_coverage = payload["data_summary"]["variant_coverage"]
+    objective_coverage = payload["data_summary"]["objective_coverage"]
     lines = [
         "Policy data collection",
         f"Policy: {payload['policy']}",
@@ -175,9 +176,18 @@ def format_collection_lines(payload):
             f"legacy={variant_coverage['legacy_obstacle_samples']}, "
             f"quality={variant_coverage['status']}"
         ),
+        (
+            "Objective coverage: "
+            f"target={objective_coverage['target_objective']}, "
+            f"target_samples={objective_coverage['target_samples']}, "
+            f"legacy={objective_coverage['legacy_samples']}, "
+            f"quality={objective_coverage['status']}"
+        ),
     ]
     if variant_coverage["warnings"]:
         lines.append("Variant warnings: " + ", ".join(variant_coverage["warnings"]))
+    if objective_coverage["warnings"]:
+        lines.append("Objective warnings: " + ", ".join(objective_coverage["warnings"]))
     lines.extend(format_summary_lines(payload["collection_summary"], games_label="Collected games"))
     return lines
 

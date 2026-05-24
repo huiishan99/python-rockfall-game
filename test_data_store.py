@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from data_store import append_game_data, load_game_data
+from data_store import ORE_TARGET_OBJECTIVE, build_game_data_entry, append_game_data, load_game_data
 
 
 class GameDataStoreTest(unittest.TestCase):
@@ -25,6 +25,12 @@ class GameDataStoreTest(unittest.TestCase):
         self.assertEqual(previous_count, 0)
         self.assertEqual(total_count, 1)
         self.assertEqual(load_game_data(self.data_path), [entry])
+
+    def test_build_game_data_entry_tags_ore_target_objective(self):
+        entry = build_game_data_entry({"player_x": 10, "obstacles": []}, "left", source="manual")
+
+        self.assertEqual(entry["objective"], ORE_TARGET_OBJECTIVE)
+        self.assertEqual(entry["source"], "manual")
 
     def test_append_creates_parent_directory(self):
         nested_path = os.path.join(self.temp_dir.name, "runs", "experiment.json")

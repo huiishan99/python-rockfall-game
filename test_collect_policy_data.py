@@ -12,6 +12,7 @@ from collect_policy_data import (
     validate_args,
     write_collection_report,
 )
+from data_store import ORE_TARGET_OBJECTIVE, POLICY_ORE_TARGET_DATA_FILE
 
 
 COLLECTION_SUMMARY = {
@@ -44,14 +45,23 @@ DATA_SUMMARY = {
         "status": "variant_ready",
         "warnings": [],
     },
+    "objective_coverage": {
+        "target_objective": ORE_TARGET_OBJECTIVE,
+        "target_samples": 10,
+        "legacy_samples": 0,
+        "other_samples": 0,
+        "status": "objective_ready",
+        "warnings": [],
+    },
 }
 
 
 class CollectPolicyDataTest(unittest.TestCase):
-    def test_parse_args_defaults_to_runs_policy_data(self):
+    def test_parse_args_defaults_to_runs_policy_ore_target_data(self):
         args = parse_args([])
 
-        self.assertEqual(args.data, DEFAULT_POLICY_DATA_FILE)
+        self.assertEqual(args.data, POLICY_ORE_TARGET_DATA_FILE)
+        self.assertEqual(DEFAULT_POLICY_DATA_FILE, POLICY_ORE_TARGET_DATA_FILE)
         self.assertEqual(args.policy, "safe-rule")
         self.assertEqual(args.variant_profile, "variant-rich")
 
@@ -69,6 +79,8 @@ class CollectPolicyDataTest(unittest.TestCase):
         self.assertEqual(len(samples), 2)
         self.assertEqual(samples[0]["state"]["player_x"], 100)
         self.assertIn(samples[0]["action"], ("left", "right"))
+        self.assertEqual(samples[0]["objective"], ORE_TARGET_OBJECTIVE)
+        self.assertEqual(samples[0]["source"], "policy:safe-rule")
         self.assertEqual(result["frames"], 2)
         self.assertTrue(result["timed_out"])
 
@@ -115,6 +127,10 @@ class CollectPolicyDataTest(unittest.TestCase):
 
         self.assertIn("Policy data collection", lines)
         self.assertIn("Variant coverage: recorded=4, legacy=0, quality=variant_ready", lines)
+        self.assertIn(
+            "Objective coverage: target=ore_target_v1, target_samples=10, legacy=0, quality=objective_ready",
+            lines,
+        )
         self.assertIn("Collected games: 1", lines)
 
     def test_write_collection_report_creates_parent_directory(self):

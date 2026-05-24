@@ -26,6 +26,12 @@ DATA_SUMMARY = {
         "warnings": ["no_recorded_variant_samples"],
         "recorded_variant_samples": 0,
     },
+    "objective_coverage": {
+        "status": "needs_objective_data",
+        "warnings": ["no_ore_target_samples"],
+        "target_objective": "ore_target_v1",
+        "target_samples": 0,
+    },
 }
 
 MODEL_RESULT = {
@@ -87,6 +93,7 @@ class ModelReportTest(unittest.TestCase):
         )
 
         self.assertEqual(payload["model"], "game_model.pkl")
+        self.assertIn("collect_ore_target_data", payload["recommendations"])
         self.assertIn("collect_variant_rich_data", payload["recommendations"])
         self.assertIn("beat_baseline_on_standard", payload["recommendations"])
         self.assertIn("improve_reward_capture_on_variant-rich", payload["recommendations"])
@@ -119,6 +126,7 @@ class ModelReportTest(unittest.TestCase):
 
         self.assertIn("Model learning report", lines)
         self.assertIn("Variant warnings: no_recorded_variant_samples", lines)
+        self.assertIn("Objective warnings: no_ore_target_samples", lines)
         self.assertIn("Profile: variant-rich", lines)
         self.assertTrue(any("policy:safe-rule" in line for line in lines))
         self.assertTrue(any("Recommendations:" in line for line in lines))

@@ -7,7 +7,7 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.1-dev`.
+Current version: `0.8.2-dev`.
 
 This is post-v0.8 development after the playable v0.8 release:
 
@@ -30,14 +30,14 @@ This is post-v0.8 development after the playable v0.8 release:
 - Model play can jump back to manual data collection when the model feels weak, keeping the same tuning settings.
 - Model comparison can include a built-in `safe-rule` baseline policy, making it easier to see whether a trained model beats a simple deterministic dodger.
 - Model play can show a debug overlay with predicted action, feature compatibility count, and nearest rock feature values.
-- Model learning reports combine data quality, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and safe-rule baseline comparison.
-- Policy data collection can record safe-rule demonstration samples into `runs/` for quick variant-rich training experiments.
+- Model learning reports combine data quality, objective coverage, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and safe-rule baseline comparison.
+- Policy data collection can record `ore_target_v1` safe-rule demonstration samples into `runs/` for quick variant-rich training experiments.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for ore score gains, dodges, combos, dodge-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
 - Start-screen `HOW IT WORKS` help that explains the game rules, shows a rock-variant legend, and connects the machine-learning loop from manual data collection to model play.
-- Manual samples now include rock type, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features; optional reward weighting can give reward-bearing samples more influence during training.
+- Manual samples now include rock type and the `ore_target_v1` objective, so retrained models can distinguish normal, heavy, swift, and ore behavior through position, speed, and reward features; optional reward weighting can give reward-bearing samples more influence during training.
 - Start-screen `PLAY WITH MODEL` button that launches AI play when `game_model.pkl` exists, or shows a training prompt when no model has been trained.
-- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, per-variant outcomes, ore/reward breakdowns, and text or JSON output, including ore score, dodges, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
+- Headless model evaluation, model comparison, candidate-model experiments, and standalone data inspection with data-quality checks, rock-variant coverage, objective coverage, per-variant outcomes, ore/reward breakdowns, and text or JSON output, including ore score, dodges, best combo, survival frames, remaining lives, survival rate, timeouts, random seed, frame limit, difficulty, player speed, initial lives, and variant profile.
 - Release verification through `release_check.py`, plus unit tests for data storage, feature extraction, spawning, difficulty, audio, evaluation, release checks, and rendering behavior.
 
 ## Development Log
@@ -102,13 +102,13 @@ python3 release_check.py
 This runs the unit tests and a short headless model evaluation. Use `--report runs/release_check.json` to save the version, unit-test result, evaluation settings, and evaluation summary as a release-check artifact.
 
 ### Data Collection
-To collect data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements along with obstacle positions will be appended to `game_data.json`:
+To collect ore-target data for training the machine learning model, run the `game.py` script. Press Space to start. Player movements, obstacle positions, and the `ore_target_v1` objective tag will be appended to `runs/ore_target_manual.json` by default:
 
 ```bash
 python3 game.py
 ```
 
-To collect an experiment dataset without touching the default tracked file:
+To collect an experiment dataset in another file:
 
 ```bash
 python3 game.py --data runs/experiment.json
@@ -118,24 +118,24 @@ Missing parent directories for the selected data file are created automatically.
 To collect more rock-variant examples for retraining, use the variant-rich profile:
 
 ```bash
-python3 game.py --data runs/variant_rich.json --variant-profile variant-rich
+python3 game.py --data runs/ore_target_variant_rich.json --variant-profile variant-rich
 ```
 
-To bootstrap a variant-rich imitation dataset from the built-in safe-rule policy:
+To bootstrap an ore-target imitation dataset from the built-in safe-rule policy:
 
 ```bash
-python3 collect_policy_data.py --data runs/policy_variant_rich.json --games 3 --max-frames 900
+python3 collect_policy_data.py --games 3 --max-frames 900
 ```
 
-This creates synthetic policy demonstrations for experiments; keep them separate from human play data when comparing model behavior.
+This writes `runs/policy_ore_target.json` by default. It creates synthetic policy demonstrations for experiments; keep them separate from human play data when comparing model behavior.
 
 Inspect collected data before training:
 
 ```bash
-python3 inspect_data.py --data game_data.json
+python3 inspect_data.py --data runs/ore_target_manual.json
 ```
 
-The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, nearest-three rock-variant coverage, and data-quality warnings. If the report says `no_recorded_variant_samples`, the dataset predates rock variants and can still train a position-aware model, but it cannot teach the model that ore is worth `+5`. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
+The inspection command reports valid samples, skipped entries, feature names, action balance, skipped ratio, balance ratio, nearest-three rock-variant coverage, ore-target objective coverage, and data-quality warnings. If the report says `no_recorded_variant_samples`, the dataset predates rock variants and can still train a position-aware model, but it cannot teach the model that ore is worth `+5`. If it says `no_ore_target_samples`, the dataset predates the ore-target objective tag and should not be used as the main source for the new scoring rules. Use `--report runs/data_report.json` to save the same payload, or `--json` for machine-readable output.
 
 ### Train the Model
 After collecting enough data, you can train the machine learning model using the `train_model.py` script. This will process the collected data and save a trained model to the disk:
@@ -144,19 +144,19 @@ After collecting enough data, you can train the machine learning model using the
 python3 train_model.py
 ```
 
-Newly trained models use player x-position plus the nearest three rocks, with each rock represented by x-position, y-position, horizontal distance, fall-speed modifier, and score bonus. The training command prints variant coverage so stale datasets are obvious. Existing model files trained on the original four position features or the first six single-rock variant features still run in manual evaluation and model play; retrain after collecting fresh variant samples if you want the model to learn that ore is worth `+5`, ordinary stones are survival pressure rather than direct score, swift rocks fall faster, heavy rocks fall slower, and multiple rocks can compete for attention.
+Newly trained models use player x-position plus the nearest three rocks, with each rock represented by x-position, y-position, horizontal distance, fall-speed modifier, and score bonus. The training command prints variant coverage and objective coverage so stale datasets are obvious. Existing model files trained on the original four position features or the first six single-rock variant features still run in manual evaluation and model play; retrain after collecting fresh `ore_target_v1` samples if you want the model to learn that ore is worth `+5`, ordinary stones are survival pressure rather than direct score, swift rocks fall faster, heavy rocks fall slower, and multiple rocks can compete for attention.
 
 You can also experiment with alternate data or model files:
 
 ```bash
-python3 train_model.py --data game_data.json --model game_model.pkl --estimators 150
+python3 train_model.py --data runs/ore_target_manual.json --model runs/ore_target_model.pkl --estimators 150 --require-objective ore_target_v1
 ```
 
 Missing parent directories for the selected model output are created automatically.
 After collecting variant-rich data, add reward-aware sample weighting to emphasize reward-bearing states during training:
 
 ```bash
-python3 train_model.py --data runs/variant_rich.json --model runs/reward_model.pkl --reward-weighting score
+python3 train_model.py --data runs/ore_target_variant_rich.json --model runs/reward_model.pkl --reward-weighting score --require-objective ore_target_v1
 ```
 
 If the data predates rock variants, reward weighting safely reports min/max/average weight as `1.00`, meaning it had no reward-bearing samples to emphasize.
@@ -166,10 +166,10 @@ If the data predates rock variants, reward weighting safely reports min/max/aver
 Train a candidate model and compare it against the current baseline with the same evaluation seeds:
 
 ```bash
-python3 run_model_experiment.py --data runs/experiment.json --candidate runs/v02_model.pkl --games 10 --max-frames 3600
+python3 run_model_experiment.py --data runs/ore_target_manual.json --candidate runs/v02_model.pkl --games 10 --max-frames 3600 --require-objective ore_target_v1
 ```
 
-Use `--reward-weighting score` after collecting variant-rich data if you want the candidate training step to emphasize reward-bearing samples. Use `--report runs/v02_report.json` to save the training summary, sample-weight summary, data-quality status, candidate result, and comparison metrics, or `--json` to print the same structured payload.
+Use `--reward-weighting score` after collecting variant-rich ore-target data if you want the candidate training step to emphasize reward-bearing samples. Use `--report runs/v02_report.json` to save the training summary, sample-weight summary, data-quality status, objective coverage, candidate result, and comparison metrics, or `--json` to print the same structured payload.
 The experiment command refuses to use the same path for `--baseline` and `--candidate`, so the baseline model is not overwritten accidentally.
 
 ### Play the Game with the Model
