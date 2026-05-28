@@ -73,6 +73,8 @@ class TrainPipelineTest(unittest.TestCase):
         self.assertEqual(args.policy_baselines, ["safe-rule", "ore-hunter"])
         self.assertEqual(args.require_objective, "ore_target_v2")
         self.assertEqual(args.reward_weighting, "score")
+        self.assertTrue(args.leaderboard.endswith("model_leaderboard.json"))
+        self.assertFalse(args.skip_leaderboard)
 
     def test_validate_args_rejects_missing_baseline(self):
         args = parse_args(["--baseline", "missing.pkl"])

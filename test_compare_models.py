@@ -90,6 +90,11 @@ class CompareModelsTest(unittest.TestCase):
 
         self.assertEqual(args.report, "runs/comparison.json")
 
+    def test_parse_args_accepts_leaderboard_path(self):
+        args = parse_args(["base.pkl", "--leaderboard", "runs/model_leaderboard.json"])
+
+        self.assertEqual(args.leaderboard, "runs/model_leaderboard.json")
+
     def test_parse_args_accepts_rule_baseline(self):
         args = parse_args(["base.pkl", "--include-rule-baseline"])
 

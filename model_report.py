@@ -17,6 +17,7 @@ from data_quality import (
 from data_store import GAME_DATA_FILE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
+from leaderboard import DEFAULT_LEADERBOARD_FILE, append_report_to_leaderboard
 from play_with_model import MODEL_FILE
 from policies import built_in_policy_names, policy_label
 from settings import DEFAULT_VARIANT_PROFILE, INITIAL_LIVES, PLAYER_SPEED, variant_profile_names
@@ -70,6 +71,13 @@ def parse_args(argv=None):
         help="Recommended maximum skipped-entry ratio.",
     )
     parser.add_argument("--report", help="Optional JSON report file to write.")
+    parser.add_argument(
+        "--leaderboard",
+        default=DEFAULT_LEADERBOARD_FILE,
+        help="Model leaderboard JSON file to update after report generation.",
+    )
+    parser.add_argument("--leaderboard-tag", help="Optional leaderboard label for this report.")
+    parser.add_argument("--skip-leaderboard", action="store_true", help="Do not update the model leaderboard.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
@@ -329,6 +337,14 @@ def main(argv=None):
     payload = build_model_report(args)
     if args.report:
         write_model_report(payload, args.report)
+    leaderboard_entries = []
+    if not args.skip_leaderboard:
+        _, leaderboard_entries = append_report_to_leaderboard(
+            payload,
+            leaderboard_path=args.leaderboard,
+            source_report=args.report,
+            tag=args.leaderboard_tag,
+        )
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -337,6 +353,8 @@ def main(argv=None):
             print(line)
         if args.report:
             print(f"Report saved to {args.report}")
+        if leaderboard_entries:
+            print(f"Leaderboard updated: {args.leaderboard} (+{len(leaderboard_entries)} entries)")
 
     return 0
 

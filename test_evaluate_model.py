@@ -45,6 +45,17 @@ class EvaluateModelTest(unittest.TestCase):
 
         self.assertEqual(args.report, "runs/eval.json")
 
+    def test_parse_args_accepts_leaderboard_path(self):
+        args = parse_args(["--leaderboard", "runs/model_leaderboard.json"])
+
+        self.assertEqual(args.leaderboard, "runs/model_leaderboard.json")
+
+    def test_parse_args_accepts_trace_dir(self):
+        args = parse_args(["--trace-dir", "runs/replays", "--trace-stride", "12"])
+
+        self.assertEqual(args.trace_dir, "runs/replays")
+        self.assertEqual(args.trace_stride, 12)
+
     def test_summarizes_scores_and_timeouts(self):
         summary = summarize_results(
             [

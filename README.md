@@ -7,13 +7,14 @@ This project integrates a machine learning model into a simple pygame-based game
 
 ## Project Status
 
-Current version: `0.8.4-dev`.
+Current version: `0.8.5-dev`.
 
 This is post-v0.8 development after the playable v0.8 release:
 
 - Manual play collects training data.
 - AI play uses a trained Random Forest model.
 - Headless evaluation reports ore-score baselines, run breakdowns, and rock-variant outcomes.
+- Headless evaluation can save per-game replay traces, and reports can feed a local model leaderboard.
 - Runtime hand-feel tuning for difficulty, player speed, initial lives, and rock variant profile is implemented across play, evaluation, comparison, experiments, and release checks.
 - Evaluation and comparison reports include survival metrics, ore/reward breakdowns, variant outcomes, and can be saved as JSON artifacts.
 - Data inspection can check collected samples, action balance, and rock-variant coverage before training.
@@ -32,7 +33,8 @@ This is post-v0.8 development after the playable v0.8 release:
 - Model comparison can also include an `ore-hunter` baseline that spends lives for collectable ore when it looks worthwhile.
 - Model play can show a debug overlay with predicted action, confidence, feature compatibility count, danger pressure, ore pull, and nearest rock feature values.
 - Model learning reports combine data quality, objective coverage, standard evaluation, variant-rich stress testing, ore/reward breakdowns, and built-in policy baseline comparison.
-- `train_pipeline.py` runs the ore-target data check, candidate training, model/policy comparison, promotion recommendation, and JSON report in one command.
+- `train_pipeline.py` runs the ore-target data check, candidate training, model/policy comparison, promotion recommendation, JSON report, and leaderboard update in one command.
+- `leaderboard.py` ranks evaluation/comparison/report artifacts over time, while `ml_dashboard.py` combines data health, leaderboard status, and next-step recommendations.
 - Policy data collection can record `ore_target_v2` built-in policy demonstration samples into `runs/` for quick variant-rich training experiments.
 - Dynamic difficulty with `easy`, `normal`, and `hard` presets, faster falling speed, tighter spawn frequency, lane-based rock spawning, and optional variant-rich spawning for training data collection.
 - Gameplay feedback for ore score gains, dodges, combos, dodge-milestone life recovery, close dodges, hits, level-ups, low lives, hit screen tint, variant rock-shaped obstacles, a mine-cart player, panel-based HUD, and styled menu prompts.
@@ -171,7 +173,7 @@ For a full data-to-model loop, run:
 python3 train_pipeline.py --data runs/ore_target_v2_manual.json --games 10 --max-frames 3600 --variant-profile variant-rich
 ```
 
-The pipeline checks that data matches `ore_target_v2`, trains `runs/pipeline_candidate.pkl`, compares the tracked baseline, candidate model, `policy:safe-rule`, and `policy:ore-hunter`, writes `runs/training_pipeline.json`, and prints a promotion recommendation. It does not replace `game_model.pkl` unless you add `--promote`, and promotion only happens when the candidate is the best model and clears `--min-score-delta`.
+The pipeline checks that data matches `ore_target_v2`, trains `runs/pipeline_candidate.pkl`, compares the tracked baseline, candidate model, `policy:safe-rule`, and `policy:ore-hunter`, writes `runs/training_pipeline.json`, updates `runs/model_leaderboard.json`, and prints a promotion recommendation. It does not replace `game_model.pkl` unless you add `--promote`, and promotion only happens when the candidate is the best model and clears `--min-score-delta`. Add `--skip-leaderboard` if you want a dry report without changing the local leaderboard.
 
 ### Run a Model Experiment
 
@@ -221,7 +223,19 @@ For scripts or future charts, emit machine-readable JSON with the evaluation set
 python3 evaluate_model.py --games 10 --max-frames 3600 --json
 ```
 
-Use `--report runs/eval.json` to save the same evaluation payload while still printing the normal text summary.
+Use `--report runs/eval.json` to save the same evaluation payload while still printing the normal text summary. Add `--leaderboard runs/model_leaderboard.json` to append that evaluation to the local model leaderboard.
+
+To save replay-style traces for each headless game:
+
+```bash
+python3 evaluate_model.py --games 3 --max-frames 900 --trace-dir runs/replays --trace-stride 30
+```
+
+Trace files record the seed, settings, model action, player x-position, score, lives, combo, nearby rocks, and important events on stride frames. Inspect a trace with:
+
+```bash
+python3 replay.py runs/replays/game_model.pkl-game-1-seed-42.json
+```
 
 Compare multiple models with the same random seeds:
 
@@ -241,7 +255,29 @@ Add `--include-ore-hunter-baseline` to compare against the more reward-seeking `
 python3 compare_models.py game_model.pkl --include-rule-baseline --include-ore-hunter-baseline --games 10 --max-frames 3600 --variant-profile variant-rich
 ```
 
-Comparison output includes score deltas, average remaining lives, survival rate, average dodge count, ore bonus, missed-ore penalty columns, run breakdowns and per-variant outcomes in JSON reports, and the best model by average ore score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output or `--report runs/comparison.json` to save it.
+Comparison output includes score deltas, average remaining lives, survival rate, average dodge count, ore bonus, missed-ore penalty columns, run breakdowns and per-variant outcomes in JSON reports, and the best model by average ore score. Missing model paths fail with a concise error. Add `--json` to produce structured comparison output, `--report runs/comparison.json` to save it, or `--leaderboard runs/model_leaderboard.json` to append the comparison rows to the leaderboard.
+
+### Track Model Progress
+
+Append any saved evaluation, comparison, model-report, or training-pipeline report to the leaderboard:
+
+```bash
+python3 leaderboard.py --report runs/comparison.json --tag v0.8.5-smoke
+```
+
+Print the current ranking:
+
+```bash
+python3 leaderboard.py --limit 10
+```
+
+Open the combined ML dashboard:
+
+```bash
+python3 ml_dashboard.py --data runs/ore_target_v2_manual.json
+```
+
+The dashboard reports data quality, objective coverage, variant coverage, top leaderboard rows, and recommendations such as collecting fresh ore-target data or training a model that beats the ore-hunter policy.
 
 ### Build a Model Learning Report
 
@@ -251,20 +287,21 @@ Generate one report that inspects the training data, evaluates the model on both
 python3 model_report.py --games 3 --max-frames 1200 --report runs/model_report.json
 ```
 
-Use `--json` for machine-readable output, `--profiles standard` for a smaller report, `--policy-baselines safe-rule` to narrow the comparison, or `--skip-rule-baseline` when you only want model-only evaluation.
+Use `--json` for machine-readable output, `--profiles standard` for a smaller report, `--policy-baselines safe-rule` to narrow the comparison, `--skip-rule-baseline` when you only want model-only evaluation, or `--skip-leaderboard` when you do not want to update `runs/model_leaderboard.json`.
 
 ### Runtime Files
 
 High scores are saved locally in `high_scores.json`. This file is ignored by git because it contains local play history rather than source data.
 
-Local experiment outputs under `runs/` are also ignored by git.
+Local experiment outputs under `runs/` are also ignored by git, including replay traces, pipeline reports, dashboard reports, candidate models, and `runs/model_leaderboard.json`.
 
 ## Post-v0.8 Ideas
 
 - Collect fresh lane-based gameplay data, especially with `--variant-profile variant-rich`.
 - Bootstrap safe-rule or ore-hunter demonstration data with `collect_policy_data.py` and compare it against human-play models.
 - Use `train_pipeline.py` after each fresh dataset to decide whether a candidate model is worth promoting.
-- Generate `model_report.py` reports after each candidate retrain to track whether new data actually improves model behavior.
+- Generate `model_report.py` and `ml_dashboard.py` reports after each candidate retrain to track whether new data actually improves model behavior.
+- Save replay traces for strange model runs, then inspect the seed/action timeline with `replay.py`.
 - Tune rock variant spawn rates and rewards after more real-window playtesting.
 - Continue collecting fresh play data and compare future models with `evaluate_model.py`.
 

@@ -13,6 +13,7 @@ from evaluate_model import (
     summarize_results,
     write_summary_report,
 )
+from leaderboard import append_report_to_leaderboard
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from policies import POLICY_ORE_HUNTER, POLICY_SAFE_RULE, policy_label
 from play_with_model import MODEL_FILE
@@ -50,6 +51,8 @@ def parse_args(argv=None):
         help="Compare models against a built-in ore-hunter policy that spends lives for ore.",
     )
     parser.add_argument("--report", help="Optional JSON report file to write.")
+    parser.add_argument("--leaderboard", help="Optional model leaderboard JSON file to update.")
+    parser.add_argument("--leaderboard-tag", help="Optional leaderboard label for this comparison.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of a table.")
     return parser.parse_args(argv)
 
@@ -311,6 +314,14 @@ def main(argv=None):
     )
     if args.report:
         write_summary_report(payload, args.report)
+    leaderboard_entries = []
+    if args.leaderboard:
+        _, leaderboard_entries = append_report_to_leaderboard(
+            payload,
+            leaderboard_path=args.leaderboard,
+            source_report=args.report,
+            tag=args.leaderboard_tag,
+        )
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -323,6 +334,8 @@ def main(argv=None):
             print(line)
         if args.report:
             print(f"Report saved to {args.report}")
+        if leaderboard_entries:
+            print(f"Leaderboard updated: {args.leaderboard} (+{len(leaderboard_entries)} entries)")
 
     return 0
 

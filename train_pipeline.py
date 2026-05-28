@@ -7,6 +7,7 @@ from compare_models import build_comparison_payload, evaluate_model_path, evalua
 from data_store import ORE_TARGET_DATA_FILE, ORE_TARGET_OBJECTIVE, ensure_parent_dir
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from evaluate_model import DEFAULT_GAMES, DEFAULT_MAX_FRAMES, DEFAULT_RANDOM_SEED
+from leaderboard import DEFAULT_LEADERBOARD_FILE, append_report_to_leaderboard
 from policies import built_in_policy_names, policy_label
 from play_with_model import MODEL_FILE
 from run_model_experiment import train_candidate_model, validate_experiment_paths
@@ -33,6 +34,13 @@ def parse_args(argv=None):
     parser.add_argument("--baseline", default=MODEL_FILE, help="Current baseline model.")
     parser.add_argument("--candidate", default=DEFAULT_CANDIDATE_MODEL, help="Candidate model output file.")
     parser.add_argument("--report", default=DEFAULT_PIPELINE_REPORT, help="JSON report file to write.")
+    parser.add_argument(
+        "--leaderboard",
+        default=DEFAULT_LEADERBOARD_FILE,
+        help="Model leaderboard JSON file to update after the pipeline run.",
+    )
+    parser.add_argument("--leaderboard-tag", help="Optional leaderboard label for this pipeline run.")
+    parser.add_argument("--skip-leaderboard", action="store_true", help="Do not update the model leaderboard.")
     parser.add_argument("--test-size", type=float, default=TEST_SIZE, help="Validation split size.")
     parser.add_argument("--random-state", type=int, default=RANDOM_STATE, help="Training random seed.")
     parser.add_argument("--estimators", type=int, default=N_ESTIMATORS, help="Random forest tree count.")
@@ -312,6 +320,14 @@ def main(argv=None):
     payload = run_pipeline(args)
     if args.report:
         write_pipeline_report(payload, args.report)
+    leaderboard_entries = []
+    if not args.skip_leaderboard:
+        _, leaderboard_entries = append_report_to_leaderboard(
+            payload,
+            leaderboard_path=args.leaderboard,
+            source_report=args.report,
+            tag=args.leaderboard_tag,
+        )
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
@@ -319,6 +335,8 @@ def main(argv=None):
             print(line)
         if args.report:
             print(f"Report saved to {args.report}")
+        if leaderboard_entries:
+            print(f"Leaderboard updated: {args.leaderboard} (+{len(leaderboard_entries)} entries)")
     return 0
 
 

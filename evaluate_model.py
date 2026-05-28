@@ -5,9 +5,17 @@ import random
 from statistics import mean
 
 from data_store import ensure_parent_dir
+from leaderboard import append_report_to_leaderboard
 from play_with_model import MODEL_FILE
 from difficulty import DEFAULT_DIFFICULTY_PRESET, difficulty_preset_names
 from policies import choose_policy_action
+from replay import (
+    DEFAULT_TRACE_STRIDE,
+    build_trace_payload,
+    finalize_trace,
+    record_trace_frame,
+    write_trace,
+)
 from settings import (
     DEFAULT_VARIANT_PROFILE,
     INITIAL_LIVES,
@@ -43,6 +51,15 @@ def parse_args(argv=None):
         help="Rock variant spawn profile.",
     )
     parser.add_argument("--report", help="Optional JSON report file to write.")
+    parser.add_argument("--leaderboard", help="Optional model leaderboard JSON file to update.")
+    parser.add_argument("--leaderboard-tag", help="Optional leaderboard label for this evaluation.")
+    parser.add_argument("--trace-dir", help="Optional directory for per-game replay trace JSON files.")
+    parser.add_argument(
+        "--trace-stride",
+        type=int,
+        default=DEFAULT_TRACE_STRIDE,
+        help="Record one replay trace frame every N frames, plus event frames.",
+    )
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON instead of text.")
     return parser.parse_args(argv)
 
@@ -55,6 +72,8 @@ def run_game(
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
     variant_profile=DEFAULT_VARIANT_PROFILE,
+    trace=None,
+    trace_stride=DEFAULT_TRACE_STRIDE,
 ):
     from play_with_model import predict_action
 
@@ -66,6 +85,8 @@ def run_game(
         player_speed=player_speed,
         initial_lives=initial_lives,
         variant_profile=variant_profile,
+        trace=trace,
+        trace_stride=trace_stride,
     )
 
 
@@ -77,6 +98,8 @@ def run_policy(
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
     variant_profile=DEFAULT_VARIANT_PROFILE,
+    trace=None,
+    trace_stride=DEFAULT_TRACE_STRIDE,
 ):
     return run_game_with_action_provider(
         lambda game: choose_policy_action(policy_name, game),
@@ -86,6 +109,8 @@ def run_policy(
         player_speed=player_speed,
         initial_lives=initial_lives,
         variant_profile=variant_profile,
+        trace=trace,
+        trace_stride=trace_stride,
     )
 
 
@@ -97,6 +122,8 @@ def run_game_with_action_provider(
     player_speed=PLAYER_SPEED,
     initial_lives=INITIAL_LIVES,
     variant_profile=DEFAULT_VARIANT_PROFILE,
+    trace=None,
+    trace_stride=DEFAULT_TRACE_STRIDE,
 ):
     from game_core import RockfallGame
 
@@ -110,11 +137,15 @@ def run_game_with_action_provider(
     frames = 0
 
     while not game.game_over and frames < max_frames:
-        game.apply_action(action_provider(game))
+        action = action_provider(game)
+        game.apply_action(action)
         game.update()
         frames += 1
+        events = game.pop_events() if trace is not None else []
+        if trace is not None:
+            record_trace_frame(trace, game, frames, action, events=events, stride=trace_stride)
 
-    return {
+    result = {
         "score": game.score,
         "best_combo": game.best_combo,
         "frames": frames,
@@ -123,6 +154,9 @@ def run_game_with_action_provider(
         "variant_stats": game.variant_stats_payload(),
         "score_breakdown": game.score_breakdown_payload(),
     }
+    if trace is not None:
+        finalize_trace(trace, result)
+    return result
 
 
 def empty_variant_stats():
@@ -266,6 +300,8 @@ def main(argv=None):
         raise ValueError("--player-speed must be greater than zero.")
     if args.lives <= 0:
         raise ValueError("--lives must be greater than zero.")
+    if args.trace_stride <= 0:
+        raise ValueError("--trace-stride must be greater than zero.")
 
     import joblib
 
@@ -279,9 +315,21 @@ def main(argv=None):
     model = joblib.load(args.model)
 
     results = []
+    trace_paths = []
+    trace_settings = {
+        "max_frames": args.max_frames,
+        "difficulty": args.difficulty,
+        "player_speed": args.player_speed,
+        "initial_lives": args.lives,
+        "variant_profile": args.variant_profile,
+    }
     for game_index in range(args.games):
-        random.seed(args.random_seed + game_index)
-        results.append(
+        seed = args.random_seed + game_index
+        random.seed(seed)
+        trace = None
+        if args.trace_dir:
+            trace = build_trace_payload(args.model, game_index, seed, trace_settings)
+        result = (
             run_game(
                 model,
                 screen,
@@ -290,8 +338,15 @@ def main(argv=None):
                 player_speed=args.player_speed,
                 initial_lives=args.lives,
                 variant_profile=args.variant_profile,
+                trace=trace,
+                trace_stride=args.trace_stride,
             )
         )
+        if trace is not None:
+            trace_path = write_trace(trace, args.trace_dir)
+            result["trace_file"] = trace_path
+            trace_paths.append(trace_path)
+        results.append(result)
 
     summary = summarize_results(results)
     payload = build_summary_payload(
@@ -304,8 +359,18 @@ def main(argv=None):
         initial_lives=args.lives,
         variant_profile=args.variant_profile,
     )
+    if trace_paths:
+        payload["traces"] = trace_paths
     if args.report:
         write_summary_report(payload, args.report)
+    leaderboard_entries = []
+    if args.leaderboard:
+        _, leaderboard_entries = append_report_to_leaderboard(
+            payload,
+            leaderboard_path=args.leaderboard,
+            source_report=args.report,
+            tag=args.leaderboard_tag,
+        )
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -315,10 +380,14 @@ def main(argv=None):
         print(f"Player speed: {args.player_speed}")
         print(f"Initial lives: {args.lives}")
         print(f"Variant profile: {args.variant_profile}")
+        if trace_paths:
+            print(f"Replay traces: {len(trace_paths)} saved to {args.trace_dir}")
         for line in format_summary_lines(summary):
             print(line)
         if args.report:
             print(f"Report saved to {args.report}")
+        if leaderboard_entries:
+            print(f"Leaderboard updated: {args.leaderboard} (+{len(leaderboard_entries)} entries)")
 
     pygame.quit()
 

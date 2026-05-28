@@ -82,6 +82,12 @@ class ModelReportTest(unittest.TestCase):
 
         self.assertEqual(args.policy_baselines, ["ore-hunter"])
 
+    def test_parse_args_defaults_to_leaderboard(self):
+        args = parse_args([])
+
+        self.assertTrue(args.leaderboard.endswith("model_leaderboard.json"))
+        self.assertFalse(args.skip_leaderboard)
+
     def test_validate_args_rejects_duplicate_profiles(self):
         args = parse_args(["--profiles", "standard", "standard"])
 
